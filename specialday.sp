@@ -96,10 +96,10 @@ new g_WeaponParent;
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
-	author = "destoer",
+	author = "organ harvester",
 	description = "special days for jailbreak",
 	version = VERSION,
-	url = "https://github.com/destoer/css_jailbreak_plugins"
+	url = "https://github.com/destoer/counter_strike_jailbreak"
 };
 
 
