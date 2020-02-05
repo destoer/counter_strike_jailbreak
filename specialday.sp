@@ -92,14 +92,14 @@ Handle g_autokick; // turn auto kick off for friednly fire
 // gun removal
 new g_WeaponParent;
 
-#define VERSION "1.4.4"
+#define VERSION "1.5"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
-	author = "organ harvester",
+	author = "destoer",
 	description = "special days for jailbreak",
 	version = VERSION,
-	url = "https://github.com/destoer/counter_strike_jailbreak"
+	url = "https://github.com/destoer/css_jailbreak_plugins"
 };
 
 
@@ -876,26 +876,49 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 	return 0;
 }
 
-// credits "MASTER(D)"
+// filter to ignore a ray hitting a player
+bool trace_ignore_players(int entity, contents_mask)
+{
+	if(entity > 0 && entity < MAXPLAYERS)
+	{
+		return false;
+	}
+	
+	return true;
+}
+
+
 public CreateKnockBack(int client, int attacker, float damage)
 {
 
-  	float eye_angles[3];
-  	float push[3];
+	float attacker_ang[3];
+	float attacker_pos[3]
+	float client_pos[3]
 
-
-  	GetClientEyeAngles(client, eye_angles);
-
-	push[0] = (FloatMul(damage - damage - damage, Cosine(DegToRad(eye_angles[1]))));
-
-	push[1] = (FloatMul(damage - damage - damage, Sine(DegToRad(eye_angles[1]))));
-
-	push[2] = (FloatMul(-50.0, Sine(DegToRad(eye_angles[0]))));
-
-	//Multiply
-	ScaleVector(push, 3.0);
+	// attacker eye pos and angle
+	GetClientEyePosition(attacker, attacker_pos);
+	GetClientEyeAngles(attacker, attacker_ang);
 	
-	//Teleport
+	// get pos of where victim is from attacker "eyeline"
+	// technically this will go until the nearest object from the attackers eyeline
+	// to make handle dumb cases where a bullet hits multiple players
+	// (so we wont get the victims actual pos but as we are normalizing the vector it doesent really matter)
+	TR_TraceRayFilter(attacker_pos, attacker_ang, MASK_ALL, RayType_Infinite, trace_ignore_players);
+	TR_GetEndPosition(client_pos);
+	
+	float push[3];
+	
+	// get position vector from attacker to victim
+	MakeVectorFromPoints(attacker_pos, client_pos, push);
+	
+	// normalize the vector so it doesent care about how far away we are shooting from
+	NormalizeVector(push, push);
+	
+	// scale it
+	float scale = damage * 3;
+	ScaleVector(push, scale);
+
+	//teleport the victim to new pos from scaled vector to simulate knockback
 	TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, push);
 }
 
