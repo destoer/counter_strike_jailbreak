@@ -92,7 +92,7 @@ Handle g_autokick; // turn auto kick off for friednly fire
 // gun removal
 new g_WeaponParent;
 
-#define VERSION "1.5"
+#define VERSION "1.5.1"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -117,7 +117,6 @@ public OnPluginStart()
 	RegAdminCmd("uf",UnFreeze,ADMFLAG_BAN);
 	
 	RegConsoleCmd("sdv", sd_version);
-
 	
 	// gun removal
 	g_WeaponParent = FindSendPropOffs("CBaseCombatWeapon", "m_hOwnerEntity");
@@ -1866,6 +1865,15 @@ stock StripAllWeapons(client)
 			RemovePlayerItem(client, wepIdx);
 			AcceptEntityInput(wepIdx, "Kill");
 		}
+	}
+
+	// remove any nades left (as it will only remove first from nade slot)
+	wepIdx = GetPlayerWeaponSlot(client, 3); // 3 is the nade slot 
+	while(wepIdx  != -1)
+	{
+			RemovePlayerItem(client, wepIdx);
+			AcceptEntityInput(wepIdx, "Kill");
+			wepIdx = GetPlayerWeaponSlot(client, 3);
 	}
 
 }
