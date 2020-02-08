@@ -9,6 +9,7 @@
  TODO
  add infinite ammo for last man standing!
  currently just gives a ton in current ammo
+ implement gun game!
 */
 
 // if running gangs or ct bans with this define to prevent issues :)
@@ -46,7 +47,8 @@ enum SpecialDay
 	hide_day,
 	friendly_fire_day,
 	grenade_day,
-	zombie_day
+	zombie_day,
+	gungame_day
 };
 
 
@@ -84,6 +86,29 @@ Handle g_hFriendlyFire; // mp_friendlyfire var
 Handle g_autokick; // turn auto kick off for friednly fire
 
 
+
+// gun game current progression
+#define GUNGAME_SIZE 9
+
+Handle g_ignore_round_win; 
+
+new const String:guns_list[GUNGAME_SIZE][] = 
+{
+	"weapon_ak47",
+	"weapon_awp",
+	"weapon_m4a1",
+	"weapon_mp5navy",
+	"weapon_deagle",
+	"weapon_elite",
+	"weapon_p90",
+	"weapon_famas",
+	"weapon_usp"
+};
+
+// level of progression the player is on
+int gun_counter[64] =  { 0 };
+
+
 // backups
 // (unused)
 //new b_hFriendlyFire; // mp_friendlyfire var
@@ -92,7 +117,7 @@ Handle g_autokick; // turn auto kick off for friednly fire
 // gun removal
 new g_WeaponParent;
 
-#define VERSION "1.5.1"
+#define VERSION "1.7"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -117,6 +142,7 @@ public OnPluginStart()
 	RegAdminCmd("uf",UnFreeze,ADMFLAG_BAN);
 	
 	RegConsoleCmd("sdv", sd_version);
+	RegConsoleCmd("zspawn", zspawn);
 	
 	// gun removal
 	g_WeaponParent = FindSendPropOffs("CBaseCombatWeapon", "m_hOwnerEntity");
@@ -136,6 +162,7 @@ public OnPluginStart()
 #endif
 	
 	g_hFriendlyFire = FindConVar("mp_friendlyfire"); // get the friendly fire var
+	g_ignore_round_win = FindConVar("mp_ignore_round_win_conditions");
 	g_autokick = FindConVar("mp_autokick");
 	SetConVarBool(g_autokick, false);	
 	//b_autokick = GetConVarBool(g_autokick);
@@ -160,6 +187,17 @@ public OnPluginStart()
 public Action sd_version(int client, int args)
 {
 	PrintToChat(client, "%s SD VERSION: %s",SPECIALDAY_PREFIX, VERSION);
+}
+
+
+public Action zspawn(int client, int args)
+{
+	if(sd_state != sd_active || special_day != zombie_day) 
+	{
+		PrintToChat(client, "%s zombie day is not running", SPECIALDAY_PREFIX);
+		return;
+	}
+	CreateTimer(3.0, ReviveZombie, client);
 }
 
 
@@ -190,12 +228,6 @@ public Action hide_timer_callback(Handle timer)
 
 public Action join_team(Handle event, const String: name[], bool bDontBroadcast)
 {	
-	// sd is running (20 secs in cant join)
-	// or not active so we dont care
-	if(sd_state == sd_inactive || sd_active)
-	{
-		return Plugin_Continue;
-	}
 	
 	// special day has been called but is not running
 	// if a player joins at this point we need to give them 
@@ -204,7 +236,33 @@ public Action join_team(Handle event, const String: name[], bool bDontBroadcast)
 	if (!IsValidClient(client))
 	{   
         return Plugin_Continue; 
-    }
+    }	
+	
+	// sd is running (20 secs in cant join)
+	// or not active so we dont care
+	if(sd_state == sd_inactive)
+	{
+		return Plugin_Continue;
+	}
+	
+	else if(sd_state == sd_active)
+	{
+
+		if(special_day == zombie_day)
+		{
+			CreateTimer(3.0, ReviveZombie, client);
+			return Plugin_Continue;
+		}
+		
+		else if(special_day == gungame_day)
+		{
+			CreateTimer(3.0, ReviveGunGame, client);
+		}
+	}
+	
+	
+	// else the sd is started but not active
+	
 	
 	int team = GetClientTeam(client)
 	if(team != CS_TEAM_CT || team != CS_TEAM_T)
@@ -280,6 +338,11 @@ public Action join_team(Handle event, const String: name[], bool bDontBroadcast)
 		case zombie_day:
 		{
 			WeaponMenu(client);
+		}
+		
+		case gungame_day:
+		{
+			// do nothing
 		}
 		
 		case normal_day:
@@ -662,6 +725,12 @@ public int EndSd()
 		case fly_day: {}
 		case grenade_day: {}
 		
+		// need to turn off ignore round win here :)
+		case gungame_day:
+		{
+			SetConVarBool(g_ignore_round_win, false);
+		}
+		
 		case zombie_day:
 		{
 			RestoreTeams();
@@ -699,6 +768,9 @@ public int EndSd()
 
 	special_day = normal_day;
 	sd_state = sd_inactive;
+	hp_steal = false;
+	fr = false;
+	no_damage = false;
 }
 
 
@@ -732,6 +804,7 @@ public Action command_special_day(int client,args)
 	panel.DrawItem("Dodgeball");
 	panel.DrawItem("Grenade");
 	panel.DrawItem("Zombie");
+	panel.DrawItem("Gun Game");
 	// open a selection menu for 20 seconds
 	panel.Send(client, SdHandler, 20);
 
@@ -743,17 +816,15 @@ public Action command_special_day(int client,args)
 
 public Action command_cancel_special_day(int client,args)  
 {
-
 	PrintToChatAll("%s Special day cancelled!", SPECIALDAY_PREFIX);
 	EndSd();
 	return Plugin_Handled;
-
 }
 
 
 
-public Action WeaponMenuAll() {
-
+public Action WeaponMenuAll() 
+{
 	PrintToChatAll("%s Please select a rifle for the special day", SPECIALDAY_PREFIX);
 	
 	Panel guns = new Panel();
@@ -876,7 +947,7 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 }
 
 // filter to ignore a ray hitting a player
-bool trace_ignore_players(int entity, contents_mask)
+bool trace_ignore_players(int entity, int contents_mask)
 {
 	if(entity > 0 && entity < MAXPLAYERS)
 	{
@@ -1133,11 +1204,80 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 			}			
 		}
 	}
+	
+	else if(special_day == gungame_day)
+	{
+		int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+		int victim = GetClientOfUserId(GetEventInt(event, "userid"));
+		
+		// if they die by some silly means then ignore and resp
+		if(!IsClientInGame(attacker))
+		{
+			CreateTimer(3.0, ReviveGunGame, victim);
+			return Plugin_Handled;
+		}
+		
+		
+		char weapon_name[64];
+		GetClientWeapon(attacker, weapon_name, sizeof(weapon_name));
+		
+		// kill with current weapon
+		if(gun_counter[attacker] < GUNGAME_SIZE && StrEqual(weapon_name, guns_list[gun_counter[attacker]]))
+		{
+			gun_counter[attacker]++;
+			if(gun_counter[attacker] >= GUNGAME_SIZE)
+			{
+				// end the round
+				gun_counter[attacker] = 0;
+				
+				// renable loss conds
+				SetConVarBool(g_ignore_round_win, false);
+				PrintToChatAll("%s %N won gungame", SPECIALDAY_PREFIX, attacker);
+				
+				
+				
+				// slay everyone
+				for (int i=1; i<=MaxClients; i++)
+				{
+					if (IsClientInGame(i) && IsPlayerAlive(i)) 
+					{
+						ForcePlayerSuicide(i);
+					}
+				}
+			}
+			
+			else // still going
+			{
+				// update gun
+				GiveGunGameGun(attacker);
+			}
+			
+		}
+		
+		// killed with knife dec the enemies weapon
+		else if(StrEqual(weapon_name,"weapon_knife"))
+		{
+			gun_counter[victim]--;
+			if(gun_counter[victim] < 0)
+			{
+				gun_counter[victim] = 0;
+			}
+		}
+		
+		
+		
+		
+		// start a respawn for the dead player :)
+		CreateTimer(3.0, ReviveGunGame, victim);
+		
+		
+	}
+	return Plugin_Continue;
 }
 
 public Action NewZombie(Handle timer, int client)
 {
-	if(special_day != zombie_day)
+	if(special_day != zombie_day || !IsClientInGame(client))
 	{
 		return;
 	}
@@ -1152,7 +1292,7 @@ public Action NewZombie(Handle timer, int client)
 
 public Action ReviveZombie(Handle timer, int client)
 {
-	if(special_day != zombie_day)
+	if(special_day != zombie_day || !IsClientInGame(client) || IsPlayerAlive(client))
 	{
 		return;
 	}
@@ -1191,12 +1331,20 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 		{
 			while((entity = FindEntityByClassname(entity, entity_list[i])) != -1)
 			
-			
 			if(IsValidEntity(entity))
 			{
 				AcceptEntityInput(entity, "Open");
-			}
+			}	
 		}
+		
+		// destroy all breakables
+		while((entity = FindEntityByClassname(entity, "func_breakable")) != -1)
+			
+		if(IsValidEntity(entity))
+		{
+			AcceptEntityInput(entity, "Break");
+		}
+		
 		// special done begun but not active
 		sd_state = sd_started; 
 		
@@ -1429,6 +1577,34 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 					}
 				}
 			}
+			
+			case 9: // gun game
+			{
+				PrintToChatAll("%s gun game day started", SPECIALDAY_PREFIX);
+				
+				special_day = gungame_day;
+				
+				// reset the gun counter
+				for (int i = 0; i < MaxClients; i++)
+				{
+					gun_counter[i] = 0;
+				}
+				
+				for(new i = 1; i < MaxClients; i++)
+				{
+					if(IsClientInGame(i)) // check the client is in the game
+					{
+						if(IsPlayerAlive(i))  // check player is dead
+						{
+							if(IsOnTeam(i)) // check not in spec
+							{
+								// give armour and current gun
+								GiveGunGameGun(i);
+							}
+						}
+					}
+				}					
+			}
 		} 
 	}
 	
@@ -1562,6 +1738,10 @@ public StartSD()
 			StartZombie();
 		}
 		
+		case gungame_day:
+		{
+			StartGunGame();
+		}
 		
 		default:
 		{
@@ -1585,6 +1765,43 @@ public int make_invis_t()
 		}
 	}	
 }
+
+
+public GiveGunGameGun(int client)
+{
+	StripAllWeapons(client);
+	GivePlayerItem(client, "weapon_knife");
+	GivePlayerItem(client, "item_assaultsuit");
+	GivePlayerItem(client, guns_list[gun_counter[client]]);
+	PrintToChat(client, "%s Current level: %s", SPECIALDAY_PREFIX, guns_list[gun_counter[client]]);
+}
+
+
+
+public Action ReviveGunGame(Handle timer, int client)
+{
+	if(special_day != gungame_day)
+	{
+		return;
+	}
+	
+	if(IsClientInGame(client))
+	{
+		CS_RespawnPlayer(client);
+		GiveGunGameGun(client);
+	}		
+}
+
+public StartGunGame()
+{
+	ff = true;
+	SetConVarBool(g_hFriendlyFire, true); // enable friendly fire	
+	no_damage = false;	
+	PrintCenterTextAll("Gun game active");
+	SetConVarBool(g_ignore_round_win, true);
+	CreateTimer(1.0, RemoveGuns);
+}
+
 
 
 public MakeZombie(int client)
@@ -1782,6 +1999,11 @@ public OnEntityCreated(int entity, const String:classname[])
 
 public Action RemoveGuns(Handle timer)
 {	
+	if(sd_state != sd_active)
+	{
+		return Plugin_Handled;
+	}
+	
 	// By Kigen (c) 2008 - Please give me credit. :)
 	new maxent = GetMaxEntities(), String:weapon[64];
 	for (new i=GetMaxClients();i<maxent;i++)
@@ -1793,12 +2015,10 @@ public Action RemoveGuns(Handle timer)
 					RemoveEdict(i);
 		}
 	}
+	
 
-	if(special_day == dodgeball_day || special_day == grenade_day)
-	{
-		CreateTimer(1.0, RemoveGuns);
-	}
-
+	CreateTimer(1.0, RemoveGuns);
+	return Plugin_Continue;
 }
 
 public Action GiveFlash(Handle timer, any entity)

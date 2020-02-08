@@ -11,7 +11,7 @@
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.5.2 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.5.3 - Violent Intent Jailbreak"
 
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
@@ -349,6 +349,7 @@ public OnMapStart()
 	for (int i = 0; i < MAXPLAYERS + 1; i++)
 	{
 		LaserUse[i] = false;
+		use_draw_laser_settings[i] = false;
 	}
 	
 }
@@ -359,12 +360,13 @@ public OnMapStart()
 public void OnClientConnected(int client)
 {
 	LaserUse[client] = false;
+	use_draw_laser_settings[client] = false;
 }
 
 public void OnClientDisconnect(client)
 {
 	LaserUse[client] = false;
-	
+	use_draw_laser_settings[client] = false;
 	if(client == warden_id)
 	{
 		warden_id = WARDEN_INVALID;
