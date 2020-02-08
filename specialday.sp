@@ -117,7 +117,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 new g_WeaponParent;
 
-#define VERSION "1.7"
+#define VERSION "1.7.1"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -1211,7 +1211,7 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 		int victim = GetClientOfUserId(GetEventInt(event, "userid"));
 		
 		// if they die by some silly means then ignore and resp
-		if(!IsClientInGame(attacker))
+		if(!(attacker > 0 && victim <= MaxClients))
 		{
 			CreateTimer(3.0, ReviveGunGame, victim);
 			return Plugin_Handled;
