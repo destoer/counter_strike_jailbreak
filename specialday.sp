@@ -117,7 +117,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 new g_WeaponParent;
 
-#define VERSION "1.7.1"
+#define VERSION "1.7.2"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -1299,7 +1299,7 @@ public Action ReviveZombie(Handle timer, int client)
 	
 	if(IsPlayerAlive(patient_zero))
 	{	
-
+		// pull cords so we can tele player to patient zero
 		float cords[3];
 		GetClientAbsOrigin(patient_zero, cords);
 		CS_RespawnPlayer(client);
@@ -1981,7 +1981,7 @@ public int StartDodgeball()
 
 
 
-// block flashes 
+// handle nade projectiles for a sd create timers to remove them :)
 public OnEntityCreated(int entity, const String:classname[])
 {
 	if(special_day == dodgeball_day)
@@ -2005,14 +2005,17 @@ public Action RemoveGuns(Handle timer)
 	}
 	
 	// By Kigen (c) 2008 - Please give me credit. :)
-	new maxent = GetMaxEntities(), String:weapon[64];
+	int maxent = GetMaxEntities();
+	char weapon[64];
 	for (new i=GetMaxClients();i<maxent;i++)
 	{
 		if ( IsValidEdict(i) && IsValidEntity(i) )
 		{
 			GetEdictClassname(i, weapon, sizeof(weapon));
 			if ( ( StrContains(weapon, "weapon_") != -1 || StrContains(weapon, "item_") != -1 ) && GetEntDataEnt2(i, g_WeaponParent) == -1 )
-					RemoveEdict(i);
+			{
+				RemoveEdict(i);
+			}
 		}
 	}
 	
@@ -2030,15 +2033,10 @@ public Action GiveFlash(Handle timer, any entity)
 		AcceptEntityInput(entity, "Kill");
 	}
 	
-	else 
-	{
-		return;
-	}
 
 	// giver person who threw a flash after a second +  set hp to one
 	
 	if(special_day != dodgeball_day) { return; }
-	
 	
 	
 	if(IsClientInGame(client))
@@ -2094,6 +2092,12 @@ stock StripAllWeapons(client)
 			RemovePlayerItem(client, wepIdx);
 			AcceptEntityInput(wepIdx, "Kill");
 			wepIdx = GetPlayerWeaponSlot(client, 3);
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		// nade offsets start at 11 in css
+		SetEntProp(client, Prop_Send, "m_iAmmo", 0, _, 11 + i);
 	}
 
 }
