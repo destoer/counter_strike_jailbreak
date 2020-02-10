@@ -4,12 +4,11 @@
 #include <sdkhooks>
 #include <entity>
 #include "colorvariables.inc"
+#include "lib.inc"
+
 
 /*
- TODO
- add infinite ammo for last man standing!
- currently just gives a ton in current ammo
- implement gun game!
+TODO make all names consistent 
 */
 
 // if running gangs or ct bans with this define to prevent issues :)
@@ -175,7 +174,7 @@ public OnPluginStart()
 	
 	for(int i = 1;i < MaxClients;i++)
 	{
-		if(IsValidClient(i))
+		if(is_valid_client(i))
 		{
 			OnClientPutInServer(i);
 		}
@@ -233,7 +232,7 @@ public Action join_team(Handle event, const String: name[], bool bDontBroadcast)
 	// if a player joins at this point we need to give them 
 	// the same action as in the main handler
 	int client = GetClientOfUserId(GetEventInt(event, "userid")); 
-	if (!IsValidClient(client))
+	if (!is_valid_client(client))
 	{   
         return Plugin_Continue; 
     }	
@@ -291,7 +290,7 @@ public Action join_team(Handle event, const String: name[], bool bDontBroadcast)
 		
 		case fly_day:
 		{
-			SetClientSpeed(client,2.5);
+			set_client_speed(client,2.5);
 			SetEntityMoveType(client, MOVETYPE_FLY); // should add the ability to toggle with a weapon switch
 															// to make navigation easy (as brushing on the floor sucks)
 			GivePlayerItem(client, "weapon_m3"); // all ways give a deagle
@@ -301,14 +300,14 @@ public Action join_team(Handle event, const String: name[], bool bDontBroadcast)
 		case dodgeball_day:
 		{
 			SetEntityHealth(client, 1); // set health to 1
-			StripAllWeapons(client); // remove all the players weapons
+			strip_all_weapons(client); // remove all the players weapons
 			GivePlayerItem(client, "weapon_flashbang");
 			SetEntProp(client, Prop_Data, "m_ArmorValue", 0.0);  	
 		}
 		
 		case grenade_day:
 		{
-			StripAllWeapons(client); // remove all the players weapons
+			strip_all_weapons(client); // remove all the players weapons
 			GivePlayerItem(client, "weapon_hegrenade");
 			SetEntProp(client, Prop_Data, "m_ArmorValue", 0.0);  	
 		}
@@ -324,14 +323,13 @@ public Action join_team(Handle event, const String: name[], bool bDontBroadcast)
 						
 			else if(team == CS_TEAM_CT)
 			{
-						
-				StripAllWeapons(client);
+				strip_all_weapons(client);
 				GivePlayerItem(client, "weapon_m3"); // give a shotty
 				// give em shit tons of ammo
 				int weapon = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);
-				SetReserveAmmo(client , weapon, 999)
+				set_reserve_ammo(client , weapon, 999)
 				// freeze the player in place
-				SetEntPropFloat(client, Prop_Data, "m_flLaggedMovementValue", 0.0);			
+				set_client_speed(client,0.0);			
 			}
 		}
 		
@@ -367,7 +365,8 @@ public Action join_team(Handle event, const String: name[], bool bDontBroadcast)
 // freeze all players and turn ff on
 public Action Freeze(client,args)
 {
-	if(sd_state != sd_inactive) { 
+	if(sd_state != sd_inactive) 
+	{ 
 		PrintToChat(client,"%s Can't freeze players during Special Day", SPECIALDAY_PREFIX);
 		return Plugin_Handled; 
 		
@@ -378,7 +377,7 @@ public Action Freeze(client,args)
 	{ 
 		if(IsClientInGame(i))
 		{
-			SetEntPropFloat(i, Prop_Data, "m_flLaggedMovementValue", 0.0);
+			set_client_speed(i, 0.0);
 		}
 	
 	}
@@ -389,11 +388,13 @@ public Action Freeze(client,args)
 // unfreeze all players off
 public Action UnFreeze(client,args)
 {
-	if(sd_state != sd_inactive) { 
+	if(sd_state != sd_inactive) 
+	{ 
 		PrintToChat(client,"%s Can't unfreeze players during Special Day", SPECIALDAY_PREFIX);
 		return Plugin_Handled; 		
 	} // dont allow freezes during an sd
-	if(fr == false) {
+	if(fr == false) 
+	{
 		PrintToChat(client,"%s Can't unfreeze if not already frozen", SPECIALDAY_PREFIX);
 		return Plugin_Handled; 
 	} // can only unfreeze if frozen
@@ -402,7 +403,7 @@ public Action UnFreeze(client,args)
 	{
 		if(IsClientInGame(i))
 		{
-			SetEntPropFloat(i, Prop_Data, "m_flLaggedMovementValue", 1.0);
+			set_client_speed(i, 1.0);
 		}
 	
 	}
@@ -410,18 +411,6 @@ public Action UnFreeze(client,args)
 	PrintCenterTextAll("Game play active");
 	return Plugin_Handled;
 }
-
-
-bool IsValidClient(int client)
-{
-	if(client <= 0 ) return false;
-	if(client > MaxClients) return false;
-	if(!IsClientConnected(client)) return false;
-	return IsClientInGame(client);
-}
-
-
-
 
 
 public void OnClientPutInServer(int client)
@@ -448,11 +437,9 @@ public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &
 
 public Action PlayerDisconnect_Event(Handle event, const String:name[], bool dontBroadcast)
 {
-	new client;
-	new clientid;
-	
-	clientid = GetEventInt(event,"userid");
-	client = GetClientOfUserId(clientid);
+
+	int client = GetClientOfUserId(GetEventInt(event,"userid"));
+
 
 	// if the tank disconnects
 	if(client == tank && sd_state == sd_inactive)
@@ -503,7 +490,7 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 		// while the current disconnecter
 		while(tank == client)
 		{
-			new rand = GetRandomInt( 0, (validclients-1) );
+			int rand = GetRandomInt( 0, (validclients-1) );
 			tank = game_clients[rand]; // select the lucky client
 		}
 		
@@ -659,36 +646,15 @@ public SetupFog()
 
 
 
-// needs to be investigated for causing cvar errors
-public Action:OnRoundStart(Handle event, const String:name[], bool dontBroadcast)
-{
 
-	sd_state = sd_inactive;
-	special_day = normal_day;
-	hp_steal = false;
-	fr = false;
-	tank = -1;
-	patient_zero = -1;
-	if(ff == true) // if we just had ffd
-	{
-		ff = false;
-		SetConVarBool(g_hFriendlyFire, false); // disable friendly fire
-	} 
-	// reset the alpha just to be safe
-	for(int i = 1; i <= MaxClients; i++)
-	{
-		if(IsClientInGame(i) && (GetClientTeam(i) == CS_TEAM_T || GetClientTeam(i) == CS_TEAM_CT))
-		{
-			SetEntityRenderMode(i, RENDER_TRANSCOLOR);
-			SetEntityRenderColor(i, 255, 255, 255, 255);
-			SetEntityGravity(i, 1.0); // reset the gravity
-		}
-	}	
+public Action OnRoundStart(Handle event, const String:name[], bool dontBroadcast)
+{
+	EndSd();
 }
 
 
 
-public int EndSd()
+public void EndSd()
 {
 	switch(special_day)
 	{
@@ -765,12 +731,32 @@ public int EndSd()
 #endif
 
 
+	if(ff)
+	{
+			ff = false;
+			SetConVarBool(g_hFriendlyFire, false); // disable friendly fire	
+	}
 
 	special_day = normal_day;
 	sd_state = sd_inactive;
 	hp_steal = false;
 	fr = false;
 	no_damage = false;
+	tank = -1;
+	patient_zero = -1;
+	
+	
+	// reset the alpha just to be safe
+	for(int i = 1; i <= MaxClients; i++)
+	{
+		if(IsClientInGame(i) && (GetClientTeam(i) == CS_TEAM_T || GetClientTeam(i) == CS_TEAM_CT))
+		{
+			SetEntityRenderMode(i, RENDER_TRANSCOLOR);
+			SetEntityRenderColor(i, 255, 255, 255, 255);
+			SetEntityGravity(i, 1.0); // reset the gravity
+		}
+	}	
+	
 }
 
 
@@ -852,23 +838,6 @@ public Action WeaponMenuAll()
 	return Plugin_Handled;		
 }
 
-
-
-
-
-
-stock SetReserveAmmo(int client, int weapon, int ammo)
-{
-  new g_Offset_Ammo = FindSendPropInfo("CCSPlayer", "m_iAmmo");
-  new iAmmoType = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
-  SetEntData(client, g_Offset_Ammo+(iAmmoType*4), ammo, _, true);
-}
-
-
-
-
-
-
 public int WeaponHandler(Menu menu, MenuAction action, int client, int param2) 
 {
 	if(action == MenuAction_Select) 
@@ -879,7 +848,7 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 			return -1;
 		}
 		
-		StripAllWeapons(client);
+		strip_all_weapons(client);
 		
 	
 		GivePlayerItem(client, "weapon_knife"); // give back a knife
@@ -891,15 +860,14 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 		
 		
 		// give them plenty of deagle ammo
-		new weapon;
-		
-		weapon = GetPlayerWeaponSlot(client, CS_SLOT_SECONDARY);
-		SetReserveAmmo(client, weapon, 999)
+		int weapon = GetPlayerWeaponSlot(client, CS_SLOT_SECONDARY);
+		set_reserve_ammo(client, weapon, 999)
 		
 		// give player nades
 		GivePlayerItem(client, "weapon_flashbang"); 
 		GivePlayerItem(client, "weapon_hegrenade"); 
-		GivePlayerItem(client, "weapon_smokegrenade"); 
+		GivePlayerItem(client, "weapon_smokegrenade");
+		
 		// and kevlar
 		GivePlayerItem(client, "item_assaultsuit"); 
 		
@@ -931,9 +899,7 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 		
 		// give them plenty of primary ammo
 		weapon = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);
-		SetReserveAmmo(client, weapon, 999)
-		
-		
+		set_reserve_ammo(client, weapon, 999);
 	}
 
 	
@@ -944,17 +910,6 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 	
 	
 	return 0;
-}
-
-// filter to ignore a ray hitting a player
-bool trace_ignore_players(int entity, int contents_mask)
-{
-	if(entity > 0 && entity < MAXPLAYERS)
-	{
-		return false;
-	}
-	
-	return true;
 }
 
 
@@ -1017,7 +972,7 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 	
 	else if(special_day == zombie_day)
 	{
-		if (!IsValidClient(attacker)) { return Plugin_Continue; }
+		if (!is_valid_client(attacker)) { return Plugin_Continue; }
 		
 		if(GetClientTeam(victim) == CS_TEAM_T)
 		{
@@ -1072,15 +1027,15 @@ public SaveTeams(bool onlyct)
 			#if defined CT_BAN 
 				if(ctban_running && onlyct)
 				{
-					valid = IsOnTeam(i) && !CTBan_IsClientBanned(i);
+					valid = is_on_team(i) && !CTBan_IsClientBanned(i);
 				}
 				
 				else
 				{
-					valid = IsOnTeam(i);
+					valid = is_on_team(i);
 				}
 			#else
-				valid = IsOnTeam(i);
+				valid = is_on_team(i);
 			#endif
 			
 			if(valid)
@@ -1101,39 +1056,17 @@ public RestoreTeams()
 	{
 		int client = game_clients[i]; // get the client index
 		
-		if(!IsValidClient(client) || !IsClientInGame(client))
+		if(!is_valid_client(client) || !IsClientInGame(client))
 		{
 			continue;
 		}
 		
 		// switch back to team actual team
-		if(IsOnTeam(client))
+		if(is_on_team(client))
 		{
 			CS_SwitchTeam(client,teams[i]);
 		}
 	}
-}
-
-
-//get players alive on a team
-public int get_alive_team_count(int team)
-{
-	int number = 0;
-	for (int i=1; i<=MaxClients; i++)
-	{
-		if (IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == team) 
-		{
-			number += 1;
-		}
-	}
-	return number;
-}  
-
-
-public SetClipAmmo(int client, int weapon, int ammo)
-{
-	SetEntProp(weapon, Prop_Send, "m_iClip1", ammo);
-	SetEntProp(weapon, Prop_Send, "m_iClip2", ammo);
 }
 
 
@@ -1159,25 +1092,19 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 	if(special_day == zombie_day)
 	{
 		// test that first time hitting one ct
-		int cur_count = get_alive_team_count(CS_TEAM_CT);
+		int last_man;
+		int cur_count = get_alive_team_count(CS_TEAM_CT, last_man);
 		bool last_man_triggered  = (cur_count == 1) && (cur_count != ct_count)
 		ct_count = cur_count;
 		if(last_man_triggered)
 		{
-			for (int i = 1; i <= MaxClients; i++)
-			{
-				if (IsClientConnected(i) && IsPlayerAlive(i) && GetClientTeam(i) == CS_TEAM_CT) 
-				{
-					// LAST MAN STANDING
-					PrintCenterTextAll("%N IS LAST MAN STANDING!", i);
-					SetEntityHealth(i, 350);
-					int weapon = GetPlayerWeaponSlot(i, CS_SLOT_SECONDARY);
-					SetClipAmmo(i,weapon, 999);
-					weapon =  GetPlayerWeaponSlot(i, CS_SLOT_PRIMARY);
-					SetClipAmmo(i,weapon, 999);
-					break;
-				}			
-			}
+			// LAST MAN STANDING
+			PrintCenterTextAll("%N IS LAST MAN STANDING!", last_man);
+			SetEntityHealth(last_man, 350);
+			int weapon = GetPlayerWeaponSlot(last_man, CS_SLOT_SECONDARY);
+			set_clip_ammo(last_man,weapon, 999);
+			weapon =  GetPlayerWeaponSlot(last_man, CS_SLOT_PRIMARY);
+			set_clip_ammo(last_man,weapon, 999);
 		}
 		
 		
@@ -1357,7 +1284,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 			{
 				if(!IsPlayerAlive(i))  // check player is dead
 				{
-					if(IsOnTeam(i)) // check not in spec
+					if(is_on_team(i)) // check not in spec
 					{
 						CS_RespawnPlayer(i);
 					}
@@ -1437,9 +1364,9 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 				{
 					if(IsClientInGame(i) && IsPlayerAlive(i)) // check the client is in the game
 					{
-						StripAllWeapons(i);
+						strip_all_weapons(i);
 					
-						SetClientSpeed(i,2.5);
+						set_client_speed(i,2.5);
 						SetEntityMoveType(i, MOVETYPE_FLY); // should add the ability to toggle with a weapon switch
 															// to make navigation easy (as brushing on the floor sucks)
 						GivePlayerItem(i, "weapon_m3"); // all ways give a deagle
@@ -1475,14 +1402,14 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 					else if(GetClientTeam(i) == CS_TEAM_CT)
 					{
 
-						StripAllWeapons(i);
+						strip_all_weapons(i);
 	
 						GivePlayerItem(i, "weapon_m3"); // give a shotty
 						// give em shit tons of ammo
 						int weapon = GetPlayerWeaponSlot(i, CS_SLOT_PRIMARY);
-						SetReserveAmmo(i, weapon, 999)
+						set_reserve_ammo(i, weapon, 999)
 						// freeze the player in place
-						SetEntPropFloat(i, Prop_Data, "m_flLaggedMovementValue", 0.0);
+						set_client_speed(i, 0.0);
 						SetEntityHealth(i,500); // set health to 500
 						
 					}
@@ -1506,10 +1433,10 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 					{
 						if(IsPlayerAlive(i))  // check player is dead
 						{
-							if(IsOnTeam(i)) // check not in spec
+							if(is_on_team(i)) // check not in spec
 							{
 								SetEntityHealth(i,100); // set health to 1
-								StripAllWeapons(i); // remove all the players weapons
+								strip_all_weapons(i); // remove all the players weapons
 								GivePlayerItem(i, "weapon_flashbang");
 								SetEntProp(i, Prop_Data, "m_ArmorValue", 0.0);  
 								SetEntityGravity(i, 0.6);
@@ -1533,10 +1460,10 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 					{
 						if(IsPlayerAlive(i))  // check player is dead
 						{
-							if(IsOnTeam(i)) // check not in spec
+							if(is_on_team(i)) // check not in spec
 							{
 								SetEntityHealth(i,100); // set health to 1
-								StripAllWeapons(i); // remove all the players weapons
+								strip_all_weapons(i); // remove all the players weapons
 								GivePlayerItem(i, "weapon_hegrenade");
 								SetEntProp(i, Prop_Data, "m_ArmorValue", 0.0);  
 								SetEntityGravity(i, 0.6);
@@ -1569,7 +1496,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 					{
 						if(IsPlayerAlive(i))  // check player is dead
 						{
-							if(IsOnTeam(i)) // check not in spec
+							if(is_on_team(i)) // check not in spec
 							{
 								WeaponMenu(i);
 							}
@@ -1596,7 +1523,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 					{
 						if(IsPlayerAlive(i))  // check player is dead
 						{
-							if(IsOnTeam(i)) // check not in spec
+							if(is_on_team(i)) // check not in spec
 							{
 								// give armour and current gun
 								GiveGunGameGun(i);
@@ -1621,18 +1548,6 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 	
 	return 0;
 }
-
-public bool IsOnTeam(int i)
-{
-	return GetClientTeam(i) == CS_TEAM_CT || GetClientTeam(i) == CS_TEAM_T;
-}
-
-
-public SetClientSpeed(int client,float speed)
-{
-      SetEntPropFloat(client, Prop_Send, "m_flLaggedMovementValue", speed)
-}  
-
 
 
 // consider a better way of doing this without several timers to save function call overhead
@@ -1769,7 +1684,7 @@ public int make_invis_t()
 
 public GiveGunGameGun(int client)
 {
-	StripAllWeapons(client);
+	strip_all_weapons(client);
 	GivePlayerItem(client, "weapon_knife");
 	GivePlayerItem(client, "item_assaultsuit");
 	GivePlayerItem(client, guns_list[gun_counter[client]]);
@@ -1806,8 +1721,8 @@ public StartGunGame()
 
 public MakeZombie(int client)
 {
-	StripAllWeapons(client);
-	SetClientSpeed(client, 1.2);
+	strip_all_weapons(client);
+	set_client_speed(client, 1.2);
 	SetEntityGravity(client, 0.4);
 	SetEntityHealth(client, 250);
 	GivePlayerItem(client, "weapon_knife");
@@ -1832,7 +1747,7 @@ public int StartZombie()
 	{
 		if(IsClientInGame(i))
 		{
-			if(IsOnTeam(i))
+			if(is_on_team(i))
 			{
 				CS_SwitchTeam(i,CS_TEAM_CT);
 			}
@@ -1861,7 +1776,7 @@ public int StartGrenade()
 		{
 			if(IsPlayerAlive(i))  // check player is dead
 			{
-				if(IsOnTeam(i)) // check not in spec
+				if(is_on_team(i)) // check not in spec
 				{
 					SetEntityHealth(i,250);
 				}
@@ -1877,7 +1792,7 @@ public int StartHide()
 	{
 		if(IsClientInGame(i) && GetClientTeam(i) == CS_TEAM_CT) // check the client is in the game
 		{
-			SetEntPropFloat(i, Prop_Data, "m_flLaggedMovementValue", 1.0);
+			set_client_speed(i, 1.0);
 			SetEntityHealth(i,500); // set health to 500
 		}
 	}
@@ -1913,7 +1828,7 @@ public int StartTank()
 	{
 		if(IsClientInGame(i))
 		{
-			if(IsOnTeam(i))
+			if(is_on_team(i))
 			{
 				CS_SwitchTeam(i,CS_TEAM_T);
 			}
@@ -1965,7 +1880,7 @@ public int StartDodgeball()
 		{
 			if(IsPlayerAlive(i))  // check player is dead
 			{
-				if(GetClientTeam(i) == CS_TEAM_CT || GetClientTeam(i) ==  CS_TEAM_T ) // check not in spec
+				if(is_on_team(i)) // check not in spec
 				{
 					SetEntityHealth(i,1);
 					SetEntProp(i, Prop_Data, "m_ArmorValue", 0.0);  // remove armor 
@@ -1973,8 +1888,6 @@ public int StartDodgeball()
 			}
 		}	
 	}
-
-
 }
 
 
@@ -2007,7 +1920,7 @@ public Action RemoveGuns(Handle timer)
 	// By Kigen (c) 2008 - Please give me credit. :)
 	int maxent = GetMaxEntities();
 	char weapon[64];
-	for (new i=GetMaxClients();i<maxent;i++)
+	for (int i=GetMaxClients(); i < maxent; i++)
 	{
 		if ( IsValidEdict(i) && IsValidEntity(i) )
 		{
@@ -2026,7 +1939,7 @@ public Action RemoveGuns(Handle timer)
 
 public Action GiveFlash(Handle timer, any entity)
 {
-	new client = GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity");
+	int client = GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity");
 
 	if (IsValidEntity(entity))
 	{
@@ -2034,16 +1947,18 @@ public Action GiveFlash(Handle timer, any entity)
 	}
 	
 
-	// giver person who threw a flash after a second +  set hp to one
-	
-	if(special_day != dodgeball_day) { return; }
+	// give person who threw a flash after a second +  set hp to one
+	if(special_day != dodgeball_day) 
+	{ 
+		return; 
+	}
 	
 	
 	if(IsClientInGame(client))
 	{
 		if(GetClientTeam(client) == CS_TEAM_CT || GetClientTeam(client) ==  CS_TEAM_T && IsPlayerAlive(client) )
 		{
-			StripAllWeapons(client);
+			strip_all_weapons(client);
 			GivePlayerItem(client, "weapon_flashbang");
 			SetEntityHealth(client,1);
 		}
@@ -2054,7 +1969,7 @@ public Action GiveFlash(Handle timer, any entity)
 
 public Action GiveGrenade(Handle timer, any entity)
 {
-	new client = GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity");
+	int client = GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity");
 
 	// giver person who threw a flash after a second +  set hp to one
 	
@@ -2066,44 +1981,11 @@ public Action GiveGrenade(Handle timer, any entity)
 	{
 		if(GetClientTeam(client) == CS_TEAM_CT || GetClientTeam(client) ==  CS_TEAM_T && IsPlayerAlive(client) )
 		{
-			StripAllWeapons(client);
+			strip_all_weapons(client);
 			GivePlayerItem(client, "weapon_hegrenade");
 		}
 	}	
 }
-
-
-stock StripAllWeapons(client)
-{
-	int wepIdx;
-	for (int i = 0; i < 6; i++)
-	{
-		if ((wepIdx = GetPlayerWeaponSlot(client, i)) != -1)
-		{
-			RemovePlayerItem(client, wepIdx);
-			AcceptEntityInput(wepIdx, "Kill");
-		}
-	}
-
-	// remove any nades left (as it will only remove first from nade slot)
-	wepIdx = GetPlayerWeaponSlot(client, 3); // 3 is the nade slot 
-	while(wepIdx  != -1)
-	{
-			RemovePlayerItem(client, wepIdx);
-			AcceptEntityInput(wepIdx, "Kill");
-			wepIdx = GetPlayerWeaponSlot(client, 3);
-	}
-
-	for (int i = 0; i < 4; i++)
-	{
-		// nade offsets start at 11 in css
-		SetEntProp(client, Prop_Send, "m_iAmmo", 0, _, 11 + i);
-	}
-
-}
-
-
-
 
 // prevent additional weapon pickups
 
@@ -2111,9 +1993,9 @@ public Action OnWeaponEquip(int client, int weapon)
 {
 	if(special_day == dodgeball_day)
 	{
-		char sWeapon[32];
-		GetEdictClassname(weapon, sWeapon, sizeof(sWeapon)); 
-		if(!StrEqual(sWeapon,"weapon_flashbang"))
+		char weapon_string[32];
+		GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
+		if(!StrEqual(weapon_string,"weapon_flashbang"))
 		{
 			return Plugin_Handled;
 		}
@@ -2121,9 +2003,9 @@ public Action OnWeaponEquip(int client, int weapon)
 	
 	if(special_day == grenade_day)
 	{
-		char sWeapon[32];
-		GetEdictClassname(weapon, sWeapon, sizeof(sWeapon)); 
-		if(!StrEqual(sWeapon,"weapon_hegrenade"))
+		char weapon_string[32];
+		GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
+		if(!StrEqual(weapon_string,"weapon_hegrenade"))
 		{
 			return Plugin_Handled;
 		}
@@ -2131,12 +2013,12 @@ public Action OnWeaponEquip(int client, int weapon)
 	
 	else if(special_day == zombie_day && sd_state == sd_active)
 	{
-		char sWeapon[32];
-		GetEdictClassname(weapon, sWeapon, sizeof(sWeapon)); 
+		char weapon_string[32];
+		GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
 		
 		if(GetClientTeam(client) == CS_TEAM_T)
 		{
-			if(!StrEqual(sWeapon,"weapon_knife"))
+			if(!StrEqual(weapon_string,"weapon_knife"))
 			{
 				return Plugin_Handled;
 			}

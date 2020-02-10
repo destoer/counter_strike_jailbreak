@@ -8,6 +8,11 @@
 */
 
 
+/*
+TODO make all names consistent 
+*/
+
+
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
@@ -22,6 +27,7 @@
 #include <sourcemod>
 #include <sdktools>
 #include <cstrike>
+#include "lib.inc"
 
 bool use_draw_laser_settings[MAXPLAYERS + 1];
 
@@ -169,6 +175,23 @@ enum laser_type
 };
 
 
+
+public void SetupLaser(int client,int color[4])
+{
+	// setup laser
+	float m_fOrigin[3];
+	float m_fImpact[3];
+	GetClientEyePosition(client, m_fOrigin);
+	GetClientSightEnd(client, m_fImpact);	
+	TE_SetupBeamPoints(m_fOrigin, m_fImpact, g_lbeam, 0, 0, 0, 0.1, 0.8, 0.8, 2, 0.0,color , 0);
+	TE_SendToAll();
+	
+	
+	// setup laser end "glow"
+	TE_SetupGlowSprite(m_fImpact, g_lpont, 0.1, 0.2, 255);
+	TE_SendToAll();
+}
+
 public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon)
 {
 	// reset laser cords we are no longer drawing
@@ -216,36 +239,26 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 		LaserUse[client] = true;
 		if(IsClientInGame(client) && LaserUse[client])
 		{
-			float m_fOrigin[3];
-			float m_fImpact[3];
-			GetClientEyePosition(client, m_fOrigin);
-			GetClientSightEnd(client, m_fImpact);
-			
-			
+
+		
 			switch(type)
 			{
 				case warden:
 				{
-					TE_SetupBeamPoints(m_fOrigin, m_fImpact, g_lbeam, 0, 0, 0, 0.1, 0.8, 0.8, 2, 0.0, laser_colors[0], 0);
+					SetupLaser(client,laser_colors[0]);
 				}
 			
 			
 				case admin:
 				{
-					TE_SetupBeamPoints(m_fOrigin, m_fImpact, g_lbeam, 0, 0, 0, 0.1, 0.8, 0.8, 2, 0.0,laser_rainbow[rainbow_color] , 0);
+					SetupLaser(client,laser_rainbow[rainbow_color]);
 				}
 				
 				case donator:
 				{
-					TE_SetupBeamPoints(m_fOrigin, m_fImpact, g_lbeam, 0, 0, 0, 0.1, 0.8, 0.8, 2, 0.0, laser_colors[laser_color[client]], 0);
+					SetupLaser(client,laser_colors[laser_color[client]]);
 				}
-			
 			}
-			TE_SendToAll();
-			// change life param to have it not persist
-			// and size for a bigger one
-			TE_SetupGlowSprite(m_fImpact, g_lpont, 0.1, 0.2, 255);
-			TE_SendToAll();
 		}
 	}
 	
@@ -274,30 +287,18 @@ public void OnClientSpeakingEx(client)
 
 
 
-stock GetClientSightEnd(client, float out[3])
+public void GetClientSightEnd(client, float out[3])
 {
 	float m_fEyes[3];
 	float m_fAngles[3];
 	GetClientEyePosition(client, m_fEyes);
 	GetClientEyeAngles(client, m_fAngles);
-	TR_TraceRayFilter(m_fEyes, m_fAngles, MASK_PLAYERSOLID, RayType_Infinite, TraceRayDontHitPlayers);
+	TR_TraceRayFilter(m_fEyes, m_fAngles, MASK_PLAYERSOLID, RayType_Infinite, trace_ignore_players);
 	if(TR_DidHit())
 	{
 		TR_GetEndPosition(out);
 	}
 }
-
-public bool TraceRayDontHitPlayers(entity, mask, any data)
-{
-	if(0 < entity <= MaxClients)
-	{
-		return false;
-	}
-	return true;
-}
-
-
-
 
 // circle stuff
 
@@ -316,7 +317,7 @@ public Action Repetidor(Handle timer)
 	}
 }
 
-SetupBeacon(client)
+public void SetupBeacon(client)
 {
 	float vec[3];
 	GetClientAbsOrigin(client, vec);
@@ -512,7 +513,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
             {
                 for (new i = 1; i <= MaxClients; i++)
                 {
-                    if (IsValidClient(i) && GetClientTeam(i) == 3)
+                    if (is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT)
                     {
                         if (sArgs[0] != '@')
                         {
@@ -534,22 +535,6 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
     
     return Plugin_Continue;
 }
-
-public bool:IsValidClient(client)
-{
-	if (!(1 <= client <= MaxClients) || !IsClientInGame(client))
-		return false;
-	
-	return true;
-} 
-
-
-
-
-
-
-
-
 
 
 // init the plugin
@@ -634,7 +619,7 @@ public Action print_warden_text_all(Handle timer)
 
 	else
 	{
-		StrCat(buf, sizeof(buf), "Current Warden: N/A");
+		Format(buf, sizeof(buf), "Current Warden: N/A");
 	}
 	
 	
@@ -658,7 +643,7 @@ public Action print_warden_text_all(Handle timer)
 } 
 
 // relinquish warden
-public Action leave_warden(client, args)
+public Action leave_warden(int client, int args)
 {
 	// only warden is allowed to quit
 	if(client == warden_id)
@@ -669,7 +654,7 @@ public Action leave_warden(client, args)
 	return Plugin_Handled;
 }
 
-public Action become_warden(client, args) 
+public Action become_warden(int client, int args) 
 {
 	// warden does not exist
 	if(warden_id == WARDEN_INVALID)
@@ -686,8 +671,7 @@ public Action become_warden(client, args)
 			else 
 			{
 				PrintToChat(client, "%s Cannot warden whilst dead", WARDEN_PREFIX);
-			}
-			
+			}	
 		}
 		
 		else 
@@ -746,21 +730,6 @@ public set_warden(client)
 
 }
 
-
-//get players alive on a team
-public int get_alive_team_count(int team)
-{
-	int number = 0;
-	for (int i=1; i<=MaxClients; i++)
-	{
-		if (IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == team) 
-		{
-			number += 1;
-		}
-	}
-	return number;
-}  
-
 public Action player_death(Handle event, const String:name[], bool dontBroadcast) 
 {
 	int client = GetClientOfUserId(GetEventInt(event, "userid")); // Get the dead clients id
@@ -772,27 +741,18 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 		remove_warden();
 	}
 	
-
+	int new_warden;
 	// if there is only one ct left alive automatically warden him
-	if(get_alive_team_count(CS_TEAM_CT) == 1)
+	if(get_alive_team_count(CS_TEAM_CT,new_warden) == 1)
 	{
-		for (int i = 1; i <= MaxClients; i++)
+		if(warden_id != WARDEN_INVALID)
 		{
-			if (IsClientConnected(i) && IsPlayerAlive(i) && GetClientTeam(i) == CS_TEAM_CT) 
-			{
-				// theres no need to set this twice  
-				if(i != warden_id)
-				{
-					set_warden(i);
-				}
-				break;
-			}			
-		}	
+			set_warden(new_warden);
+		}
 	}
-	
-	
 }
 
+// give ct 50 kevlar on spawn 
 public Action player_spawn(Handle event, const String:name[], bool dontBroadcast)
 {
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
@@ -898,7 +858,7 @@ public Action:Command_Stuck(client, args)
 
 
 
-public Action:Timer_UnBlockPlayer(Handle:timer, any:client)
+public Action Timer_UnBlockPlayer(Handle:timer, int client)
 {
     TimerActive = 0;
     
@@ -914,12 +874,12 @@ public Action:Timer_UnBlockPlayer(Handle:timer, any:client)
     
 }
 
-DisableAntiStuck(client)
+void DisableAntiStuck(int client)
 {
     SetEntProp(client, Prop_Data, "m_CollisionGroup", COLLISION_GROUP_PLAYER);
 }
 
-EnableAntiStuck(client)
+void EnableAntiStuck(int client)
 {
     SetEntProp(client, Prop_Data, "m_CollisionGroup", COLLISION_GROUP_PUSHAWAY);
 }
@@ -1000,24 +960,7 @@ public empty_weapon(client, weapon)
 	}
 }
 
-
-public set_reserve_ammo(int client, int weapon, int ammo)
-{
-  int g_Offset_Ammo = FindSendPropInfo("CCSPlayer", "m_iAmmo");
-  int iAmmoType = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
-  SetEntData(client, g_Offset_Ammo+(iAmmoType*4), ammo, _, true);
-}
-
-
-public set_clip_ammo(int client, int weapon, int ammo)
-{
-  SetEntProp(weapon, Prop_Send, "m_iClip1", ammo);
-  SetEntProp(weapon, Prop_Send, "m_iClip2", ammo);
-}
-
 // laser menu
-
-
 public Action laser_menu(client,args) {
 	Panel options = new Panel();
 	options.SetTitle("Laser selection");
@@ -1083,18 +1026,9 @@ public weapon_handler(Menu menu, MenuAction action, int param1, int param2)
 {
 	if(action == MenuAction_Select) 
 	{
-		new weaponIndex;
-		// picked a weapon remove all items
-		for(int slot = 0; slot < 6; slot++)
-		{
-			while ((weaponIndex = GetPlayerWeaponSlot(param1, slot)) != -1)
-			{
-				RemovePlayerItem(param1, weaponIndex);
-				RemoveEdict(weaponIndex);
-			}
-		}
-		
-	
+
+		strip_all_weapons(param1);
+
 		GivePlayerItem(param1, "weapon_knife"); // give back a knife
 		GivePlayerItem(param1, "weapon_deagle"); // all ways give a deagle
 		
