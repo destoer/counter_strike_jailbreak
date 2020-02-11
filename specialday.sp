@@ -6,11 +6,6 @@
 #include "colorvariables.inc"
 #include "lib.inc"
 
-
-/*
-TODO make all names consistent 
-*/
-
 // if running gangs or ct bans with this define to prevent issues :)
 #define GANGS
 #define CT_BAN
@@ -1371,6 +1366,8 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 															// to make navigation easy (as brushing on the floor sucks)
 						GivePlayerItem(i, "weapon_m3"); // all ways give a deagle
 						GivePlayerItem(i, "item_assaultsuit");
+						int weapon = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);
+						set_reserve_ammo(i , weapon, 999)
 					}
 				}
 			}
