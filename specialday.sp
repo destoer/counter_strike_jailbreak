@@ -118,7 +118,7 @@ public Plugin myinfo = {
 	author = "destoer",
 	description = "special days for jailbreak",
 	version = VERSION,
-	url = "https://github.com/destoer/css_jailbreak_plugins"
+	url = "https://github.com/destoer/counter_strike_jailbreak"
 };
 
 
