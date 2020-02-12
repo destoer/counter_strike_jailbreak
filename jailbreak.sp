@@ -39,7 +39,7 @@ public Plugin:myinfo =
 	author = PLUGIN_AUTHOR,
 	description = "warden and special days for jailbreak",
 	version = PLUGIN_VERSION,
-	url = "https://github.com/destoer/css_jailbreak_plugins"
+	url = "https://github.com/destoer/counter_strike_jailbreak"
 };
 
 
