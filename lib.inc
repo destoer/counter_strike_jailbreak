@@ -14,19 +14,7 @@ stock bool is_on_team(int i)
 
 stock void set_client_speed(int client,float speed)
 {
-      SetEntPropFloat(client, Prop_Send, "m_flLaggedMovementValue", speed)
-}
-
-int get_collision_offset()
-{
-	// get offset for collsion var
-	int g_offset_collision_group = FindSendPropOffs("CBaseEntity", "m_CollisionGroup");
-
-	if (g_offset_collision_group  == -1)
-	{
-		ThrowError("unable to get collision offset for noblock");
-	}
-	return g_offset_collision_group;
+      SetEntPropFloat(client, Prop_Data, "m_flLaggedMovementValue", speed)
 }
 
 
@@ -36,7 +24,7 @@ stock void block_all_clients()
 	{
 		if (IsClientInGame(i) && IsPlayerAlive(i))
 		{
-			SetEntData(i, get_collision_offset(), 5, 4, true);
+			SetEntProp(i, Prop_Data,"m_CollisionGroup", 5, 4, true);
 		}
 	}
 }
@@ -47,7 +35,7 @@ stock void unblock_all_clients()
 	{
 		if (IsClientInGame(i) && IsPlayerAlive(i))
 		{
-			SetEntData(i, get_collision_offset(), 2, 4, true);
+			SetEntProp(i, Prop_Data,"m_CollisionGroup", 2, 4, true);
 		}
 	}
 }
@@ -59,7 +47,7 @@ stock bool noblock_enabled()
 	{
 		if(IsClientInGame(i))
 		{
-			return GetEntData(i, get_collision_offset()) == 2;
+			return GetEntProp(i, Prop_Data,"m_CollisionGroup") == 2;
 		}
 	}
 	ThrowError("could not pull collision data from a client");

@@ -111,7 +111,7 @@ int gun_counter[64] =  { 0 };
 //new b_autokick; // turn auto kick off for friednly fire
 
 // gun removal
-new g_WeaponParent;
+int g_WeaponParent;
 
 #define VERSION "1.7.3"
 
@@ -161,6 +161,7 @@ public OnPluginStart()
 	g_ignore_round_win = FindConVar("mp_ignore_round_win_conditions");
 	g_autokick = FindConVar("mp_autokick");
 	SetConVarBool(g_autokick, false);	
+	// should really save the defaults but ehhh
 	//b_autokick = GetConVarBool(g_autokick);
 	//b_hFriendlyFire = GetConVarBool(g_hFriendlyFire);
 	
