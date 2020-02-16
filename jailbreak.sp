@@ -39,7 +39,7 @@ public Plugin:myinfo =
 	author = PLUGIN_AUTHOR,
 	description = "warden and special days for jailbreak",
 	version = PLUGIN_VERSION,
-	url = "https://github.com/destoer/counter_strike_jailbreak"
+	url = "https://github.com/destoer/css_jailbreak_plugins"
 };
 
 
@@ -379,12 +379,8 @@ public void OnClientDisconnect(client)
 // might want to add a default round setting...
 // also give newly spawned players this setting...
 
-// NO BLOCK
-
-bool is_blocking = false; // should make this a config but ah well
 
 // no block
-new g_offsCollisionGroup;
 
 public Action stuck_callback(client,args)
 {	
@@ -396,7 +392,7 @@ public Action stuck_callback(client,args)
 		return Plugin_Handled;
 	}
 	
-	if(is_blocking && IsPlayerAlive(client))
+	if(!noblock_enabled() && IsPlayerAlive(client))
 	{
 		// 3 second usage delay
 		next = GetTime() + 5;
@@ -418,15 +414,7 @@ public Action block_timer_callback(Handle timer)
 
 public disable_block_all()
 {
-	
-  	for(new i=1; i <= MaxClients; i++)
-	{
-		if (IsClientInGame(i) && IsPlayerAlive(i))
-		{
-			SetEntData(i, g_offsCollisionGroup, 2, 4, true);
-		}
-	}
-	is_blocking = false;
+	unblock_all_clients();
 }
 
 public Action disable_block_warden_callback(client, args)
@@ -460,14 +448,7 @@ public Action enable_block_admin(client, args)
 
 public enable_block_all()
 {
-  	for(int i=1; i <= MaxClients; i++)
-	{
-		if (IsClientInGame(i) && IsPlayerAlive(i))
-		{
-			SetEntData(i, g_offsCollisionGroup, 5, 4, true);
-		}
-	}
-	is_blocking = true;
+	block_all_clients();
 }
 
 public Action enable_block_warden_callback(client, args)
@@ -579,15 +560,6 @@ public OnPluginStart()
 	// default no block is on
 	enable_block_all(); 
 
-	// get offset for collsion var
-	g_offsCollisionGroup = FindSendPropOffs("CBaseEntity", "m_CollisionGroup");
-
-	if (g_offsCollisionGroup == -1)
-	{
-		PrintToServer("Failed to get collsion offset for no block!");
-	}
-	
-	
 	// Start a circle timer
 	CreateTimer(0.1, Repetidor, _, TIMER_REPEAT);
 	CreateTimer(0.3, rainbow_timer, _, TIMER_REPEAT);

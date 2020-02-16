@@ -12,10 +12,58 @@ stock bool is_on_team(int i)
 	return GetClientTeam(i) == CS_TEAM_CT || GetClientTeam(i) == CS_TEAM_T;
 }
 
-
 stock void set_client_speed(int client,float speed)
 {
       SetEntPropFloat(client, Prop_Send, "m_flLaggedMovementValue", speed)
+}
+
+int get_collision_offset()
+{
+	// get offset for collsion var
+	int g_offset_collision_group = FindSendPropOffs("CBaseEntity", "m_CollisionGroup");
+
+	if (g_offset_collision_group  == -1)
+	{
+		ThrowError("unable to get collision offset for noblock");
+	}
+	return g_offset_collision_group;
+}
+
+
+stock void block_all_clients()
+{
+  	for(int i=1; i <= MaxClients; i++)
+	{
+		if (IsClientInGame(i) && IsPlayerAlive(i))
+		{
+			SetEntData(i, get_collision_offset(), 5, 4, true);
+		}
+	}
+}
+
+stock void unblock_all_clients()
+{
+  	for(int i=1; i <= MaxClients; i++)
+	{
+		if (IsClientInGame(i) && IsPlayerAlive(i))
+		{
+			SetEntData(i, get_collision_offset(), 2, 4, true);
+		}
+	}
+}
+
+// not even gonna bother assuming things will go thru the above functions
+stock bool noblock_enabled()
+{
+	for (int i = 1; i < MaxClients; i++)
+	{
+		if(IsClientInGame(i))
+		{
+			return GetEntData(i, get_collision_offset()) == 2;
+		}
+	}
+	ThrowError("could not pull collision data from a client");
+	return false; // keep compilier happy
 }
 
 
