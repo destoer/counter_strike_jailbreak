@@ -13,13 +13,20 @@ stock bool is_on_team(int i)
 }
 
 stock void set_client_speed(int client,float speed)
-{
+{ 
       SetEntPropFloat(client, Prop_Data, "m_flLaggedMovementValue", speed)
 }
 
 
 stock void block_all_clients()
 {
+	// block is allready on dont bother
+	if(!noblock_enabled())
+	{
+		return;
+	}
+	
+	
   	for(int i=1; i <= MaxClients; i++)
 	{
 		if (IsClientInGame(i) && IsPlayerAlive(i))
@@ -31,6 +38,12 @@ stock void block_all_clients()
 
 stock void unblock_all_clients()
 {
+	// noblock allready enabled dont bother
+	if(noblock_enabled())
+	{
+		return;
+	}
+	
   	for(int i=1; i <= MaxClients; i++)
 	{
 		if (IsClientInGame(i) && IsPlayerAlive(i))
