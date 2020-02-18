@@ -29,7 +29,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.5.6 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.5.7 - Violent Intent Jailbreak"
 
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
@@ -738,11 +738,11 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 		remove_warden();
 	}
 	
-	int new_warden;
+	int new_warden = 0;
 	// if there is only one ct left alive automatically warden him
-	if(get_alive_team_count(CS_TEAM_CT,new_warden) == 1)
+	if(get_alive_team_count(CS_TEAM_CT,new_warden) == 1 && new_warden != 0)
 	{
-		if(warden_id != WARDEN_INVALID)
+		if(warden_id == WARDEN_INVALID)
 		{
 			set_warden(new_warden);
 		}
