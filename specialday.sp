@@ -758,6 +758,9 @@ public void EndSd()
 			SetEntityRenderMode(i, RENDER_TRANSCOLOR);
 			SetEntityRenderColor(i, 255, 255, 255, 255);
 			SetEntityGravity(i, 1.0); // reset the gravity
+			
+			SetEntityMoveType(i, MOVETYPE_WALK);
+			set_client_speed(i, 1.0);
 		}
 	}	
 	
@@ -1376,19 +1379,15 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 				PrintToChatAll("%s Sky wars started", SPECIALDAY_PREFIX);
 				for(new i = 1; i < MaxClients; i++)
 				{
-					if(IsClientInGame(i) && IsPlayerAlive(i)) // check the client is in the game
+					if(IsClientInGame(i) && is_on_team(i) && IsPlayerAlive(i)) // check the client is in the game
 					{
-						strip_all_weapons(i);
-					
+
 						set_client_speed(i,2.5);
 						SetEntityMoveType(i, MOVETYPE_FLY); // should add the ability to toggle with a weapon switch
 															// to make navigation easy (as brushing on the floor sucks)
-						GivePlayerItem(i, "weapon_m3"); // all ways give a deagle
-						GivePlayerItem(i, "item_assaultsuit");
-						int weapon = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);
-						set_reserve_ammo(i , weapon, 999)
 					}
 				}
+				WeaponMenuAll();
 			}
 			
 			case 5: // hide and seek day
