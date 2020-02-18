@@ -24,6 +24,9 @@ TODO make all names consistent
 #define WARDEN_PLAYER_PREFIX "\x07FF0000[VI Warden]\x07F8F8FF"
 #define PTS_PREFIX "\x07F8F8FF"
 
+//uncomment to make noblock default 
+//#define NOBLOCK_DEFAULT
+
 #include <sourcemod>
 #include <sdktools>
 #include <cstrike>
@@ -557,9 +560,14 @@ public OnPluginStart()
 	// reate a timer for a the warden text
 	CreateTimer(3.0, print_warden_text_all, _, TIMER_REPEAT);
 	
-	// default no block is on
-	enable_block_all(); 
-
+	// if no block is default
+	#if defined NOBLOCK_DEFAULT
+		disable_block_all();
+	#else
+		enable_block_all();
+	#endif
+	
+	
 	// Start a circle timer
 	CreateTimer(0.1, Repetidor, _, TIMER_REPEAT);
 	CreateTimer(0.3, rainbow_timer, _, TIMER_REPEAT);
@@ -738,6 +746,13 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 
 public Action round_start(Handle event, const String:name[], bool dontBroadcast) 
 {
+	// if we are running with block on reset the status on round start
+	#if defined NOBLOCK_DEFAULT // does sourcemod have #ifndef?
+		// do nothing
+	#else
+	enable_block_all();
+	#endif
+	
 	// there is no warden
 	warden_id = -1;
 	return Plugin_Continue;

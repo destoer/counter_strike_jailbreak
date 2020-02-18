@@ -6,6 +6,8 @@
 #endif
 #define _DESTOER_LIB_included
 
+#define COLLISION_GROUP_PLAYER 5 // normal player collision
+#define COLLISION_GROUP_DEBRIS_TRIGGER 2 // noblock
 
 stock bool is_on_team(int i)
 {
@@ -31,7 +33,7 @@ stock void block_all_clients()
 	{
 		if (IsClientInGame(i) && IsPlayerAlive(i))
 		{
-			SetEntProp(i, Prop_Data,"m_CollisionGroup", 5, 4, true);
+			SetEntProp(i, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_PLAYER, 4);
 		}
 	}
 }
@@ -48,7 +50,7 @@ stock void unblock_all_clients()
 	{
 		if (IsClientInGame(i) && IsPlayerAlive(i))
 		{
-			SetEntProp(i, Prop_Data,"m_CollisionGroup", 2, 4, true);
+			SetEntProp(i, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_DEBRIS_TRIGGER, 4);
 		}
 	}
 }
@@ -56,6 +58,12 @@ stock void unblock_all_clients()
 // not even gonna bother assuming things will go thru the above functions
 stock bool noblock_enabled()
 {
+	// ignore cases where there are no clients
+	if(GetClientCount(true) == 0)
+	{
+		return false;
+	}
+	
 	for (int i = 1; i < MaxClients; i++)
 	{
 		if(IsClientInGame(i))
