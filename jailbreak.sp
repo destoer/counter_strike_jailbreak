@@ -29,7 +29,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.5.5 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.5.6 - Violent Intent Jailbreak"
 
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
@@ -776,6 +776,14 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 	
 	// there is no warden
 	warden_id = -1;
+	
+	// 1 ct only on team auto warden them at start of round
+	int client = 0;
+	if(get_alive_team_count(CS_TEAM_CT, client) == 1 && client != 0)
+	{
+		set_warden(client);
+	}
+	
 	return Plugin_Continue;
 }
 

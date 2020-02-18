@@ -68,7 +68,7 @@ stock bool noblock_enabled()
 	{
 		if(IsClientInGame(i))
 		{
-			return GetEntProp(i, Prop_Data,"m_CollisionGroup") == 2;
+			return GetEntProp(i, Prop_Data,"m_CollisionGroup") == COLLISION_GROUP_DEBRIS_TRIGGER;
 		}
 	}
 	ThrowError("could not pull collision data from a client");
