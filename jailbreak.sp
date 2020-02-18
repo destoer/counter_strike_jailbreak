@@ -73,10 +73,10 @@ int empty_uses = 2;
 
 // laser stuff
 // laser globals
-new bool:LaserUse[MAXPLAYERS+1];
+bool laser_use[MAXPLAYERS+1];
 float prev_pos[MAXPLAYERS+1][3];
-new g_lbeam;
-new g_lpont;
+int g_lbeam;
+int g_lpont;
 
 
 public int native_get_warden_id(Handle plugin, int numParam)
@@ -96,7 +96,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 // timer here to draw connected points
 public Action laser_draw(Handle timer)
 {
-	if(warden_id != WARDEN_INVALID && use_draw_laser_settings[warden_id] && LaserUse[warden_id])
+	if(warden_id != WARDEN_INVALID && use_draw_laser_settings[warden_id] && laser_use[warden_id])
 	{
 		float cur_pos[3];
 		GetClientSightEnd(warden_id, cur_pos);
@@ -216,7 +216,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 		prev_pos[client][0] = 0.0;
 		prev_pos[client][1] = 0.0;
 		prev_pos[client][2] = 0.0;
-		LaserUse[client] = false;
+		laser_use[client] = false;
 		return Plugin_Continue;
 	}
 	
@@ -252,8 +252,8 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	
 	if(type != none)
 	{
-		LaserUse[client] = true;
-		if(IsClientInGame(client) && LaserUse[client])
+		laser_use[client] = true;
+		if(IsClientInGame(client) && laser_use[client])
 		{
 
 		
@@ -281,11 +281,11 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	if((use_draw_laser_settings[client]))
 	{
 		// first time drawing store the 1st pos
-		if(!LaserUse[client])
+		if(!laser_use[client])
 		{
 			GetClientSightEnd(client, prev_pos[client]);
 		}
-		LaserUse[client] = true;
+		laser_use[client] = true;
 	}
 
 	return Plugin_Continue;
@@ -365,7 +365,7 @@ public OnMapStart()
 	// reset laser settings
 	for (int i = 0; i < MAXPLAYERS + 1; i++)
 	{
-		LaserUse[i] = false;
+		laser_use[i] = false;
 		use_draw_laser_settings[i] = false;
 	}
 	
@@ -376,13 +376,13 @@ public OnMapStart()
 
 public void OnClientConnected(int client)
 {
-	LaserUse[client] = false;
+	laser_use[client] = false;
 	use_draw_laser_settings[client] = false;
 }
 
 public void OnClientDisconnect(client)
 {
-	LaserUse[client] = false;
+	laser_use[client] = false;
 	use_draw_laser_settings[client] = false;
 	if(client == warden_id)
 	{
@@ -397,7 +397,7 @@ public void OnClientDisconnect(client)
 
 
 // no block
-
+#if defined STUCK
 public Action stuck_callback(client,args)
 {	
 	static int next = 0;
@@ -426,7 +426,7 @@ public Action block_timer_callback(Handle timer)
 {
 	enable_block_all();
 }
-
+#endif
 
 public disable_block_all()
 {
@@ -551,7 +551,11 @@ public OnPluginStart()
 	RegConsoleCmd("wempty", empty_menu);
 	RegConsoleCmd("guns", weapon_menu);
 	// disabled
-	RegConsoleCmd("stuck", stuck_callback); // Command_stuck is new one
+	// command_stuck is push out callback
+	// we currently use the noblock toggle callback
+	#if defined STUCK
+	RegConsoleCmd("stuck", stuck_callback);
+	#endif		
 	RegConsoleCmd("sm_samira", samira_EE);
 	RegConsoleCmd("wv", jailbreak_version);
 	
@@ -824,30 +828,34 @@ public Action samira_EE(int client, int args)
     return Plugin_Handled;
 } 
 
-/* antistuck command is unused */
-new TimerActive;
+
+
+// this antistuck command is unused
+// uses the push out method
+/*
+bool timer_active = false;
 
 
 #define COLLISION_GROUP_PUSHAWAY            17
 #define COLLISION_GROUP_PLAYER              5
 
-public Action:Command_Stuck(client, args)
+public Action command_stuck(int client, int args)
 {
-    if (IsClientInGame(client) && IsPlayerAlive(client) && TimerActive == 0)
+    if (IsClientInGame(client) && IsPlayerAlive(client) && !timer_active)
     {
         PrintToChatAll("%s %N unstuck all players", ANTISTUCK_PREFIX, client);    
-        TimerActive = 1;
-        CreateTimer(1.0, Timer_UnBlockPlayer, client);
+        timer_active = true;
+        CreateTimer(1.0, timer_unblock_player, client);
         
-        for (new i = 1; i <= MaxClients; i++)
+        for (int i = 1; i <= MaxClients; i++)
         {    
             if (IsClientInGame(i) && IsPlayerAlive(i))
             {
-                EnableAntiStuck(i);
+                enable_anti_stuck(i);
             }
         }
     }
-    else if (TimerActive == 1)
+    else if (timer_active)
     {
         PrintToChat(client, "%s Command is already in use", ANTISTUCK_PREFIX);
     }
@@ -862,32 +870,32 @@ public Action:Command_Stuck(client, args)
 
 
 
-public Action Timer_UnBlockPlayer(Handle:timer, int client)
+public Action timer_unblock_player(Handle timer, int client)
 {
-    TimerActive = 0;
+  	timer_active = false;
     
-    for (new i = 1; i <= MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
     {    
         if (IsClientInGame(i) && IsPlayerAlive(i))
         {
-            DisableAntiStuck(i);
+            disable_anti_stuck(i);
         }
     }
     
-    return Plugin_Continue;
+	return Plugin_Continue;
     
 }
 
-void DisableAntiStuck(int client)
+void disable_anti_stuck(int client)
 {
     SetEntProp(client, Prop_Data, "m_CollisionGroup", COLLISION_GROUP_PLAYER);
 }
 
-void EnableAntiStuck(int client)
+void enable_anti_stuck(int client)
 {
     SetEntProp(client, Prop_Data, "m_CollisionGroup", COLLISION_GROUP_PUSHAWAY);
 }
-
+*/
 
 // empty weapon handler
 public empty_handler(Menu menu, MenuAction action, int client, int menu_option) 
