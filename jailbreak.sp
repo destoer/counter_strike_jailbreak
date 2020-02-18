@@ -13,10 +13,23 @@ TODO make all names consistent
 */
 
 
+/*
+	admin flags
+
+	ADMFLAG_CUSTOM1 - allow clients to use a draw laser as warden
+	ADMFLAG_CUSTOM4 - allow clients to change laser color as warden
+	ADMFLAG_CUSTOM3 - rainbow laser for use anytime (restrict to admins)
+*/
+
+
+//#define CT_ARMOUR  // 50 armour for ct on spawn
+#define CT_KEVLAR_HELMET // kevlar + helment for cts 
+#define STUCK
+
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.5.3 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.5.5 - Violent Intent Jailbreak"
 
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
@@ -538,7 +551,7 @@ public OnPluginStart()
 	RegConsoleCmd("wempty", empty_menu);
 	RegConsoleCmd("guns", weapon_menu);
 	// disabled
-	//RegConsoleCmd("stuck", stuck_callback); // Command_stuck is new one
+	RegConsoleCmd("stuck", stuck_callback); // Command_stuck is new one
 	RegConsoleCmd("sm_samira", samira_EE);
 	RegConsoleCmd("wv", jailbreak_version);
 	
@@ -732,14 +745,18 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 	}
 }
 
-// give ct 50 kevlar on spawn 
+// give ct equitment on spawn
 public Action player_spawn(Handle event, const String:name[], bool dontBroadcast)
 {
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
 	if(IsClientInGame(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
 	{
-		GivePlayerItem(client, "item_kevlar");
-		SetEntProp(client , Prop_Send, "m_ArmorValue", 50, 1);
+		#if defined CT_KEVLAR_HELMET
+			GivePlayerItem(client, "item_assaultsuit");
+		#elseif defined CT_ARMOUR
+			GivePlayerItem(client, "item_kevlar");
+			SetEntProp(client , Prop_Send, "m_ArmorValue", 50, 1);
+		#endif
 	}
 }
 
