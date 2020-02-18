@@ -13,6 +13,10 @@ TODO make all names consistent
 */
 
 
+// if defined these two features are locked behind custom admin flags
+//#define DRAW_CUSTOM_FLAGS
+//#define LASER_COLOR_CUSTOM_FLAGS
+
 /*
 	admin flags
 
@@ -20,6 +24,9 @@ TODO make all names consistent
 	ADMFLAG_CUSTOM4 - allow clients to change laser color as warden
 	ADMFLAG_CUSTOM3 - rainbow laser for use anytime (restrict to admins)
 */
+
+//uncomment to make noblock default 
+//#define NOBLOCK_DEFAULT
 
 
 //#define CT_ARMOUR  // 50 armour for ct on spawn
@@ -29,16 +36,13 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.5.7 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.6 - Violent Intent Jailbreak"
 
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
 #define WARDEN_PREFIX "\x07FF0000[VI Warden]\x07F8F8FF"
 #define WARDEN_PLAYER_PREFIX "\x07FF0000[VI Warden]\x07F8F8FF"
 #define PTS_PREFIX "\x07F8F8FF"
-
-//uncomment to make noblock default 
-//#define NOBLOCK_DEFAULT
 
 #include <sourcemod>
 #include <sdktools>
@@ -229,15 +233,20 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	
 	if(is_warden)
 	{
+		// custom flag required to do use color changed laser
+#if defined LASER_COLOR_CUSTOM_FLAGS
 		if(CheckCommandAccess(client, "generic_admin", ADMFLAG_CUSTOM4, false))
 		{
 			type = donator;
 		}
 		
-		else if(is_warden)
+		else
 		{
 			type = warden;
-		}	
+		}
+#else
+		type = donator;
+#endif		
 	}
 	
 	else if(CheckCommandAccess(client, "generic_admin", ADMFLAG_CUSTOM3, false))
@@ -563,9 +572,19 @@ public OnPluginStart()
 	RegAdminCmd("sm_rw", fire_warden, ADMFLAG_KICK);
 	RegAdminCmd("block", enable_block_admin, ADMFLAG_BAN);
 	RegAdminCmd("ublock",disable_block_admin, ADMFLAG_BAN);	
-	RegAdminCmd("laser", laser_menu, ADMFLAG_CUSTOM1);
-	RegAdminCmd("laser_color", command_laser_color, ADMFLAG_CUSTOM4);
 	
+	// custom flag required to do draw laser
+	#if defined DRAW_CUSTOM_FLAGS 
+	RegAdminCmd("laser", laser_menu, ADMFLAG_CUSTOM1);
+	#else
+	RegConsoleCmd("laser", laser_menu);
+	#endif
+	
+	#if defined LASER_COLOR_CUSTOM_FLAGS
+	RegAdminCmd("laser_color", command_laser_color, ADMFLAG_CUSTOM4);
+	#else
+	RegConsoleCmd("laser_color", command_laser_color);
+	#endif
 	
 	
 	// hooks
