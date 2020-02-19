@@ -149,11 +149,8 @@ void hide_player_init(int client)
 void dodgeball_player_init(int client)
 {
 	SetEntityHealth(client,1); // set health to 1
-	if(sd_state == sd_started)
-	{
-		strip_all_weapons(client); // remove all the players weapons
-		GivePlayerItem(client, "weapon_flashbang");
-	}
+	strip_all_weapons(client); // remove all the players weapons
+	GivePlayerItem(client, "weapon_flashbang");
 	SetEntProp(client, Prop_Data, "m_ArmorValue", 0.0);  
 	SetEntityGravity(client, 0.6);
 }
@@ -163,11 +160,8 @@ void grenade_player_init(int client)
 {
 	// when coming off ladders and using the reset
 	// we dont wanna regive the nades
-	if(sd_state == sd_started)
-	{
-		strip_all_weapons(client); // remove all the players weapons
-		GivePlayerItem(client, "weapon_hegrenade");
-	}
+	strip_all_weapons(client); // remove all the players weapons
+	GivePlayerItem(client, "weapon_hegrenade");
 	SetEntProp(client, Prop_Data, "m_ArmorValue", 0.0);  
 	SetEntityGravity(client, 0.6);
 }
@@ -329,7 +323,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.8.3"
+#define VERSION "1.8.4"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
