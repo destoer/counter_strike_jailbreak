@@ -344,7 +344,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.8.4"
+#define VERSION "1.8.5"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -674,6 +674,7 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 bool use_custom_zombie_model = false;
 
 // custom alien zombie model (will use stock hl2 zombie if it cant find it)
+// yes this is alot of code
 public bool CacheCustomZombieModel()
 {
 // these apparently just fail silently...
@@ -710,39 +711,39 @@ AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_legs_norm
 AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_torso.vmt");
 AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_torso.vtf");
 AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_torso_normal.vtf");
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.dx80.vtx")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.dx90.vtx")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.mdl")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.phy")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.sw.vtx")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.vvd")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.xbox.vtx")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.dx80.vtx")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.dx90.vtx")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.mdl")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.phy")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.sw.vtx")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.vvd")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.xbox.vtx")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.dx80.vtx")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.dx90.vtx")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.mdl")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.phy")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.sw.vtx")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.vvd")) return false;
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.xbox.vtx")) return false;
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms.vmt")) return false;
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms.vtf")) return false;
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms_normal.vtf")) return false;
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head.vmt")) return false;
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head.vtf")) return false;
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head_normal.vtf")) return false;
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs.vmt")) return false;
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs.vtf")) return false;
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs_normal.vtf")) return false;
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso.vmt")) return false;
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso.vtf")) return false;
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso_normal.vtf")) return false;
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.dx80.vtx")) {return false;}
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.dx90.vtx")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.mdl")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.phy")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.sw.vtx")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.vvd")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.xbox.vtx")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.dx80.vtx")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.dx90.vtx")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.mdl")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.phy")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.sw.vtx")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.vvd")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.xbox.vtx")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.dx80.vtx")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.dx90.vtx")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.mdl")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.phy")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.sw.vtx")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.vvd")) { return false; }
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.xbox.vtx")) { return false; }
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms.vmt")) { return false; }
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms.vtf")) { return false; }
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms_normal.vtf")) { return false; }
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head.vmt")) { return false; }
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head.vtf")) { return false; }
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head_normal.vtf")) { return false; }
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs.vmt")) { return false; }
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs.vtf")) { return false; }
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs_normal.vtf")) { return false; }
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso.vmt")) { return false; }
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso.vtf")) { return false; }
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso_normal.vtf")) { return false; }
 return true;
 }
 
