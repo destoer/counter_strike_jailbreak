@@ -323,7 +323,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.8"
+#define VERSION "1.8.1"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -2288,6 +2288,11 @@ public Action check_movement(Handle Timer)
 							}
 							
 							case grenade_day:
+							{
+								sd_player_init(client);
+							}
+							
+							case scoutknife_day:
 							{
 								sd_player_init(client);
 							}
