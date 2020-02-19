@@ -48,7 +48,8 @@ enum SpecialDay
 	zombie_day,
 	gungame_day,
 	knife_day,
-	scoutknife_day
+	scoutknife_day,
+	deathmatch_day
 };
 
 
@@ -210,6 +211,12 @@ void scout_player_init(int client)
 	SetEntityGravity(client, 0.1)
 }
 
+void deathmatch_player_init(int client)
+{
+	WeaponMenu(client);
+}
+
+
 // sd modifiers
 
 // underlying convar handles
@@ -323,7 +330,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.8.1"
+#define VERSION "1.8.2"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -804,6 +811,22 @@ public Action OnRoundStart(Handle event, const String:name[], bool dontBroadcast
 
 
 
+int get_client_max_kills()
+{
+	int max = 0;
+	int cli = 1;
+	for (int i = 1; i < MaxClients; i++)
+	{
+		if(player_kills[i] > max)
+		{
+			max = player_kills[i];
+			cli = i;
+		}
+	}
+	
+	return cli;
+}
+
 public void EndSd()
 {
 	switch(special_day)
@@ -834,22 +857,24 @@ public void EndSd()
 		
 		case scoutknife_day:
 		{
-			int max = 0;
-			int cli = 1;
-			for (int i = 1; i < MaxClients; i++)
-			{
-				if(player_kills[i] > max)
-				{
-					max = player_kills[i];
-					cli = i;
-				}
-			}
+			int cli = get_client_max_kills();
 			
 			if(IsClientConnected(cli) && IsClientInGame(cli) && is_on_team(cli))
 			{
 				PrintToChatAll("%s %N won scoutknifes", SPECIALDAY_PREFIX, cli);
 			}
 		}
+		
+		case deathmatch_day:
+		{
+			int cli = get_client_max_kills();
+			
+			if(IsClientConnected(cli) && IsClientInGame(cli) && is_on_team(cli))
+			{
+				PrintToChatAll("%s %N won deathmatch", SPECIALDAY_PREFIX, cli);
+			}	
+		}
+		
 		
 		// need to turn off ignore round win here :)
 		case gungame_day:
@@ -935,7 +960,7 @@ public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 }
 
 
-const int SD_SIZE = 11;
+const int SD_SIZE = 12;
 new const String:sd_list[SD_SIZE][] =
 {	
 	"Friendly Fire Day", 
@@ -948,7 +973,8 @@ new const String:sd_list[SD_SIZE][] =
 	"Zombie",
 	"Gun Game",
 	"Knife",
-	"Scout knifes"
+	"Scout knifes",
+	"Death Match"
 };
 
 public Menu build_sd_menu()
@@ -995,7 +1021,13 @@ public Action print_specialday_text_all(Handle timer)
 			{
 				Format(buf, sizeof(buf), "scout knife: %d", round_delay_timer);
 			}
+
+			case deathmatch_day:
+			{
+				Format(buf, sizeof(buf), "death match: %d", round_delay_timer);	
+			}			
 			
+
 			
 			default:
 			{
@@ -1374,6 +1406,16 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 		player_kills[attacker]++;
 	}
 	
+	if(special_day == deathmatch_day)
+	{
+		int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+		int victim = GetClientOfUserId(GetEventInt(event, "userid"));
+		
+		CreateTimer(3.0, ReviveDeathMatch, victim);
+		
+		player_kills[attacker]++;
+	}	
+	
 	else if(special_day == gungame_day)
 	{
 		int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
@@ -1438,6 +1480,13 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 }
 
 public Action ReviveScout(Handle Timer, int client)
+{
+	CS_RespawnPlayer(client);
+	sd_player_init(client);
+}
+
+
+public Action ReviveDeathMatch(Handle Timer, int client)
 {
 	CS_RespawnPlayer(client);
 	sd_player_init(client);
@@ -1677,6 +1726,19 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 					player_kills[i] = 0;
 				}
 			}
+			
+			case 11: // deathmatch
+			{
+				PrintToChatAll("%s deathmatch day started", SPECIALDAY_PREFIX);
+				special_day = deathmatch_day;
+				sd_player_init_fptr = deathmatch_player_init;
+				
+				// reset player kill
+				for (int i = 0; i < 64; i++)
+				{
+					player_kills[i] = 0;
+				}		
+			}
 		}
 
 		// call the initial init for all players on the function pointers we just set
@@ -1819,6 +1881,11 @@ public StartSD()
 			StartScout();
 		}
 		
+		case deathmatch_day:
+		{
+			StartDeathMatch();
+		}
+		
 		default:
 		{
 			ThrowNativeError(SP_ERROR_NATIVE, "attempted to start invalid sd %d", special_day);
@@ -1840,6 +1907,14 @@ public int make_invis_t()
 			}
 		}
 	}	
+}
+
+public StartDeathMatch()
+{
+	no_damage = false;
+	start_round_delay(60 * 2);
+	CreateTimer(1.0, RemoveGuns);
+	enable_friendly_fire();
 }
 
 
