@@ -35,21 +35,42 @@ bool block_reset = false;
 // gun menu
 Menu gun_menu;
 
+
+
+const int SD_SIZE = 12;
+new const String:sd_list[SD_SIZE][] =
+{	
+	"Friendly Fire Day", 
+	"Tank Day",
+	"Friendly Fire Juggernaut Day",
+	"Sky Wars",
+	"Hide and Seek",
+	"Dodgeball",
+	"Grenade",
+	"Zombie",
+	"Gun Game",
+	"Knife",
+	"Scout knifes",
+	"Death Match"
+};
+
+
 // sadly we cant scope these
 enum SpecialDay
 {
-	normal_day,
+	friendly_fire_day,
 	tank_day,
-	dodgeball_day,
+	juggernaut_day,
 	fly_day,
 	hide_day,
-	friendly_fire_day,
+	dodgeball_day,
 	grenade_day,
 	zombie_day,
 	gungame_day,
 	knife_day,
 	scoutknife_day,
-	deathmatch_day
+	deathmatch_day,
+	normal_day,
 };
 
 
@@ -838,6 +859,11 @@ public void EndSd()
 			disable_friendly_fire();
 		}
 		
+		case juggernaut_day:
+		{
+			disable_friendly_fire();
+		}
+		
 		case hide_day: {} // we render players further down to handle maps that do messy things
 		
 
@@ -953,23 +979,6 @@ public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 }
 
 
-const int SD_SIZE = 12;
-new const String:sd_list[SD_SIZE][] =
-{	
-	"Friendly Fire Day", 
-	"Tank Day",
-	"Friendly Fire Juggernaut Day",
-	"Sky Wars",
-	"Hide and Seek",
-	"Dodgeball",
-	"Grenade",
-	"Zombie",
-	"Gun Game",
-	"Knife",
-	"Scout knifes",
-	"Death Match"
-};
-
 public Menu build_sd_menu()
 {
 	Menu menu = new Menu(SdHandler);
@@ -1078,18 +1087,23 @@ public Action command_cancel_special_day(int client,args)
 	return Plugin_Handled;
 }
 
-const int GUNS_SIZE = 6;
+const int GUNS_SIZE = 14;
 
 new const String:gun_list[GUNS_SIZE][] =
 {	
 	"AK47", "M4A1", "AWP","SHOTGUN",
-	"P90", "M249"
+	"P90", "M249", "SCOUT", "MP5", 
+	"GALIL","SG", "TMP", "AUG",
+	"FAMAS", "XM"
 };
 
 new const String:gun_give_list[GUNS_SIZE][] =
 {	
 	"weapon_ak47", "weapon_m4a1", "weapon_awp","weapon_m3",
-	"weapon_p90", "weapon_m249"
+	"weapon_p90", "weapon_m249", "weapon_scout", "weapon_mp5navy",
+	"weapon_galil", "weapon_sg552","weapon_tmp", "weapon_aug",
+	"weapon_famas", "weapon_xm1014"
+	
 };
 
 public Menu build_gun_menu()
@@ -1614,7 +1628,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 			case 2: //ffdg
 			{
 				hp_steal = true; 
-				special_day = friendly_fire_day;
+				special_day = juggernaut_day;
 				PrintToChatAll("%s Friendly fire juggernaut day  started.", SPECIALDAY_PREFIX);
 				
 				sd_player_init_fptr = ffdg_player_init;
@@ -1828,6 +1842,11 @@ public StartSD()
 			StartFFD();
 		}
 		
+		case juggernaut_day:
+		{
+			StartJuggernaut();
+		}
+		
 		case tank_day:
 		{
 			StartTank();
@@ -1886,7 +1905,7 @@ public StartSD()
 	}
 }
 
-public int make_invis_t()
+public void make_invis_t()
 {
 	for(new i = 1; i < MaxClients; i++)
 	{
@@ -1902,24 +1921,22 @@ public int make_invis_t()
 	}	
 }
 
-public StartDeathMatch()
+public void StartDeathMatch()
 {
-	no_damage = false;
 	start_round_delay(60 * 2);
 	CreateTimer(1.0, RemoveGuns);
 	enable_friendly_fire();
 }
 
 
-public StartScout()
+public void StartScout()
 {
-	no_damage = false;
 	start_round_delay(60 * 2);
 	CreateTimer(1.0, RemoveGuns);
 	enable_friendly_fire();
 }
 
-public GiveGunGameGun(int client)
+public void GiveGunGameGun(int client)
 {
 	strip_all_weapons(client);
 	GivePlayerItem(client, "weapon_knife");
@@ -1944,32 +1961,30 @@ public Action ReviveGunGame(Handle timer, int client)
 	}		
 }
 
-public StartGunGame()
+public void StartGunGame()
 {
 	enable_friendly_fire();
-	no_damage = false;	
 	PrintCenterTextAll("Gun game active");
 	disable_round_end();
 	CreateTimer(1.0, RemoveGuns);
 }
 
 
-public StartKnife()
+public void StartKnife()
 {
 	enable_friendly_fire();
-	no_damage = false;	
 	PrintCenterTextAll("Knife day active");
 	CreateTimer(1.0, RemoveGuns);
 }
 
 
-public set_zombie_speed(int client)
+public void set_zombie_speed(int client)
 {
 	set_client_speed(client, 1.2);
 	SetEntityGravity(client, 0.4);
 }
 
-public MakeZombie(int client)
+public void MakeZombie(int client)
 {
 	strip_all_weapons(client);
 	set_zombie_speed(client)
@@ -1987,7 +2002,7 @@ public MakeZombie(int client)
 	}
 }
 
-public int StartZombie()
+public void StartZombie()
 {
 
 	// swap everyone other than the patient zero to the t side
@@ -2012,10 +2027,9 @@ public int StartZombie()
 	AcceptEntityInput(fog_ent, "TurnOn");
 }
 
-public int StartGrenade()
+public void StartGrenade()
 {
 	enable_friendly_fire();
-	no_damage = false;
 	
 	// set everyones hp to 250
 	for(new i = 1; i < MaxClients; i++)
@@ -2033,7 +2047,7 @@ public int StartGrenade()
 	}	
 }
 
-public int StartHide()
+public void StartHide()
 {
 	// renable movement
 	for(new i = 1; i < MaxClients; i++)
@@ -2050,19 +2064,17 @@ public int StartHide()
 	
 	// callbakc incase shit fucks with the color
 	CreateTimer(5.0, hide_timer_callback);
-	
-	no_damage = false;
+
 }
 
 
 
-public int StartFly()
+public void StartFly()
 {
-	no_damage = false;
 	enable_friendly_fire();
 }
 
-public int StartTank()
+public void StartTank()
 {	
 	SetEntityHealth(tank, 250 * GetClientCount(true));
 	
@@ -2089,9 +2101,9 @@ public int StartTank()
 
 
 
-public int StartFFD()
+public void StartFFD()
 {
-	PrintToChatAll("[SM] Friendly fire enabled");
+	PrintToChatAll("%s Friendly fire enabled",SPECIALDAY_PREFIX);
 	
 	//implement a proper printing function lol
 	PrintCenterTextAll("Friendly fire day has begun"); 
@@ -2105,7 +2117,14 @@ public int StartFFD()
 }
 
 
-public int StartDodgeball()
+StartJuggernaut()
+{
+	PrintToChatAll("%s Friendly fire enabled",SPECIALDAY_PREFIX);
+	
+	enable_friendly_fire();
+}
+
+public void StartDodgeball()
 {
 
 	PrintCenterTextAll("Dodgeball active!");
