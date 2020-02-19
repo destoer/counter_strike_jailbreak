@@ -161,7 +161,6 @@ void dodgeball_player_init(int client)
 // grenade day
 void grenade_player_init(int client)
 {
-	SetEntityHealth(client,1); // set health to 1
 	// when coming off ladders and using the reset
 	// we dont wanna regive the nades
 	if(sd_state == sd_started)
@@ -330,7 +329,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.8.2"
+#define VERSION "1.8.3"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
