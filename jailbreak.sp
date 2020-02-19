@@ -36,7 +36,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.6 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.7 - Violent Intent Jailbreak"
 
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
@@ -48,6 +48,7 @@ TODO make all names consistent
 #include <sdktools>
 #include <cstrike>
 #include "lib.inc"
+#include "specialday.inc"
 
 bool use_draw_laser_settings[MAXPLAYERS + 1];
 
@@ -351,7 +352,7 @@ public void SetupBeacon(client)
 	TE_SendToAll();
 }
 
-
+Menu gun_menu;
 
 
 public OnMapStart()
@@ -378,6 +379,13 @@ public OnMapStart()
 		use_draw_laser_settings[i] = false;
 	}
 	
+	
+	gun_menu = build_gun_menu();
+}
+
+public OnMapEnd()
+{
+	delete gun_menu;
 }
 
 // If the Warden leaves
@@ -572,6 +580,7 @@ public OnPluginStart()
 	RegAdminCmd("sm_rw", fire_warden, ADMFLAG_KICK);
 	RegAdminCmd("block", enable_block_admin, ADMFLAG_BAN);
 	RegAdminCmd("ublock",disable_block_admin, ADMFLAG_BAN);	
+	RegAdminCmd("force_open", force_open_callback, ADMFLAG_BAN);
 	
 	// custom flag required to do draw laser
 	#if defined DRAW_CUSTOM_FLAGS 
@@ -593,8 +602,8 @@ public OnPluginStart()
 	HookEvent("player_death", player_death); // To check when our warden dies :)
 	
 	
-	// reate a timer for a the warden text
-	CreateTimer(3.0, print_warden_text_all, _, TIMER_REPEAT);
+	// create a timer for a the warden text
+	CreateTimer(1.0, print_warden_text_all, _, TIMER_REPEAT);
 	
 	// if no block is default
 	#if defined NOBLOCK_DEFAULT
@@ -612,6 +621,12 @@ public OnPluginStart()
 }
 
 
+
+public Action force_open_callback (int client, int args)
+{
+	force_open();
+}
+
 public Action jailbreak_version(int client, int args)
 {
 	PrintToChat(client, "%s WARDEN VERSION: %s",WARDEN_PREFIX, PLUGIN_VERSION);
@@ -621,6 +636,11 @@ public Action jailbreak_version(int client, int args)
 public Action print_warden_text_all(Handle timer)
 {
 
+	
+	if(sd_active())
+	{
+		return Plugin_Continue;
+	}
 	
 	char buf[256];
 	
@@ -641,7 +661,7 @@ public Action print_warden_text_all(Handle timer)
 	
 	
 	Handle h_hud_text = CreateHudSynchronizer();
-	SetHudTextParams(-1.5, -1.7, 4.0, 255, 255, 255, 255);
+	SetHudTextParams(-1.5, -1.7, 1.0, 255, 255, 255, 255);
 
 	// for each client
 	for (int i = 1; i <= MaxClients; i++)
@@ -1036,67 +1056,70 @@ public laser_handler(Menu menu, MenuAction action, int param1, int param2)
 }
 
 
+const int GUNS_SIZE = 6;
 
-// weapon menu
+new const String:gun_list[GUNS_SIZE][] =
+{	
+	"AK47", "M4A1", "AWP","SHOTGUN",
+	"P90", "M249"
+};
 
-public Action weapon_menu(client,args) {
+new const String:gun_give_list[GUNS_SIZE][] =
+{	
+	"weapon_ak47", "weapon_m4a1", "weapon_awp","weapon_m3",
+	"weapon_p90", "weapon_m249"
+};
 
-	
-	
-	Panel guns = new Panel();
-	guns.SetTitle("Weapon Selection");
-	guns.DrawItem("AK47");
-	guns.DrawItem("M4A1");
-	guns.DrawItem("M3");
-	guns.DrawItem("P90");
-	guns.DrawItem("M249");
-
-	if (IsClientInGame(client) && GetClientTeam(client) == CS_TEAM_CT && IsPlayerAlive(client) )
+public Menu build_gun_menu()
+{
+	Menu guns = new Menu(WeaponHandler);
+	for (int i = 0; i < GUNS_SIZE; i++)
 	{
-		guns.Send(client,weapon_handler , 20);
+		guns.AddItem(gun_list[i], gun_list[i]);
 	}
-
-	delete guns;		
-	return Plugin_Handled;		
+	guns.SetTitle("Weapon Selection");
+	return guns;
 }
 
-
-public weapon_handler(Menu menu, MenuAction action, int param1, int param2) 
+public int WeaponHandler(Menu menu, MenuAction action, int client, int param2) 
 {
 	if(action == MenuAction_Select) 
 	{
 
-		strip_all_weapons(param1);
-
-		GivePlayerItem(param1, "weapon_knife"); // give back a knife
-		GivePlayerItem(param1, "weapon_deagle"); // all ways give a deagle
+		strip_all_weapons(client);
 		
 	
-		switch(param2)
-		{
+		GivePlayerItem(client, "weapon_knife"); // give back a knife
+		GivePlayerItem(client, "weapon_deagle"); // all ways give a deagle
 		
-			case 1:
-				GivePlayerItem(param1, "weapon_ak47");
 		
-			case 2:
-				GivePlayerItem(param1, "weapon_m4a1");
+		// give them plenty of deagle ammo
+		int weapon = GetPlayerWeaponSlot(client, CS_SLOT_SECONDARY);
+		set_reserve_ammo(client, weapon, 999);
 		
-			case 3:
-				GivePlayerItem(param1, "weapon_m3");
-				
-			case 4:
-				GivePlayerItem(param1, "weapon_p90");
 		
-			case 5:
-				GivePlayerItem(param1, "weapon_m249");
-		}	
+		GivePlayerItem(client, gun_give_list[param2]);
+
+		
+		// give them plenty of primary ammo
+		weapon = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);
+		set_reserve_ammo(client, weapon, 999);
 	}
 
 	
 	else if (action == MenuAction_Cancel) 
 	{
-		PrintToServer("Client %d's menu was cancelled. Reason: %d",param1,param2);
+		PrintToServer("Client %d's menu was cancelled. Reason: %d", client, param2);
 	}
 	
+	
+	return 0;
 }
 
+public Action weapon_menu(int client, int args)
+{
+	if(IsClientConnected(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
+	{
+		gun_menu.Display(client,20);
+	}
+}

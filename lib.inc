@@ -16,9 +16,45 @@ stock bool is_on_team(int i)
 
 stock void set_client_speed(int client,float speed)
 { 
-      SetEntPropFloat(client, Prop_Data, "m_flLaggedMovementValue", speed)
+	SetEntPropFloat(client, Prop_Data, "m_flLaggedMovementValue", speed)
 }
 
+// open all doors
+new const String:entity_list[][] = { "func_door", "func_movelinear","func_door_rotating","prop_door_rotating" };
+stock void force_open()
+{
+	int entity;
+	// open all doors
+	for(new i = 0; i < sizeof(entity_list); i++)
+	{
+		while((entity = FindEntityByClassname(entity, entity_list[i])) != -1)
+		
+		if(IsValidEntity(entity))
+		{
+			AcceptEntityInput(entity, "Open");
+		}	
+	}
+	
+	// destroy all breakables
+	while((entity = FindEntityByClassname(entity, "func_breakable")) != -1)
+		
+	if(IsValidEntity(entity))
+	{
+		AcceptEntityInput(entity, "Break");
+	}	
+}
+
+stock void slay_all()
+{
+	// slay everyone
+	for (int i=1; i<=MaxClients; i++)
+	{
+		if (IsClientInGame(i) && IsPlayerAlive(i)) 
+		{
+			ForcePlayerSuicide(i);
+		}
+	}	
+}
 
 stock void block_all_clients()
 {
