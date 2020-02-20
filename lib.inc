@@ -132,11 +132,23 @@ stock void set_reserve_ammo(int client, int weapon, int ammo)
 	}
 }
 
+
 // filter to ignore a ray hitting a player
-stock bool trace_ignore_players(int entity, int contents_mask)
+// kill settings if > max players is on
+// client is kill_settings - max players
+stock bool trace_ignore_players(int entity, int contents_mask, int kill_settings)
 {
 	if(entity > 0 && entity < MAXPLAYERS)
 	{
+		// kill players (if toggled)
+		// ugly hack i know
+		bool kill = kill_settings > MAXPLAYERS;
+		int cli_ignore = kill_settings - MAXPLAYERS;
+		if (kill && entity != cli_ignore)
+		{
+			ForcePlayerSuicide(entity);
+		}
+		
 		return false;
 	}
 	

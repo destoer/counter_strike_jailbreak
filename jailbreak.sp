@@ -23,6 +23,7 @@ TODO make all names consistent
 	ADMFLAG_CUSTOM1 - allow clients to use a draw laser as warden
 	ADMFLAG_CUSTOM4 - allow clients to change laser color as warden
 	ADMFLAG_CUSTOM3 - rainbow laser for use anytime (restrict to admins)
+	ADMFLAG_CUSTOM6 - toggle laser killing people
 */
 
 //uncomment to make noblock default 
@@ -32,11 +33,12 @@ TODO make all names consistent
 //#define CT_ARMOUR  // 50 armour for ct on spawn
 #define CT_KEVLAR_HELMET // kevlar + helment for cts 
 #define STUCK
+#define LASER_DEATH
 
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.7 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.8 - Violent Intent Jailbreak"
 
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
@@ -51,6 +53,8 @@ TODO make all names consistent
 #include "specialday.inc"
 
 bool use_draw_laser_settings[MAXPLAYERS + 1];
+
+bool use_kill_laser = false;
 
 EngineVersion g_Game;
 
@@ -317,9 +321,10 @@ public void GetClientSightEnd(client, float out[3])
 {
 	float m_fEyes[3];
 	float m_fAngles[3];
+	int kill_settings = use_kill_laser? client + MAXPLAYERS : client;
 	GetClientEyePosition(client, m_fEyes);
 	GetClientEyeAngles(client, m_fAngles);
-	TR_TraceRayFilter(m_fEyes, m_fAngles, MASK_PLAYERSOLID, RayType_Infinite, trace_ignore_players);
+	TR_TraceRayFilter(m_fEyes, m_fAngles, MASK_PLAYERSOLID, RayType_Infinite, trace_ignore_players,kill_settings);
 	if(TR_DidHit())
 	{
 		TR_GetEndPosition(out);
@@ -581,6 +586,8 @@ public OnPluginStart()
 	RegAdminCmd("block", enable_block_admin, ADMFLAG_BAN);
 	RegAdminCmd("ublock",disable_block_admin, ADMFLAG_BAN);	
 	RegAdminCmd("force_open", force_open_callback, ADMFLAG_BAN);
+	RegAdminCmd("kill_laser", kill_laser, ADMFLAG_CUSTOM6);
+	RegAdminCmd("safe_laser", safe_laser, ADMFLAG_CUSTOM6);
 	
 	// custom flag required to do draw laser
 	#if defined DRAW_CUSTOM_FLAGS 
@@ -620,7 +627,15 @@ public OnPluginStart()
 	
 }
 
+public Action kill_laser (int client, int args)
+{
+	use_kill_laser = true;
+}
 
+public Action safe_laser (int client, int args)
+{
+	use_kill_laser = false;
+}
 
 public Action force_open_callback (int client, int args)
 {
