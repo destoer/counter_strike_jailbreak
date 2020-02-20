@@ -344,7 +344,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.8.5"
+#define VERSION "1.8.7"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -381,8 +381,9 @@ public OnPluginStart()
 	RegAdminCmd("fr", Freeze,ADMFLAG_BAN);
 	RegAdminCmd("uf",UnFreeze,ADMFLAG_BAN);
 	
-	RegConsoleCmd("sdv", sd_version);
-	RegConsoleCmd("zspawn", zspawn);
+	RegConsoleCmd("sdv", sd_version); // print version
+	RegConsoleCmd("zspawn", zspawn); // spawn during zombie if late joiner
+	RegConsoleCmd("sd_list", sd_list_callback); // list sds
 	
 	// gun removal
 	g_WeaponParent = FindSendPropOffs("CBaseCombatWeapon", "m_hOwnerEntity");
@@ -749,6 +750,7 @@ return true;
 
 int fog_ent;
 Menu sd_menu;
+Menu sd_list_menu;
 
 // Clean up our variables just to be on the safe side
 public OnMapStart()
@@ -760,7 +762,8 @@ public OnMapStart()
 	patient_zero = -1;
 	
 	gun_menu = build_gun_menu(WeaponHandler);
-	sd_menu = build_sd_menu();
+	sd_menu = build_sd_menu(SdHandler); // real sd select
+	sd_list_menu = build_sd_menu(SdListHandler); // dummy sd menu for people to see sds
 	
 	use_custom_zombie_model = CacheCustomZombieModel();
 	
@@ -791,6 +794,20 @@ public OnMapEnd()
 {
 	delete gun_menu;
 	delete sd_menu;
+	delete sd_list_menu;
+}
+
+
+
+public Action sd_list_callback(int client, int args)
+{
+	sd_list_menu.Display(client, 20);
+}
+
+// dummy sd list to show what ones there are
+public int SdListHandler(Menu menu, MenuAction action, int client, int param2)
+{
+
 }
 
 public SetupFog()
@@ -980,9 +997,9 @@ public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 }
 
 
-public Menu build_sd_menu()
+public Menu build_sd_menu(MenuHandler handler)
 {
-	Menu menu = new Menu(SdHandler);
+	Menu menu = new Menu(handler);
 
 	for (int i = 0; i < SD_SIZE; i++)
 	{
@@ -1567,7 +1584,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 		switch(param2)
 		{
 	
-			case 0: //ffd
+			case friendly_fire_day: //ffd
 			{ 
 				special_day = friendly_fire_day;
 				PrintToChatAll("%s Friendly fire day started.", SPECIALDAY_PREFIX);
@@ -1579,7 +1596,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 				PrintToChatAll("%s Please wait 20 seconds for friendly fire to be enabled", SPECIALDAY_PREFIX);
 			}
 			
-			case 1: // tank day
+			case tank_day: // tank day
 			{
 				SaveTeams(true);
 				
@@ -1598,7 +1615,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 				tank = game_clients[rand]; // select the lucky client
 			}
 			
-			case 2: //ffdg
+			case juggernaut_day: //ffdg
 			{
 				hp_steal = true; 
 				special_day = juggernaut_day;
@@ -1613,14 +1630,14 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 				PrintToConsole(client, "Timer started at : %d", sdtimer);
 			}
 			
-			case 3: // flying day
+			case fly_day: // flying day
 			{
 				special_day = fly_day;
 				PrintToChatAll("%s Sky wars started", SPECIALDAY_PREFIX);
 				sd_player_init_fptr = flying_player_init;
 			}
 			
-			case 4: // hide and seek day
+			case hide_day: // hide and seek day
 			{
 				PrintToChatAll("%s Hide and seek day started", SPECIALDAY_PREFIX);
 				PrintToChatAll("Ts must hide while CTs seek");
@@ -1632,7 +1649,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 			}
 			
 			
-			case 5: // dodgeball day
+			case dodgeball_day: // dodgeball day
 			{
 				PrintToChatAll("%s Dodgeball day started", SPECIALDAY_PREFIX);
 				CreateTimer(1.0, RemoveGuns);
@@ -1643,7 +1660,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 			
 			
 			
-			case 6: // grenade day
+			case grenade_day: // grenade day
 			{
 				PrintToChatAll("%s grenade day started", SPECIALDAY_PREFIX);
 				CreateTimer(1.0, RemoveGuns);
@@ -1652,7 +1669,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 				sd_player_init_fptr = grenade_player_init;
 			}
 				
-			case 7: // zombie day
+			case zombie_day: // zombie day
 			{
 				
 				SaveTeams(false);
@@ -1671,7 +1688,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 				sd_player_init_fptr = zombie_player_init;
 			}
 			
-			case 8: // gun game
+			case gungame_day: // gun game
 			{
 				PrintToChatAll("%s gun game day started", SPECIALDAY_PREFIX);
 				
@@ -1686,7 +1703,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 				sd_player_init_fptr = gun_game_player_init;
 			}
 			
-			case 9: // knife day
+			case knife_day: // knife day
 			{
 				PrintToChatAll("%s knife day started", SPECIALDAY_PREFIX);
 				
@@ -1694,7 +1711,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 				sd_player_init_fptr = knife_player_init;
 			}
 			
-			case 10: // scout knife day
+			case scoutknife_day: // scout knife day
 			{
 				PrintToChatAll("%s scout knife day started", SPECIALDAY_PREFIX);
 				special_day = scoutknife_day;
@@ -1707,7 +1724,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 				}
 			}
 			
-			case 11: // deathmatch
+			case deathmatch_day: // deathmatch
 			{
 				PrintToChatAll("%s deathmatch day started", SPECIALDAY_PREFIX);
 				special_day = deathmatch_day;
@@ -2292,9 +2309,9 @@ public Action OnWeaponEquip(int client, int weapon)
 
 MoveType player_last_movement_type[64] = {MOVETYPE_WALK};
 
-const int SPECIAL_MOVE_SIZE = 4;
+const int SPECIAL_MOVE_SIZE = 5;
 // CANT DECLARE CONST CAUSE HECK KNOWS
-SpecialDay special_move[SPECIAL_MOVE_SIZE] = { zombie_day, dodgeball_day, fly_day, grenade_day };
+SpecialDay special_move[SPECIAL_MOVE_SIZE] = { zombie_day, dodgeball_day, fly_day, grenade_day, scoutknife_day };
 
 public Action check_movement(Handle Timer)
 {
@@ -2329,11 +2346,6 @@ public Action check_movement(Handle Timer)
 						switch(special_day)
 						{
 							
-							case dodgeball_day: 
-							{
-								sd_player_init(client);
-							}
-							
 							case zombie_day:
 							{
 								if(GetClientTeam(client) == CS_TEAM_T)
@@ -2346,18 +2358,13 @@ public Action check_movement(Handle Timer)
 							{
 								client_fly(client);
 							}
-							
-							case grenade_day:
+
+							// we dont have team swaps or weapon picks on these days
+							// so just call the default handler :)
+							default: 
 							{
 								sd_player_init(client);
 							}
-							
-							case scoutknife_day:
-							{
-								sd_player_init(client);
-							}
-							
-							default: {}
 						}
 					}
 					
