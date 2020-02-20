@@ -227,3 +227,33 @@ stock void strip_all_weapons(int client)
 		SetEntProp(client, Prop_Send, "m_iAmmo", 0, _, 11 + i);
 	}
 }
+ 
+const int GUNS_SIZE = 14;
+
+new const String:gun_list[GUNS_SIZE][] =
+{	
+	"AK47", "M4A1", "AWP","M3",
+	"P90", "M249", "SCOUT", "MP5", 
+	"GALIL","SG", "TMP", "AUG",
+	"FAMAS", "XM"
+};
+
+new const String:gun_give_list[GUNS_SIZE][] =
+{	
+	"weapon_ak47", "weapon_m4a1", "weapon_awp","weapon_m3",
+	"weapon_p90", "weapon_m249", "weapon_scout", "weapon_mp5navy",
+	"weapon_galil", "weapon_sg552","weapon_tmp", "weapon_aug",
+	"weapon_famas", "weapon_xm1014"
+	
+};
+
+stock Menu build_gun_menu(MenuHandler menu_handler)
+{
+	Menu menu = new Menu(menu_handler);
+	for (int i = 0; i < GUNS_SIZE; i++)
+	{
+		menu.AddItem(gun_list[i], gun_list[i]);
+	}
+	menu.SetTitle("Weapon Selection");
+	return menu;
+}

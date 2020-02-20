@@ -38,7 +38,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.8 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.8.1 - Violent Intent Jailbreak"
 
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
@@ -385,7 +385,7 @@ public OnMapStart()
 	}
 	
 	
-	gun_menu = build_gun_menu();
+	gun_menu = build_gun_menu(WeaponHandler);
 }
 
 public OnMapEnd()
@@ -586,6 +586,8 @@ public OnPluginStart()
 	RegAdminCmd("block", enable_block_admin, ADMFLAG_BAN);
 	RegAdminCmd("ublock",disable_block_admin, ADMFLAG_BAN);	
 	RegAdminCmd("force_open", force_open_callback, ADMFLAG_BAN);
+	
+	// toggle kill and safe laser
 	RegAdminCmd("kill_laser", kill_laser, ADMFLAG_CUSTOM6);
 	RegAdminCmd("safe_laser", safe_laser, ADMFLAG_CUSTOM6);
 	
@@ -1071,31 +1073,6 @@ public laser_handler(Menu menu, MenuAction action, int param1, int param2)
 }
 
 
-const int GUNS_SIZE = 6;
-
-new const String:gun_list[GUNS_SIZE][] =
-{	
-	"AK47", "M4A1", "AWP","SHOTGUN",
-	"P90", "M249"
-};
-
-new const String:gun_give_list[GUNS_SIZE][] =
-{	
-	"weapon_ak47", "weapon_m4a1", "weapon_awp","weapon_m3",
-	"weapon_p90", "weapon_m249"
-};
-
-public Menu build_gun_menu()
-{
-	Menu guns = new Menu(WeaponHandler);
-	for (int i = 0; i < GUNS_SIZE; i++)
-	{
-		guns.AddItem(gun_list[i], gun_list[i]);
-	}
-	guns.SetTitle("Weapon Selection");
-	return guns;
-}
-
 public int WeaponHandler(Menu menu, MenuAction action, int client, int param2) 
 {
 	if(action == MenuAction_Select) 
@@ -1126,8 +1103,6 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 	{
 		PrintToServer("Client %d's menu was cancelled. Reason: %d", client, param2);
 	}
-	
-	
 	return 0;
 }
 

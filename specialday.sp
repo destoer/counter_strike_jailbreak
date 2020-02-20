@@ -759,7 +759,7 @@ public OnMapStart()
 	tank = -1;
 	patient_zero = -1;
 	
-	gun_menu = build_gun_menu();
+	gun_menu = build_gun_menu(WeaponHandler);
 	sd_menu = build_sd_menu();
 	
 	use_custom_zombie_model = CacheCustomZombieModel();
@@ -1088,35 +1088,7 @@ public Action command_cancel_special_day(int client,args)
 	return Plugin_Handled;
 }
 
-const int GUNS_SIZE = 14;
 
-new const String:gun_list[GUNS_SIZE][] =
-{	
-	"AK47", "M4A1", "AWP","SHOTGUN",
-	"P90", "M249", "SCOUT", "MP5", 
-	"GALIL","SG", "TMP", "AUG",
-	"FAMAS", "XM"
-};
-
-new const String:gun_give_list[GUNS_SIZE][] =
-{	
-	"weapon_ak47", "weapon_m4a1", "weapon_awp","weapon_m3",
-	"weapon_p90", "weapon_m249", "weapon_scout", "weapon_mp5navy",
-	"weapon_galil", "weapon_sg552","weapon_tmp", "weapon_aug",
-	"weapon_famas", "weapon_xm1014"
-	
-};
-
-public Menu build_gun_menu()
-{
-	Menu guns = new Menu(WeaponHandler);
-	for (int i = 0; i < GUNS_SIZE; i++)
-	{
-		guns.AddItem(gun_list[i], gun_list[i]);
-	}
-	guns.SetTitle("Weapon Selection");
-	return guns;
-}
 
 public Action WeaponMenuAll() 
 {
@@ -1167,6 +1139,7 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 		// and kevlar
 		GivePlayerItem(client, "item_assaultsuit"); 
 		
+		// finally give the picked gun
 		GivePlayerItem(client, gun_give_list[param2]);
 
 		
@@ -1180,7 +1153,6 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 	{
 		PrintToServer("Client %d's menu was cancelled. Reason: %d", client, param2);
 	}
-	
 	
 	return 0;
 }
