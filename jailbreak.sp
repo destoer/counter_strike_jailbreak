@@ -38,7 +38,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.8.1 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.8.2 - Violent Intent Jailbreak"
 
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
@@ -400,12 +400,14 @@ public void OnClientConnected(int client)
 {
 	laser_use[client] = false;
 	use_draw_laser_settings[client] = false;
+	laser_color[client] = 0;
 }
 
 public void OnClientDisconnect(client)
 {
 	laser_use[client] = false;
 	use_draw_laser_settings[client] = false;
+	laser_color[client] = 0;
 	if(client == warden_id)
 	{
 		warden_id = WARDEN_INVALID;
