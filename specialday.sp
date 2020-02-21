@@ -12,6 +12,8 @@
 #define STORE
 
 
+#define SD_ADMIN_FLAG ADMFLAG_GENERIC
+
 #if defined CT_BAN
 #undef REQUIRE_PLUGIN
 #include "ctban.inc"
@@ -384,8 +386,8 @@ public OnPluginStart()
 
 
 	// register our special day console command	
-	RegAdminCmd("sd", command_special_day, ADMFLAG_BAN);
-	RegAdminCmd("sd_cancel", command_cancel_special_day, ADMFLAG_BAN);
+	RegAdminCmd("sd", command_special_day, SD_ADMIN_FLAG);
+	RegAdminCmd("sd_cancel", command_cancel_special_day, SD_ADMIN_FLAG);
 	// freeze stuff
 	RegAdminCmd("fr", Freeze,ADMFLAG_BAN);
 	RegAdminCmd("uf",UnFreeze,ADMFLAG_BAN);
