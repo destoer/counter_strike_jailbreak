@@ -56,6 +56,11 @@ stock void slay_all()
 	}	
 }
 
+stock bool check_command_exists(const String:command[])
+{
+	return GetCommandFlags(command) != INVALID_FCVAR_FLAGS;
+}
+
 stock void block_all_clients()
 {
 	// block is allready on dont bother

@@ -18,19 +18,17 @@
 #undef REQUIRE_PLUGIN
 #include "ctban.inc"
 #define REQUIRE_PLUGIN
-bool ctban_running = false;
 #endif
 
 #if defined STORE
 #undef REQUIRE_PLUGIN
 #include "store.inc"
 #define REQUIRE_PLUGIN
-bool store_running = false;
 #endif
 
 
 #if defined GANGS
-bool gang_running = false;
+
 #endif
 
 bool block_reset = false;
@@ -355,7 +353,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.8.9"
+#define VERSION "1.9"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -405,18 +403,6 @@ public OnPluginStart()
 	
 	
 
-#if defined GANGS
-	gang_running = GetCommandFlags("sm_gang") != INVALID_FCVAR_FLAGS;
-#endif
-	
-#if defined CT_BAN	
-	ctban_running = GetCommandFlags("sm_ctban") != INVALID_FCVAR_FLAGS;
-#endif
-
-#if defined STORE
-	store_running = GetCommandFlags("sm_store") != INVALID_FCVAR_FLAGS;
-#endif
-	
 	g_hFriendlyFire = FindConVar("mp_friendlyfire"); // get the friendly fire var
 	g_ignore_round_win = FindConVar("mp_ignore_round_win_conditions");
 	g_autokick = FindConVar("mp_autokick");
@@ -881,7 +867,7 @@ void EndSd(bool forced=false)
 	
 	if(forced)
 	{
-		PrintToChatAll("%s Sd forcibly cancelled!", SPECIALDAY_PREFIX);
+		PrintToChatAll("%s Specialday cancelled!", SPECIALDAY_PREFIX);
 	}
 	
 	switch(special_day)
@@ -964,7 +950,7 @@ void EndSd(bool forced=false)
 	}	
 	
 #if defined CT_BAN
-	if(sd_state != sd_inactive && ctban_running)
+	if(sd_state != sd_inactive && check_command_exists("sm_ctban"))
 	{
 		for (int i = 1; i < MaxClients; i++)
 		{
@@ -986,7 +972,7 @@ void EndSd(bool forced=false)
 #if defined STORE
 	if(!forced)
 	{
-		if(sd_winner != -1 && store_running)
+		if(sd_winner != -1 && check_command_exists("sm_store"))
 		{
 			Store_SetClientCredits(sd_winner, Store_GetClientCredits(sd_winner)+20);
 			PrintToChat(sd_winner,"%s you won 20 credits for winning the sd!",SPECIALDAY_PREFIX)
@@ -1024,7 +1010,7 @@ void EndSd(bool forced=false)
 public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 {
 #if defined GANGS	
-	if(sd_state == sd_active && gang_running)
+	if(sd_state == sd_active && check_command_exists("sm_gang"))
 	{
 		ServerCommand("sm plugins load hl_gangs.smx")
 	}
@@ -1137,7 +1123,6 @@ public Action command_special_day(int client,int args)
 
 public Action command_cancel_special_day(int client,args)  
 {
-	PrintToChatAll("%s Special day cancelled!", SPECIALDAY_PREFIX);
 	EndSd(true);
 	return Plugin_Handled;
 }
@@ -1324,7 +1309,7 @@ public SaveTeams(bool onlyct)
 			// if ct bans active they can only stay on t anyways
 			// and thus aernt valid for consideration
 			#if defined CT_BAN 
-				if(ctban_running && onlyct)
+				if(check_command_exists("sm_ctban") && onlyct)
 				{
 					valid = is_on_team(i) && !CTBan_IsClientBanned(i);
 				}
@@ -1855,7 +1840,7 @@ public StartSD()
 	sd_state = sd_active;
 
 #if defined GANGS
-	if(gang_running)
+	if(check_command_exists("sm_gang"))
 	{
 		ServerCommand("sm plugins unload hl_gangs.smx");
 	}
