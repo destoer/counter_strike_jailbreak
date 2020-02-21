@@ -9,6 +9,7 @@
 // if running gangs or ct bans with this define to prevent issues :)
 #define GANGS
 #define CT_BAN
+#define STORE
 
 
 #if defined CT_BAN
@@ -17,6 +18,14 @@
 #define REQUIRE_PLUGIN
 bool ctban_running = false;
 #endif
+
+#if defined STORE
+#undef REQUIRE_PLUGIN
+#include "store.inc"
+#define REQUIRE_PLUGIN
+bool store_running = false;
+#endif
+
 
 #if defined GANGS
 bool gang_running = false;
@@ -344,7 +353,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.8.7"
+#define VERSION "1.8.8"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -400,6 +409,10 @@ public OnPluginStart()
 	
 #if defined CT_BAN	
 	ctban_running = GetCommandFlags("sm_ctban") != INVALID_FCVAR_FLAGS;
+#endif
+
+#if defined STORE
+	ctban_running = GetCommandFlags("sm_store") != INVALID_FCVAR_FLAGS;
 #endif
 	
 	g_hFriendlyFire = FindConVar("mp_friendlyfire"); // get the friendly fire var
@@ -859,8 +872,16 @@ int get_client_max_kills()
 	return cli;
 }
 
-public void EndSd()
+int sd_winner = -1;
+
+void EndSd(bool forced=false)
 {
+	
+	if(forced)
+	{
+		PrintToChatAll("%s Sd forcibly cancelled!", SPECIALDAY_PREFIX);
+	}
+	
 	switch(special_day)
 	{
 		case tank_day:
@@ -900,6 +921,7 @@ public void EndSd()
 			{
 				PrintToChatAll("%s %N won scoutknifes", SPECIALDAY_PREFIX, cli);
 			}
+			sd_winner = cli;
 		}
 		
 		case deathmatch_day:
@@ -909,7 +931,8 @@ public void EndSd()
 			if(IsClientConnected(cli) && IsClientInGame(cli) && is_on_team(cli))
 			{
 				PrintToChatAll("%s %N won deathmatch", SPECIALDAY_PREFIX, cli);
-			}	
+			}
+			sd_winner = cli;
 		}
 		
 		
@@ -956,6 +979,18 @@ public void EndSd()
 	{
 		disable_friendly_fire();
 	}
+	
+	// give winner creds
+#if defined STORE
+	if(!forced)
+	{
+		if(sd_winner != -1 && store_running)
+		{
+			Store_SetClientCredits(sd_winner, Store_GetClientCredits(sd_winner)+20);
+			PrintToChat(sd_winner,"%s you won 20 credits for winning the sd!",SPECIALDAY_PREFIX)
+		}
+	}
+#endif
 
 	special_day = normal_day;
 	sd_state = sd_inactive;
@@ -964,7 +999,7 @@ public void EndSd()
 	no_damage = false;
 	tank = -1;
 	patient_zero = -1;
-	
+	sd_winner = -1;
 	
 	// reset the alpha just to be safe
 	for(int i = 1; i <= MaxClients; i++)
@@ -1101,7 +1136,7 @@ public Action command_special_day(int client,int args)
 public Action command_cancel_special_day(int client,args)  
 {
 	PrintToChatAll("%s Special day cancelled!", SPECIALDAY_PREFIX);
-	EndSd();
+	EndSd(true);
 	return Plugin_Handled;
 }
 
@@ -1443,7 +1478,7 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 				PrintToChatAll("%s %N won gungame", SPECIALDAY_PREFIX, attacker);
 				
 				
-				
+				sd_winner = attacker;
 				slay_all();
 			}
 			
