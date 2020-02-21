@@ -355,7 +355,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.8.8"
+#define VERSION "1.8.9"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -414,7 +414,7 @@ public OnPluginStart()
 #endif
 
 #if defined STORE
-	ctban_running = GetCommandFlags("sm_store") != INVALID_FCVAR_FLAGS;
+	store_running = GetCommandFlags("sm_store") != INVALID_FCVAR_FLAGS;
 #endif
 	
 	g_hFriendlyFire = FindConVar("mp_friendlyfire"); // get the friendly fire var
