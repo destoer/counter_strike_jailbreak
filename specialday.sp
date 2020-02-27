@@ -11,6 +11,7 @@
 #define CT_BAN
 #define STORE
 
+//#define USE_CUSTOM_ZOMBIE_MODEL
 
 #define SD_ADMIN_FLAG ADMFLAG_GENERIC
 
@@ -59,7 +60,7 @@ new const String:sd_list[SD_SIZE][] =
 	"Zombie",
 	"Gun Game",
 	"Knife",
-	"Scout knifes",
+	"Scout Knifes",
 	"Death Match"
 };
 
@@ -673,11 +674,10 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 
 
 
-bool use_custom_zombie_model = false;
 
-// custom alien zombie model (will use stock hl2 zombie if it cant find it)
-// yes this is alot of code
-public bool CacheCustomZombieModel()
+#if defined USE_CUSTOM_ZOMBIE_MODEL
+// custom alien zombie model 
+public void CacheCustomZombieModel()
 {
 // these apparently just fail silently...
 AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien.dx80.vtx")
@@ -713,41 +713,42 @@ AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_legs_norm
 AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_torso.vmt");
 AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_torso.vtf");
 AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_torso_normal.vtf");
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.dx80.vtx")) {return false;}
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.dx90.vtx")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.mdl")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.phy")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.sw.vtx")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.vvd")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.xbox.vtx")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.dx80.vtx")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.dx90.vtx")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.mdl")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.phy")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.sw.vtx")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.vvd")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.xbox.vtx")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.dx80.vtx")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.dx90.vtx")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.mdl")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.phy")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.sw.vtx")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.vvd")) { return false; }
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.xbox.vtx")) { return false; }
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms.vmt")) { return false; }
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms.vtf")) { return false; }
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms_normal.vtf")) { return false; }
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head.vmt")) { return false; }
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head.vtf")) { return false; }
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head_normal.vtf")) { return false; }
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs.vmt")) { return false; }
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs.vtf")) { return false; }
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs_normal.vtf")) { return false; }
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso.vmt")) { return false; }
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso.vtf")) { return false; }
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso_normal.vtf")) { return false; }
+if(PrecacheModel("models/player/slow/aliendrone/slow_alien.dx80.vtx")) 
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.dx90.vtx")) 
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.mdl")) 
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.phy")) 
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.sw.vtx"))
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.vvd"))
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.xbox.vtx"))
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.dx80.vtx"))
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.dx90.vtx"))
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.mdl"))
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.phy"))
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.sw.vtx"))
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.vvd"))
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.xbox.vtx"))
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.dx80.vtx")) 
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.dx90.vtx"))
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.mdl"))
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.phy")) 
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.sw.vtx")) 
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.vvd")) 
+if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.xbox.vtx"))
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms.vmt")) 
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms.vtf"))
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms_normal.vtf")) 
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head.vmt")) 
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head.vtf")) 
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head_normal.vtf")) 
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs.vmt")) 
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs.vtf")) 
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs_normal.vtf")) 
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso.vmt")) 
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso.vtf")) 
+if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso_normal.vtf"))
 return true;
 }
+#endif
 
 int fog_ent;
 Menu sd_menu;
@@ -766,12 +767,11 @@ public OnMapStart()
 	sd_menu = build_sd_menu(SdHandler); // real sd select
 	sd_list_menu = build_sd_menu(SdListHandler); // dummy sd menu for people to see sds
 	
-	use_custom_zombie_model = CacheCustomZombieModel();
-	
-	if(!use_custom_zombie_model)
-	{
+	#if defined USE_CUSTOM_ZOMBIE_MODEL
+		CacheCustomZombieModel();
+	#else
 		PrecacheModel("models/zombie/classic.mdl");
-	}
+	#endif
 	
 	PrecacheSound("npc/zombie/zombie_voice_idle1.wav");
 	
@@ -2003,15 +2003,12 @@ public void MakeZombie(int client)
 	SetEntityHealth(client, 250);
 	GivePlayerItem(client, "weapon_knife");
 	
-	if(!use_custom_zombie_model)
-	{
-		SetEntityModel(client, "models/zombie/classic.mdl");
-	}
-	
-	else
-	{
+	#if defined USE_CUSTOM_ZOMBIE_MODEL
 		SetEntityModel(client, "models/player/slow/aliendrone/slow_alien.mdl");
-	}
+	#else
+		SetEntityModel(client, "models/zombie/classic.mdl");
+	#endif
+	
 }
 
 public void StartZombie()
