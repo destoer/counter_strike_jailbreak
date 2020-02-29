@@ -11,7 +11,7 @@
 #define CT_BAN
 #define STORE
 
-//#define USE_CUSTOM_ZOMBIE_MODEL
+#define USE_CUSTOM_ZOMBIE_MODEL
 
 #define SD_ADMIN_FLAG ADMFLAG_GENERIC
 
@@ -354,7 +354,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.9"
+#define VERSION "1.9.1"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -1224,7 +1224,7 @@ public CreateKnockBack(int client, int attacker, float damage)
 	NormalizeVector(push, push);
 	
 	// scale it
-	float scale = damage * 3;
+	float scale = damage * 2;
 	ScaleVector(push, scale);
 
 	//teleport the victim to new pos from scaled vector to simulate knockback

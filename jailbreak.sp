@@ -38,7 +38,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.8.2 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.8.3 - Violent Intent Jailbreak"
 
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
@@ -1079,6 +1079,11 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 {
 	if(action == MenuAction_Select) 
 	{
+		// if they aernt alive or are not on ct they cant use this
+		if(!(IsClientAlive(client) && GetClientTeam(client) == CS_TEAM_CT))
+		{
+			return -1;
+		}
 
 		strip_all_weapons(client);
 		
