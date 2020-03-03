@@ -1080,7 +1080,7 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 	if(action == MenuAction_Select) 
 	{
 		// if they aernt alive or are not on ct they cant use this
-		if(!(IsClientAlive(client) && GetClientTeam(client) == CS_TEAM_CT))
+		if(!(IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT))
 		{
 			return -1;
 		}

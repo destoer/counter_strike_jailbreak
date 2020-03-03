@@ -677,7 +677,7 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 
 #if defined USE_CUSTOM_ZOMBIE_MODEL
 // custom alien zombie model 
-public void CacheCustomZombieModel()
+void CacheCustomZombieModel()
 {
 // these apparently just fail silently...
 AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien.dx80.vtx")
@@ -713,40 +713,39 @@ AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_legs_norm
 AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_torso.vmt");
 AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_torso.vtf");
 AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_torso_normal.vtf");
-if(PrecacheModel("models/player/slow/aliendrone/slow_alien.dx80.vtx")) 
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.dx90.vtx")) 
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.mdl")) 
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.phy")) 
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.sw.vtx"))
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.vvd"))
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien.xbox.vtx"))
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.dx80.vtx"))
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.dx90.vtx"))
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.mdl"))
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.phy"))
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.sw.vtx"))
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.vvd"))
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_head.xbox.vtx"))
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.dx80.vtx")) 
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.dx90.vtx"))
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.mdl"))
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.phy")) 
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.sw.vtx")) 
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.vvd")) 
-if(!PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.xbox.vtx"))
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms.vmt")) 
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms.vtf"))
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_arms_normal.vtf")) 
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head.vmt")) 
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head.vtf")) 
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_head_normal.vtf")) 
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs.vmt")) 
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs.vtf")) 
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_legs_normal.vtf")) 
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso.vmt")) 
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso.vtf")) 
-if(!PrecacheModel("materials/models/player/slow/aliendrone/drone_torso_normal.vtf"))
-return true;
+PrecacheModel("models/player/slow/aliendrone/slow_alien.dx80.vtx");
+PrecacheModel("models/player/slow/aliendrone/slow_alien.dx90.vtx");
+PrecacheModel("models/player/slow/aliendrone/slow_alien.mdl");
+PrecacheModel("models/player/slow/aliendrone/slow_alien.phy");
+PrecacheModel("models/player/slow/aliendrone/slow_alien.sw.vtx");
+PrecacheModel("models/player/slow/aliendrone/slow_alien.vvd");
+PrecacheModel("models/player/slow/aliendrone/slow_alien.xbox.vtx");
+PrecacheModel("models/player/slow/aliendrone/slow_alien_head.dx80.vtx");
+PrecacheModel("models/player/slow/aliendrone/slow_alien_head.dx90.vtx");
+PrecacheModel("models/player/slow/aliendrone/slow_alien_head.mdl");
+PrecacheModel("models/player/slow/aliendrone/slow_alien_head.phy");
+PrecacheModel("models/player/slow/aliendrone/slow_alien_head.sw.vtx");
+PrecacheModel("models/player/slow/aliendrone/slow_alien_head.vvd");
+PrecacheModel("models/player/slow/aliendrone/slow_alien_head.xbox.vtx");
+PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.dx80.vtx");
+PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.dx90.vtx");
+PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.mdl");
+PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.phy");
+PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.sw.vtx");
+PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.vvd");
+PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.xbox.vtx");
+PrecacheModel("materials/models/player/slow/aliendrone/drone_arms.vmt");
+PrecacheModel("materials/models/player/slow/aliendrone/drone_arms.vtf");
+PrecacheModel("materials/models/player/slow/aliendrone/drone_arms_normal.vtf");
+PrecacheModel("materials/models/player/slow/aliendrone/drone_head.vmt");
+PrecacheModel("materials/models/player/slow/aliendrone/drone_head.vtf");
+PrecacheModel("materials/models/player/slow/aliendrone/drone_head_normal.vtf");
+PrecacheModel("materials/models/player/slow/aliendrone/drone_legs.vmt");
+PrecacheModel("materials/models/player/slow/aliendrone/drone_legs.vtf");
+PrecacheModel("materials/models/player/slow/aliendrone/drone_legs_normal.vtf");
+PrecacheModel("materials/models/player/slow/aliendrone/drone_torso.vmt");
+PrecacheModel("materials/models/player/slow/aliendrone/drone_torso.vtf");
+PrecacheModel("materials/models/player/slow/aliendrone/drone_torso_normal.vtf");
 }
 #endif
 
