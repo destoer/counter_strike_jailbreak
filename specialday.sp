@@ -354,7 +354,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.9.1"
+#define VERSION "1.9.2"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -676,76 +676,63 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 
 
 #if defined USE_CUSTOM_ZOMBIE_MODEL
+bool zombie_model_success = false;
+const int ZOMBIE_MODEL_LIST_SIZE = 33;
+new const String:zombie_model_list[ZOMBIE_MODEL_LIST_SIZE][] = {
+"models/player/slow/aliendrone/slow_alien.dx80.vtx",
+"models/player/slow/aliendrone/slow_alien.dx90.vtx",
+"models/player/slow/aliendrone/slow_alien.mdl",
+"models/player/slow/aliendrone/slow_alien.phy",
+"models/player/slow/aliendrone/slow_alien.sw.vtx",
+"models/player/slow/aliendrone/slow_alien.vvd",
+"models/player/slow/aliendrone/slow_alien.xbox.vtx",
+"models/player/slow/aliendrone/slow_alien_head.dx80.vtx",
+"models/player/slow/aliendrone/slow_alien_head.dx90.vtx",
+"models/player/slow/aliendrone/slow_alien_head.mdl",
+"models/player/slow/aliendrone/slow_alien_head.phy",
+"models/player/slow/aliendrone/slow_alien_head.sw.vtx",
+"models/player/slow/aliendrone/slow_alien_head.vvd",
+"models/player/slow/aliendrone/slow_alien_head.xbox.vtx",
+"models/player/slow/aliendrone/slow_alien_hs.dx80.vtx",
+"models/player/slow/aliendrone/slow_alien_hs.dx90.vtx",
+"models/player/slow/aliendrone/slow_alien_hs.mdl",
+"models/player/slow/aliendrone/slow_alien_hs.phy",
+"models/player/slow/aliendrone/slow_alien_hs.sw.vtx",
+"models/player/slow/aliendrone/slow_alien_hs.vvd",
+"models/player/slow/aliendrone/slow_alien_hs.xbox.vtx",
+"materials/models/player/slow/aliendrone/drone_arms.vmt",
+"materials/models/player/slow/aliendrone/drone_arms.vtf",
+"materials/models/player/slow/aliendrone/drone_arms_normal.vtf",
+"materials/models/player/slow/aliendrone/drone_head.vmt",
+"materials/models/player/slow/aliendrone/drone_head.vtf",
+"materials/models/player/slow/aliendrone/drone_head_normal.vtf",
+"materials/models/player/slow/aliendrone/drone_legs.vmt",
+"materials/models/player/slow/aliendrone/drone_legs.vtf",
+"materials/models/player/slow/aliendrone/drone_legs_normal.vtf",
+"materials/models/player/slow/aliendrone/drone_torso.vmt",
+"materials/models/player/slow/aliendrone/drone_torso.vtf",
+"materials/models/player/slow/aliendrone/drone_torso_normal.vtf"
+};
+
 // custom alien zombie model 
-void CacheCustomZombieModel()
+bool CacheCustomZombieModel()
 {
-// these apparently just fail silently...
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien.dx80.vtx")
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien.dx90.vtx");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien.mdl");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien.phy");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien.vvd");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien.sw.vtx");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien.xbox.vtx");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien_head.dx80.vtx");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien_head.dx90.vtx");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien_head.mdl");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien_head.phy");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien_head.sw.vtx");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien_head.vvd");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien_head.xbox.vtx");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien_hs.dx80.vtx");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien_hs.dx90.vtx");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien_hs.mdl");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien_hs.phy");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien_hs.sw.vtx");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien_hs.vvd");
-AddFileToDownloadsTable("models/player/slow/aliendrone/slow_alien_hs.xbox.vtx");
-AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_arms.vmt");
-AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_arms.vtf");
-AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_arms_normal.vtf");
-AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_head.vmt");
-AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_head.vtf");
-AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_head_normal.vtf");
-AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_legs.vmt");
-AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_legs.vtf");
-AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_legs_normal.vtf");
-AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_torso.vmt");
-AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_torso.vtf");
-AddFileToDownloadsTable("materials/models/player/slow/aliendrone/drone_torso_normal.vtf");
-PrecacheModel("models/player/slow/aliendrone/slow_alien.dx80.vtx");
-PrecacheModel("models/player/slow/aliendrone/slow_alien.dx90.vtx");
-PrecacheModel("models/player/slow/aliendrone/slow_alien.mdl");
-PrecacheModel("models/player/slow/aliendrone/slow_alien.phy");
-PrecacheModel("models/player/slow/aliendrone/slow_alien.sw.vtx");
-PrecacheModel("models/player/slow/aliendrone/slow_alien.vvd");
-PrecacheModel("models/player/slow/aliendrone/slow_alien.xbox.vtx");
-PrecacheModel("models/player/slow/aliendrone/slow_alien_head.dx80.vtx");
-PrecacheModel("models/player/slow/aliendrone/slow_alien_head.dx90.vtx");
-PrecacheModel("models/player/slow/aliendrone/slow_alien_head.mdl");
-PrecacheModel("models/player/slow/aliendrone/slow_alien_head.phy");
-PrecacheModel("models/player/slow/aliendrone/slow_alien_head.sw.vtx");
-PrecacheModel("models/player/slow/aliendrone/slow_alien_head.vvd");
-PrecacheModel("models/player/slow/aliendrone/slow_alien_head.xbox.vtx");
-PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.dx80.vtx");
-PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.dx90.vtx");
-PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.mdl");
-PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.phy");
-PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.sw.vtx");
-PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.vvd");
-PrecacheModel("models/player/slow/aliendrone/slow_alien_hs.xbox.vtx");
-PrecacheModel("materials/models/player/slow/aliendrone/drone_arms.vmt");
-PrecacheModel("materials/models/player/slow/aliendrone/drone_arms.vtf");
-PrecacheModel("materials/models/player/slow/aliendrone/drone_arms_normal.vtf");
-PrecacheModel("materials/models/player/slow/aliendrone/drone_head.vmt");
-PrecacheModel("materials/models/player/slow/aliendrone/drone_head.vtf");
-PrecacheModel("materials/models/player/slow/aliendrone/drone_head_normal.vtf");
-PrecacheModel("materials/models/player/slow/aliendrone/drone_legs.vmt");
-PrecacheModel("materials/models/player/slow/aliendrone/drone_legs.vtf");
-PrecacheModel("materials/models/player/slow/aliendrone/drone_legs_normal.vtf");
-PrecacheModel("materials/models/player/slow/aliendrone/drone_torso.vmt");
-PrecacheModel("materials/models/player/slow/aliendrone/drone_torso.vtf");
-PrecacheModel("materials/models/player/slow/aliendrone/drone_torso_normal.vtf");
+	// these apparently just fail silently...
+	for (int i = 0; i < ZOMBIE_MODEL_LIST_SIZE; i++)
+	{
+		AddFileToDownloadsTable(zombie_model_list[i]);
+	}
+
+
+	for (int i = 0; i < ZOMBIE_MODEL_LIST_SIZE; i++)
+	{
+		if(!PrecacheModel(zombie_model_list[i]))
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 #endif
 
@@ -767,7 +754,11 @@ public OnMapStart()
 	sd_list_menu = build_sd_menu(SdListHandler); // dummy sd menu for people to see sds
 	
 	#if defined USE_CUSTOM_ZOMBIE_MODEL
-		CacheCustomZombieModel();
+		zombie_model_success = CacheCustomZombieModel();
+		if (!zombie_model_success)
+		{
+			PrecacheModel("models/zombie/classic.mdl");
+		}
 	#else
 		PrecacheModel("models/zombie/classic.mdl");
 	#endif
@@ -2003,7 +1994,15 @@ public void MakeZombie(int client)
 	GivePlayerItem(client, "weapon_knife");
 	
 	#if defined USE_CUSTOM_ZOMBIE_MODEL
-		SetEntityModel(client, "models/player/slow/aliendrone/slow_alien.mdl");
+		if (zombie_model_success)
+		{
+			SetEntityModel(client, "models/player/slow/aliendrone/slow_alien.mdl");
+		}
+		
+		else
+		{
+			SetEntityModel(client, "models/zombie/classic.mdl");
+		}
 	#else
 		SetEntityModel(client, "models/zombie/classic.mdl");
 	#endif
