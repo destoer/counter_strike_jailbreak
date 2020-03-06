@@ -170,9 +170,10 @@ void hide_player_init(int client)
 	
 	else if(GetClientTeam(client) == CS_TEAM_CT)
 	{
+		CS_RespawnPlayer(client);
 		WeaponMenu(client);
 		set_client_speed(client, 0.0);
-		SetEntityHealth(client,500); // set health to 500		
+		SetEntityHealth(client,500); // set health to 500
 	}
 }
 
@@ -354,7 +355,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.9.2"
+#define VERSION "1.9.3"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
