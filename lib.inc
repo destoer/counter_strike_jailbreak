@@ -105,7 +105,7 @@ stock bool noblock_enabled()
 		return false;
 	}
 	
-	for (int i = 1; i < MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i))
 		{
