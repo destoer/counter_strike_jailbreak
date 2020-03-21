@@ -1221,7 +1221,7 @@ public CreateKnockBack(int client, int attacker, float damage)
 	NormalizeVector(push, push);
 	
 	// scale it (may need balancing)
-	float scale = damage * 3;
+	float scale = damage * 4;
 	ScaleVector(push, scale);
 
 	// add the push to players velocity
