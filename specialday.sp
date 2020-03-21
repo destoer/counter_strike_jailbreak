@@ -32,8 +32,6 @@
 
 #endif
 
-bool block_reset = false;
-
 
 #define SPECIALDAY_PREFIX "\x04[Vi Special Day]\x07F8F8FF"
 #define FFA_CONDITION(%1,%2) (1 <= %1 <= MaxClients && 1 <= %2 <= MaxClients && %1 != %2 && GetClientTeam(%1) == GetClientTeam(%2))
@@ -355,7 +353,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.9.7"
+#define VERSION "1.9.8"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -832,12 +830,6 @@ public SetupFog()
 
 public Action OnRoundStart(Handle event, const String:name[], bool dontBroadcast)
 {
-	if(block_reset)
-	{
-		block_all_clients();
-		block_reset = false;
-	}
-	
 	EndSd();
 }
 
@@ -1604,14 +1596,10 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 		no_damage = true;
 		
 		
-		// check collision if so turn it off for the 
-		// sd and renable at start of next round...
-		// else its allready off and we dont care
-		if(!noblock_enabled())
-		{
-			block_reset = true;
-			unblock_all_clients();
-		}
+		// turn off collison if its allready on this function
+		// will just ignore the request
+		unblock_all_clients();
+		
 		
 
 		switch(param2)

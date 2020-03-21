@@ -49,7 +49,7 @@ stock void slay_all()
 	// slay everyone
 	for (int i=1; i<=MaxClients; i++)
 	{
-		if (IsClientInGame(i) && IsPlayerAlive(i)) 
+		if (is_valid_client(i) && IsPlayerAlive(i)) 
 		{
 			ForcePlayerSuicide(i);
 		}
@@ -72,7 +72,7 @@ stock void block_all_clients()
 	
   	for(int i=1; i <= MaxClients; i++)
 	{
-		if (IsClientInGame(i) && IsPlayerAlive(i))
+		if (is_valid_client(i))
 		{
 			SetEntProp(i, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_PLAYER, 4);
 		}
@@ -89,7 +89,7 @@ stock void unblock_all_clients()
 	
   	for(int i=1; i <= MaxClients; i++)
 	{
-		if (IsClientInGame(i) && IsPlayerAlive(i))
+		if (is_valid_client(i))
 		{
 			SetEntProp(i, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_DEBRIS_TRIGGER, 4);
 		}
@@ -107,7 +107,7 @@ stock bool noblock_enabled()
 	
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if(IsClientInGame(i))
+		if(is_valid_client(i))
 		{
 			return GetEntProp(i, Prop_Data,"m_CollisionGroup") == COLLISION_GROUP_DEBRIS_TRIGGER;
 		}
@@ -204,7 +204,7 @@ stock int get_alive_team_count(int team, int &client)
 	int number = 0;
 	for (int i= 1; i<=MaxClients; i++)
 	{
-		if (IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == team) 
+		if (is_valid_client(i) && IsPlayerAlive(i) && GetClientTeam(i) == team) 
 		{
 			number += 1;
 			client = i;

@@ -38,7 +38,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.8.4 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.8.5 - Violent Intent Jailbreak"
 
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
@@ -826,9 +826,9 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 {
 	// if we are running with block on reset the status on round start
 	#if defined NOBLOCK_DEFAULT // does sourcemod have #ifndef?
-		// do nothing
+		disable_block_all();
 	#else
-	enable_block_all();
+		enable_block_all();
 	#endif
 	
 	// there is no warden
