@@ -355,7 +355,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.9.6"
+#define VERSION "1.9.7"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -489,6 +489,16 @@ public Action join_team(Handle event, const String: name[], bool bDontBroadcast)
 	if(sd_state == sd_inactive)
 	{
 		return Plugin_Continue;
+	}
+	
+	// less than 20 seconds set them up
+	else if(sd_state == sd_started)
+	{
+		if(!IsPlayerAlive(client))
+		{
+			CS_RespawnPlayer(client);
+			sd_player_init(client);
+		}
 	}
 	
 	// sd is running (20 secs in cant join) for most sds
