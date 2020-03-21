@@ -38,7 +38,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.8.3 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.8.4 - Violent Intent Jailbreak"
 
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
@@ -510,7 +510,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
     
     if (warden_id == client)
     {
-        if (IsClientInGame(client) && IsPlayerAlive(client) && GetClientTeam(client) == 3)
+        if (IsClientInGame(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
         {
             if (!StrEqual(command, "say_team"))
             {    
@@ -556,7 +556,6 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
     
     return Plugin_Continue;
 }
-
 
 // init the plugin
 public OnPluginStart()

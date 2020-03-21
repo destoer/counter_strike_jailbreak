@@ -181,6 +181,21 @@ stock bool is_valid_client(int client)
 }
 
 
+stock void get_player_velocity(int client, float vec[3])
+{
+	if(is_valid_client(client) && is_on_team(client))
+	{
+		GetEntPropVector(client, Prop_Data, "m_vecAbsVelocity", vec);
+	}
+}
+
+stock void set_player_velocity(int client, const float vec[3])
+{
+	if(is_valid_client(client) && is_on_team(client))
+	{
+		SetEntPropVector(client, Prop_Data, "m_vecAbsVelocity", vec);
+	}
+}
 
 //get players alive on a team
 // 2nd param has last matching player found

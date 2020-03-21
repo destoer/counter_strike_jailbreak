@@ -355,7 +355,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.9.3"
+#define VERSION "1.9.6"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -376,6 +376,11 @@ public int native_sd_active(Handle plugin, int numParam)
 // register our call
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
+#if defined STORE
+	MarkNativeAsOptional("Store_GetClientCredits");
+	MarkNativeAsOptional("Store_SetClientCredits");
+#endif
+
    CreateNative("sd_active", native_sd_active);
    return APLRes_Success;
 }
@@ -474,7 +479,7 @@ public Action join_team(Handle event, const String: name[], bool bDontBroadcast)
 	// if a player joins at this point we need to give them 
 	// the same action as in the main handler
 	int client = GetClientOfUserId(GetEventInt(event, "userid")); 
-	if (!is_valid_client(client))
+	if (!is_valid_client(client) || !is_on_team(client))
 	{   
         return Plugin_Continue; 
     }	
@@ -489,7 +494,6 @@ public Action join_team(Handle event, const String: name[], bool bDontBroadcast)
 	// sd is running (20 secs in cant join) for most sds
 	else if(sd_state == sd_active)
 	{
-
 		if(special_day == zombie_day)
 		{
 			CreateTimer(3.0, ReviveZombie, client);
@@ -499,28 +503,22 @@ public Action join_team(Handle event, const String: name[], bool bDontBroadcast)
 		else if(special_day == gungame_day)
 		{
 			CreateTimer(3.0, ReviveGunGame, client);
+			return Plugin_Continue;
+		}
+		
+		else if(special_day == deathmatch_day)
+		{
+			CreateTimer(3.0, ReviveDeathMatch, client);
+			return Plugin_Continue;
+		}
+		
+		else if(special_day == scoutknife_day)
+		{
+			CreateTimer(3.0, ReviveScout, client);
+			return Plugin_Continue;
 		}
 	}
 	
-	
-	// else the sd is started but not active
-	if(is_on_team(client))
-	{
-		return Plugin_Continue;
-	}	
-	
-	// if they are dead revive them
-	if(!IsPlayerAlive(client))
-	{
-		CS_RespawnPlayer(client)
-	}
-	
-	// now just call the init function
-	sd_player_init(client);
-
-	
-
-
 	return Plugin_Continue;
 }
 
@@ -855,7 +853,12 @@ int sd_winner = -1;
 
 void EndSd(bool forced=false)
 {
-	
+	// no sd running we dont need to do anything
+	if(sd_state == sd_inactive)
+	{
+		return;
+	}
+
 	if(forced)
 	{
 		PrintToChatAll("%s Specialday cancelled!", SPECIALDAY_PREFIX);
@@ -1006,6 +1009,7 @@ public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 		ServerCommand("sm plugins load hl_gangs.smx")
 	}
 #endif
+	fr = false;
 	EndSd();
 	return Plugin_Handled;
 }
@@ -1214,12 +1218,18 @@ public CreateKnockBack(int client, int attacker, float damage)
 	// normalize the vector so it doesent care about how far away we are shooting from
 	NormalizeVector(push, push);
 	
-	// scale it
-	float scale = damage * 2;
+	// scale it (may need balancing)
+	float scale = damage * 3;
 	ScaleVector(push, scale);
 
-	//teleport the victim to new pos from scaled vector to simulate knockback
-	TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, push);
+	// add the push to players velocity
+	float vel[3];
+	get_player_velocity(client, vel);
+	
+	float new_vel[3];
+	AddVectors(vel, push, new_vel);
+	
+	set_player_velocity(client,new_vel);
 }
 
 
