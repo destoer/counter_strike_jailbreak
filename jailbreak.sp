@@ -38,7 +38,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.8.5 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.8.6 - Violent Intent Jailbreak"
 
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
@@ -573,6 +573,8 @@ public OnPluginStart()
 	RegConsoleCmd("uw", leave_warden);
 	RegConsoleCmd("wempty", empty_menu);
 	RegConsoleCmd("guns", weapon_menu);
+	RegConsoleCmd("is_blocked", is_blocked_cmd);
+	
 	// disabled
 	// command_stuck is push out callback
 	// we currently use the noblock toggle callback
@@ -648,6 +650,11 @@ public Action force_open_callback (int client, int args)
 public Action jailbreak_version(int client, int args)
 {
 	PrintToChat(client, "%s WARDEN VERSION: %s",WARDEN_PREFIX, PLUGIN_VERSION);
+}
+
+public Action is_blocked_cmd(int client, int args)
+{
+	PrintToChat(client, "%s blocked state: %s", noblock_enabled() ? "no block" : "block");
 }
 
 // Top Screen Warden Printing
