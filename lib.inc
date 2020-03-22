@@ -79,6 +79,14 @@ stock void block_all_clients()
 	}
 }
 
+stock void unblock_client(int client)
+{
+	if (is_valid_client(client))
+	{
+		SetEntProp(client, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_DEBRIS_TRIGGER, 4);
+	}	
+}
+
 stock void unblock_all_clients()
 {
 	// noblock allready enabled dont bother
@@ -89,10 +97,7 @@ stock void unblock_all_clients()
 	
   	for(int i=1; i <= MaxClients; i++)
 	{
-		if (is_valid_client(i))
-		{
-			SetEntProp(i, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_DEBRIS_TRIGGER, 4);
-		}
+		unblock_client(i);
 	}
 }
 
@@ -105,15 +110,20 @@ stock bool noblock_enabled()
 		return false;
 	}
 	
+	// if a single player who is valid does not have no block then its not on
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if(is_valid_client(i))
 		{
-			return GetEntProp(i, Prop_Data,"m_CollisionGroup") == COLLISION_GROUP_DEBRIS_TRIGGER;
+			if(GetEntProp(i, Prop_Data,"m_CollisionGroup") == COLLISION_GROUP_PLAYER)
+			{
+				return false;
+			}
 		}
 	}
-	ThrowError("could not pull collision data from a client");
-	return false; // keep compilier happy
+	
+	// if everyone has it then its on
+	return true;
 }
 
 

@@ -32,8 +32,8 @@
 
 #endif
 
-
-#define SPECIALDAY_PREFIX "\x04[Vi Special Day]\x07F8F8FF"
+//#define SPECIALDAY_PREFIX "\x04[Vi Special Day]\x07F8F8FF"
+#define SPECIALDAY_PREFIX "\x04[GK Special Day]\x07F8F8FF"
 #define FFA_CONDITION(%1,%2) (1 <= %1 <= MaxClients && 1 <= %2 <= MaxClients && %1 != %2 && GetClientTeam(%1) == GetClientTeam(%2))
 
 // set up sv_cheats in server config so we can add test bots lol
@@ -353,7 +353,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "1.9.9"
+#define VERSION "2.0.0 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -405,7 +405,9 @@ public OnPluginStart()
 	
 	// hook disonnect incase a vital member leaves
 	HookEvent("player_disconnect", PlayerDisconnect_Event, EventHookMode_Pre);
-	
+
+	// hook disonnect incase a vital member leaves
+	HookEvent("player_connect", player_connect_event, EventHookMode_Post);
 	
 
 	g_hFriendlyFire = FindConVar("mp_friendlyfire"); // get the friendly fire var
@@ -601,6 +603,18 @@ public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &
 		
 		
 		return Plugin_Continue;
+}
+
+
+public Action player_connect_event(Handle event, const String:name[], bool dontBroadcast)
+{
+	int client = GetClientOfUserId(GetEventInt(event,"userid"));
+	
+	// if valid and sd is active toggle noblock on them
+	if(is_valid_client(client) && sd_state != sd_inactive)
+	{
+		unblock_client(client);
+	}
 }
 
 public Action PlayerDisconnect_Event(Handle event, const String:name[], bool dontBroadcast)

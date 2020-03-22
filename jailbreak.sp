@@ -43,10 +43,18 @@ TODO make all names consistent
 #define PLUGIN_AUTHOR "organharvester, jordi"
 #define PLUGIN_VERSION "V2.8.7 - Violent Intent Jailbreak"
 
+/*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
 #define WARDEN_PREFIX "\x07FF0000[VI Warden]\x07F8F8FF"
 #define WARDEN_PLAYER_PREFIX "\x07FF0000[VI Warden]\x07F8F8FF"
+#define PTS_PREFIX "\x07F8F8FF"
+*/
+
+#define ANTISTUCK_PREFIX "\x07FF0000[GK Antistuck]\x07F8F8FF"
+#define JB_PREFIX "[GameKick Jailbreak]"
+#define WARDEN_PREFIX "\x07FFFF33[GameKick - Warden]\x07F8F8FF"
+#define WARDEN_PLAYER_PREFIX "\x0700008B[Warden]\x07F8F8FF"
 #define PTS_PREFIX "\x07F8F8FF"
 
 #include <sourcemod>
@@ -756,12 +764,24 @@ public Action become_warden(int client, int args)
 // \n doesent work apparently...
 public print_warden_commands(client)
 {
+/*
 	PrintToChat(client,"\x07FF0000!w           \x07800080- \x07F8F8FFbecome warden");
 	PrintToChat(client,"\x07FF0000!uw         \x07800080- \x07F8F8FFexit warden");
 	PrintToChat(client,"\x07FF0000!wb         \x07800080- \x07F8F8FFturn on block");
 	PrintToChat(client,"\x07FF0000!wub       \x07800080- \x07F8F8FFturn off block");
 	PrintToChat(client,"\x07FF0000!laser      \x07800080- \x07F8F8FFPoint/Draw Laser \x07FF0000(Member only)");
 	PrintToChat(client,"\x07FF0000!marker  \x07800080- \x07F8F8FFRMB - Bind 'key' '+marker'");
+*/
+
+
+	PrintToChat(client,"\x07FF0000!w           \x07800080- \x07F8F8FFbecome warden");
+	PrintToChat(client,"\x07FF0000!uw         \x07800080- \x07F8F8FFexit warden");
+	PrintToChat(client,"\x07FF0000!wb         \x07800080- \x07F8F8FFturn on block");
+	PrintToChat(client,"\x07FF0000!wub       \x07800080- \x07F8F8FFturn off block");
+	PrintToChat(client,"\x07FF0000!laser       \x07800080- \x07F8F8FFswitch point/draw laser");
+	PrintToChat(client,"\x07FF0000!laser_color       \x07800080- \x07F8F8FFchange laser color");
+	PrintToChat(client,"\x07FF0000!marker  \x07800080- \x07F8F8FF+marker, use mouse to adjust size, then -marker");
+
 }
 
 public set_warden(client)
