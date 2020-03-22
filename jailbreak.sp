@@ -35,10 +35,13 @@ TODO make all names consistent
 #define STUCK
 #define LASER_DEATH
 
+
+#define MAX_EDICT 2048
+
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.8.6 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.8.7 - Violent Intent Jailbreak"
 
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
@@ -654,7 +657,7 @@ public Action jailbreak_version(int client, int args)
 
 public Action is_blocked_cmd(int client, int args)
 {
-	PrintToChat(client, "%s blocked state: %s", noblock_enabled() ? "no block" : "block");
+	PrintToChat(client, "%s blocked state: %s",WARDEN_PREFIX, noblock_enabled() ? "no block" : "block");
 }
 
 // Top Screen Warden Printing
