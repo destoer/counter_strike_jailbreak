@@ -2389,7 +2389,7 @@ public Action check_movement(Handle Timer)
 							
 							case zombie_day:
 							{
-								if(GetClientTeam(client) == CS_TEAM_T)
+								if(GetClientTeam(client) == CS_TEAM_T && sd_state == sd_active)
 								{
 									set_zombie_speed(client);
 								}

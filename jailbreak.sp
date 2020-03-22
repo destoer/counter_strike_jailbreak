@@ -41,7 +41,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.8.7 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.8.8 - Violent Intent Jailbreak"
 
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
@@ -863,6 +863,8 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 	
 	// there is no warden
 	warden_id = -1;
+	
+	use_kill_laser = false;
 	
 	// 1 ct only on team auto warden them at start of round
 	int client = 0;
