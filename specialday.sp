@@ -339,7 +339,7 @@ int gungame_level[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "2.2.1 - Violent Intent Jailbreak"
+#define VERSION "2.2.2 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -393,7 +393,7 @@ public OnPluginStart()
 	HookEvent("player_disconnect", PlayerDisconnect_Event, EventHookMode_Pre);
 
 	// hook disonnect incase a vital member leaves
-	HookEvent("player_connect", player_connect_event, EventHookMode_Post);
+	HookEvent("player_activate", player_activate_event, EventHookMode_Post);
 	
 
 	g_hFriendlyFire = FindConVar("mp_friendlyfire"); // get the friendly fire var
@@ -588,7 +588,7 @@ public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &
 }
 
 
-public Action player_connect_event(Handle event, const String:name[], bool dontBroadcast)
+public Action player_activate_event(Handle event, const String:name[], bool dontBroadcast)
 {
 	int client = GetClientOfUserId(GetEventInt(event,"userid"));
 	
