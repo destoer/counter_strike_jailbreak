@@ -339,7 +339,7 @@ int gungame_level[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "2.2 - Violent Intent Jailbreak"
+#define VERSION "2.2.1 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -2199,8 +2199,7 @@ public void StartDodgeball()
 public OnEntityCreated(int entity, const String:classname[])
 {
 	
-	
-	if(sd_state != sd_active)
+	if(sd_state == sd_inactive)
 	{
 		return;
 	}	
