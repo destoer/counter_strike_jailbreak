@@ -339,7 +339,7 @@ int gungame_level[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "2.1 - Violent Intent Jailbreak"
+#define VERSION "2.2 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -382,7 +382,7 @@ public OnPluginStart()
 	RegAdminCmd("uf",UnFreeze,ADMFLAG_BAN);
 	
 	RegConsoleCmd("sdv", sd_version); // print version
-	RegConsoleCmd("zspawn", zspawn); // spawn during zombie if late joiner
+	RegConsoleCmd("sdspawn", sd_spawn); // spawn during zombie if late joiner
 	RegConsoleCmd("sd_list", sd_list_callback); // list sds
 	
 	// gun removal
@@ -406,7 +406,7 @@ public OnPluginStart()
 	
 	HookEvent("round_start", OnRoundStart); // reset variables after a sd
 	HookEvent("round_end", OnRoundEnd);
-	AddCommandListener(join_team,"jointeam");
+	
 	
 	
 	for(int i = 1;i < MaxClients;i++)
@@ -439,18 +439,6 @@ public Action sd_version(int client, int args)
 	PrintToChat(client, "%s SD VERSION: %s",SPECIALDAY_PREFIX, VERSION);
 }
 
-
-public Action zspawn(int client, int args)
-{
-	if(sd_state != sd_active || special_day != zombie_day) 
-	{
-		PrintToChat(client, "%s zombie day is not running", SPECIALDAY_PREFIX);
-		return;
-	}
-	CreateTimer(3.0, ReviveZombie, client);
-}
-
-
 public Action WeaponMenu(int client)
 {
 	gun_menu.Display(client, 20);
@@ -466,24 +454,18 @@ public Action hide_timer_callback(Handle timer)
 	}
 }
 
-public Action join_team(int client, const char[] command, int args)
-{	
-	
-	
+
+public Action sd_spawn(int client, int args)
+{
 	// sd not active so we dont care
-	if(sd_state == sd_inactive)
+	// or player alive so dont care
+	if(sd_state == sd_inactive || IsPlayerAlive(client))
 	{
 		return Plugin_Continue;
 	}	
-	
-	// special day has been called but is not running or active
-	// if a player joins at this point depending on sd we need
-	// to repsawn and init them
-	char team_str[4];
-	GetCmdArg(1, team_str, sizeof(team_str));
-	int team = StringToInt(team_str);
-	
-	if (!is_valid_client(client) || !(team == CS_TEAM_CT || team == CS_TEAM_T))
+
+	// invalid or not on a real team
+	if (!is_valid_client(client) || !is_on_team(client))
 	{	
 		return Plugin_Continue; 
     }	
@@ -491,11 +473,8 @@ public Action join_team(int client, const char[] command, int args)
 	// less than 20 seconds set them up
 	if(sd_state == sd_started)
 	{
-		if(!IsPlayerAlive(client))
-		{
-			CS_RespawnPlayer(client);
-			sd_player_init(client);
-		}
+		CS_RespawnPlayer(client);
+		sd_player_init(client);
 	}
 	
 	// sd is running (20 secs in cant join) for most sds
@@ -533,6 +512,7 @@ public Action join_team(int client, const char[] command, int args)
 	
 	return Plugin_Continue;
 }
+
 
 // freeze all players and turn ff on
 public Action Freeze(client,args)
