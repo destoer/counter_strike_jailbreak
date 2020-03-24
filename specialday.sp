@@ -353,7 +353,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "2.0.0 - Violent Intent Jailbreak"
+#define VERSION "2.0.1 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -485,7 +485,7 @@ public Action join_team(int client, const char[] command, int args)
 	// special day has been called but is not running or active
 	// if a player joins at this point depending on sd we need
 	// to repsawn and init them
-	char team_str[3];
+	char team_str[4];
 	GetCmdArg(1, team_str, sizeof(team_str));
 	int team = StringToInt(team_str);
 	
@@ -507,25 +507,33 @@ public Action join_team(int client, const char[] command, int args)
 	// sd is running (20 secs in cant join) for most sds
 	else if(sd_state == sd_active)
 	{
-		if(special_day == zombie_day)
+		
+		switch(special_day)
 		{
-			CreateTimer(3.0, ReviveZombie, client);
+			case zombie_day:
+			{
+				CreateTimer(3.0, ReviveZombie, client);
+			}
+			
+			case gungame_day:
+			{
+				CreateTimer(3.0, ReviveGunGame, client);
+			}
+			
+			case deathmatch_day:
+			{
+				CreateTimer(3.0, ReviveDeathMatch, client);
+			}
+			
+			case scoutknife_day:
+			{
+				CreateTimer(3.0, ReviveScout, client);
+			}
+			
+			default: {}
+			
 		}
 		
-		else if(special_day == gungame_day)
-		{
-			CreateTimer(3.0, ReviveGunGame, client);
-		}
-		
-		else if(special_day == deathmatch_day)
-		{
-			CreateTimer(3.0, ReviveDeathMatch, client);
-		}
-		
-		else if(special_day == scoutknife_day)
-		{
-			CreateTimer(3.0, ReviveScout, client);
-		}
 	}
 	
 	
@@ -1254,57 +1262,57 @@ public CreateKnockBack(int client, int attacker, float damage)
 public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
 {
 
-	if(no_damage == true)
+	if(no_damage)
 	{
 		damage = 0.0;
 		return Plugin_Changed;
 	}
 
-
-
-	if(special_day == dodgeball_day)
-	{
-		// any damage kills 
-		// prevents cheaters from healing 
-		damage = 500.0;
-		return Plugin_Changed;
-	}
-
-	
-	else if(special_day == zombie_day)
-	{
-		if (!is_valid_client(attacker)) { return Plugin_Continue; }
-		
-		if(GetClientTeam(victim) == CS_TEAM_T)
-		{
-			CreateKnockBack(victim, attacker, damage);
-		}
-		
-		else if(GetClientTeam(attacker) == CS_TEAM_T)
-		{
-			// patient zero instantly kills
-			if(attacker == patient_zero)
-			{
-				damage = 120.0;
-				return Plugin_Changed;
-			}
-		}
-	}
-	
-	/* Make friendly fire damage the same as real damage. */
-	if(ff == true)
+	// scale ff damage so its the same as standard dmg
+	else if(ff)
 	{
 		if (FFA_CONDITION(victim, attacker) && inflictor == attacker)
 		{
 			damage /= 0.35;
-			return Plugin_Changed;
 		}	
 	}
 
+	switch(special_day)
+	{
+	
+		case dodgeball_day:
+		{
+			// any damage kills 
+			// prevents cheaters from healing 
+			damage = 500.0;
+			return Plugin_Changed;
+		}
+		
+		
+		case zombie_day:
+		{
+			if (!is_valid_client(attacker)) { return Plugin_Continue; }
+			
+			if(GetClientTeam(victim) == CS_TEAM_T)
+			{
+				CreateKnockBack(victim, attacker, damage);
+			}
+			
+			else if(GetClientTeam(attacker) == CS_TEAM_T)
+			{
+				// patient zero instantly kills
+				if(attacker == patient_zero)
+				{
+					damage = 120.0;
+					return Plugin_Changed;
+				}
+			}
+		}
+	
+		default: {}
+	}
+	
 
-	
-	
-	
 	return Plugin_Continue;
 }
 
@@ -1377,8 +1385,7 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 {
 	static int ct_count = 0;
 	
-	// hook a death
-	if(hp_steal == true)
+	if(hp_steal)
 	{
 		int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
 		//PrintToChatAll("[SM] Juggernaut kill"); // debug
@@ -1389,128 +1396,134 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 	}
 	
 	
-	if(special_day == zombie_day)
+	switch(special_day)
 	{
-		// test that first time hitting one ct
-		int last_man;
-		int cur_count = get_alive_team_count(CS_TEAM_CT, last_man);
-		bool last_man_triggered  = (cur_count == 1) && (cur_count != ct_count)
-		ct_count = cur_count;
-		if(last_man_triggered)
+		case zombie_day:
 		{
-			// LAST MAN STANDING
-			PrintCenterTextAll("%N IS LAST MAN STANDING!", last_man);
-			SetEntityHealth(last_man, 350);
-			int weapon = GetPlayerWeaponSlot(last_man, CS_SLOT_SECONDARY);
-			set_clip_ammo(last_man,weapon, 999);
-			weapon =  GetPlayerWeaponSlot(last_man, CS_SLOT_PRIMARY);
-			set_clip_ammo(last_man,weapon, 999);
-		}
-		
-		
-		int victim = GetClientOfUserId(GetEventInt(event, "userid"));
-		
-		int team = GetClientTeam(victim);
-		// if victim is a ct -> become a zombie
-		if(team == CS_TEAM_CT)
-		{
-			float cords[3];
-			GetClientAbsOrigin(victim, cords);
-			
-			death_cords[victim] = cords;
-			death_cords[victim][2] -= 45.0; // account for player eyesight height
-			CreateTimer(0.5,NewZombie, victim)
-		}
-		
-		// if victim is a t -> respawn on 'patient zero' if alive
-		else if(team == CS_TEAM_T)
-		{
-			if(IsPlayerAlive(patient_zero))
+			// test that first time hitting one ct
+			int last_man;
+			int cur_count = get_alive_team_count(CS_TEAM_CT, last_man);
+			bool last_man_triggered  = (cur_count == 1) && (cur_count != ct_count)
+			ct_count = cur_count;
+			if(last_man_triggered)
 			{
-				CreateTimer(3.0, ReviveZombie, victim);
-			}			
+				// LAST MAN STANDING
+				PrintCenterTextAll("%N IS LAST MAN STANDING!", last_man);
+				SetEntityHealth(last_man, 350);
+				int weapon = GetPlayerWeaponSlot(last_man, CS_SLOT_SECONDARY);
+				set_clip_ammo(last_man,weapon, 999);
+				weapon =  GetPlayerWeaponSlot(last_man, CS_SLOT_PRIMARY);
+				set_clip_ammo(last_man,weapon, 999);
+			}
+			
+			
+			int victim = GetClientOfUserId(GetEventInt(event, "userid"));
+			
+			int team = GetClientTeam(victim);
+			// if victim is a ct -> become a zombie
+			if(team == CS_TEAM_CT)
+			{
+				float cords[3];
+				GetClientAbsOrigin(victim, cords);
+				
+				death_cords[victim] = cords;
+				death_cords[victim][2] -= 45.0; // account for player eyesight height
+				CreateTimer(0.5,NewZombie, victim)
+			}
+			
+			// if victim is a t -> respawn on 'patient zero' if alive
+			else if(team == CS_TEAM_T)
+			{
+				if(IsPlayerAlive(patient_zero))
+				{
+					CreateTimer(3.0, ReviveZombie, victim);
+				}			
+			}
 		}
-	}
-	
-	else if(special_day == scoutknife_day)
-	{
-		int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-		int victim = GetClientOfUserId(GetEventInt(event, "userid"));
 		
-		CreateTimer(3.0, ReviveScout, victim);
-		
-		player_kills[attacker]++;
-	}
-	
-	else if(special_day == deathmatch_day)
-	{
-		int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-		int victim = GetClientOfUserId(GetEventInt(event, "userid"));
-		
-		CreateTimer(3.0, ReviveDeathMatch, victim);
-		
-		player_kills[attacker]++;
-	}	
-	
-	else if(special_day == gungame_day)
-	{
-		int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-		int victim = GetClientOfUserId(GetEventInt(event, "userid"));
-		
-		// if they die by some silly means then ignore and resp
-		if(!(attacker > 0 && victim <= MaxClients))
+		case scoutknife_day:
 		{
+			int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+			int victim = GetClientOfUserId(GetEventInt(event, "userid"));
+			
+			CreateTimer(3.0, ReviveScout, victim);
+			
+			player_kills[attacker]++;
+		}
+		
+		case deathmatch_day:
+		{
+			int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+			int victim = GetClientOfUserId(GetEventInt(event, "userid"));
+			
+			CreateTimer(3.0, ReviveDeathMatch, victim);
+			
+			player_kills[attacker]++;
+		}	
+		
+		case gungame_day:
+		{
+			int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+			int victim = GetClientOfUserId(GetEventInt(event, "userid"));
+			
+			// if they die by some silly means then ignore and resp
+			if(!(attacker > 0 && victim <= MaxClients))
+			{
+				CreateTimer(3.0, ReviveGunGame, victim);
+				return Plugin_Handled;
+			}
+			
+			
+			char weapon_name[64];
+			GetClientWeapon(attacker, weapon_name, sizeof(weapon_name));
+			
+			// kill with current weapon
+			if(gun_counter[attacker] < GUNGAME_SIZE && StrEqual(weapon_name, guns_list[gun_counter[attacker]]))
+			{
+				gun_counter[attacker]++;
+				if(gun_counter[attacker] >= GUNGAME_SIZE)
+				{
+					// end the round
+					gun_counter[attacker] = 0;
+					
+					// renable loss conds
+					enable_round_end();
+					PrintToChatAll("%s %N won gungame", SPECIALDAY_PREFIX, attacker);
+					
+					
+					sd_winner = attacker;
+					slay_all();
+				}
+				
+				else // still going
+				{
+					// update gun
+					GiveGunGameGun(attacker);
+				}
+				
+			}
+			
+			// killed with knife dec the enemies weapon
+			else if(StrEqual(weapon_name,"weapon_knife"))
+			{
+				gun_counter[victim]--;
+				if(gun_counter[victim] < 0)
+				{
+					gun_counter[victim] = 0;
+				}
+			}
+			
+			
+			
+			
+			// start a respawn for the dead player :)
 			CreateTimer(3.0, ReviveGunGame, victim);
-			return Plugin_Handled;
-		}
-		
-		
-		char weapon_name[64];
-		GetClientWeapon(attacker, weapon_name, sizeof(weapon_name));
-		
-		// kill with current weapon
-		if(gun_counter[attacker] < GUNGAME_SIZE && StrEqual(weapon_name, guns_list[gun_counter[attacker]]))
-		{
-			gun_counter[attacker]++;
-			if(gun_counter[attacker] >= GUNGAME_SIZE)
-			{
-				// end the round
-				gun_counter[attacker] = 0;
-				
-				// renable loss conds
-				enable_round_end();
-				PrintToChatAll("%s %N won gungame", SPECIALDAY_PREFIX, attacker);
-				
-				
-				sd_winner = attacker;
-				slay_all();
-			}
 			
-			else // still going
-			{
-				// update gun
-				GiveGunGameGun(attacker);
-			}
 			
 		}
 		
-		// killed with knife dec the enemies weapon
-		else if(StrEqual(weapon_name,"weapon_knife"))
-		{
-			gun_counter[victim]--;
-			if(gun_counter[victim] < 0)
-			{
-				gun_counter[victim] = 0;
-			}
-		}
-		
-		
-		
-		
-		// start a respawn for the dead player :)
-		CreateTimer(3.0, ReviveGunGame, victim);
-		
-		
+		default: {}
+	
 	}
 	return Plugin_Continue;
 }
@@ -2193,16 +2206,24 @@ public void StartDodgeball()
 // handle nade projectiles for a sd create timers to remove them :)
 public OnEntityCreated(int entity, const String:classname[])
 {
-	if(special_day == dodgeball_day)
-	{
-		if (StrEqual(classname, "flashbang_projectile"))
-		CreateTimer(1.4, GiveFlash, entity);
-	}
 	
-	else if(special_day == grenade_day)
+	switch(special_day)
 	{
-		if (StrEqual(classname, "hegrenade_projectile"))
-		CreateTimer(1.4, GiveGrenade, entity);
+	
+		case dodgeball_day:
+		{
+			if (StrEqual(classname, "flashbang_projectile"))
+			CreateTimer(1.4, GiveFlash, entity);
+		}
+		
+		case grenade_day:
+		{
+			if (StrEqual(classname, "hegrenade_projectile"))
+			CreateTimer(1.4, GiveGrenade, entity);
+		}
+		
+		default: {}
+	
 	}
 }
 
@@ -2250,16 +2271,13 @@ public Action GiveFlash(Handle timer, any entity)
 	}
 	
 	
-	if(IsClientInGame(client))
+
+	if(is_valid_client(client) && is_on_team(client) && IsPlayerAlive(client) )
 	{
-		if(GetClientTeam(client) == CS_TEAM_CT || GetClientTeam(client) ==  CS_TEAM_T && IsPlayerAlive(client) )
-		{
-			strip_all_weapons(client);
-			GivePlayerItem(client, "weapon_flashbang");
-			SetEntityHealth(client,1);
-		}
-	}
-	
+		strip_all_weapons(client);
+		GivePlayerItem(client, "weapon_flashbang");
+		SetEntityHealth(client,1);
+	}		
 }
 
 
@@ -2267,80 +2285,92 @@ public Action GiveGrenade(Handle timer, any entity)
 {
 	int client = GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity");
 
+
+
 	// giver person who threw a flash after a second +  set hp to one
 	
 	if(special_day != grenade_day) { return; }
 	
 	
 	
-	if(IsClientInGame(client))
+
+	if(is_valid_client(client) && is_on_team(client) && IsPlayerAlive(client))
 	{
-		if(GetClientTeam(client) == CS_TEAM_CT || GetClientTeam(client) ==  CS_TEAM_T && IsPlayerAlive(client) )
-		{
-			strip_all_weapons(client);
-			GivePlayerItem(client, "weapon_hegrenade");
-		}
-	}	
+		strip_all_weapons(client);
+		GivePlayerItem(client, "weapon_hegrenade");
+	}
+		
 }
 
 // prevent additional weapon pickups
 
 public Action OnWeaponEquip(int client, int weapon) 
 {
-	if(special_day == dodgeball_day)
-	{
-		char weapon_string[32];
-		GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
-		if(!StrEqual(weapon_string,"weapon_flashbang"))
-		{
-			return Plugin_Handled;
-		}
-	}
 	
-	else if(special_day == grenade_day)
+	switch(special_day)
 	{
-		char weapon_string[32];
-		GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
-		if(!StrEqual(weapon_string,"weapon_hegrenade"))
-		{
-			return Plugin_Handled;
-		}
-	}
-	
-	else if(special_day == knife_day)
-	{
-		char weapon_string[32];
-		GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
-		if(!StrEqual(weapon_string,"weapon_knife"))
-		{
-			return Plugin_Handled;
-		}
-	}
-
-	else if(special_day == scoutknife_day)
-	{
-		char weapon_string[32];
-		GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
-		if(!(StrEqual(weapon_string,"weapon_scout") || StrEqual(weapon_string,"weapon_knife")))
-		{
-			return Plugin_Handled;
-		}
-	}
-
-	else if(special_day == zombie_day && sd_state == sd_active)
-	{
-		char weapon_string[32];
-		GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
 		
-		if(GetClientTeam(client) == CS_TEAM_T)
+	
+		case dodgeball_day:
 		{
+			char weapon_string[32];
+			GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
+			if(!StrEqual(weapon_string,"weapon_flashbang"))
+			{
+				return Plugin_Handled;
+			}
+		}
+		
+		case grenade_day:
+		{
+			char weapon_string[32];
+			GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
+			if(!StrEqual(weapon_string,"weapon_hegrenade"))
+			{
+				return Plugin_Handled;
+			}
+		}
+		
+		case knife_day:
+		{
+			char weapon_string[32];
+			GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
 			if(!StrEqual(weapon_string,"weapon_knife"))
 			{
 				return Plugin_Handled;
 			}
 		}
-	}
 	
+		case scoutknife_day:
+		{
+			char weapon_string[32];
+			GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
+			if(!(StrEqual(weapon_string,"weapon_scout") || StrEqual(weapon_string,"weapon_knife")))
+			{
+				return Plugin_Handled;
+			}
+		}
+	
+		case zombie_day:
+		{
+			if(sd_state == sd_active)
+			{
+				char weapon_string[32];
+				GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
+				
+				if(GetClientTeam(client) == CS_TEAM_T)
+				{
+					if(!StrEqual(weapon_string,"weapon_knife"))
+					{
+						return Plugin_Handled;
+					}
+				}
+			}
+		}
+		
+		default: {}
+	
+	}
 	return Plugin_Continue;
 }
 
@@ -2350,9 +2380,6 @@ public Action OnWeaponEquip(int client, int weapon)
 
 MoveType player_last_movement_type[64] = {MOVETYPE_WALK};
 
-const int SPECIAL_MOVE_SIZE = 5;
-// CANT DECLARE CONST CAUSE HECK KNOWS
-SpecialDay special_move[SPECIAL_MOVE_SIZE] = { zombie_day, dodgeball_day, fly_day, grenade_day, scoutknife_day };
 
 public Action check_movement(Handle Timer)
 {
@@ -2363,59 +2390,50 @@ public Action check_movement(Handle Timer)
 	}
 	
 
-
-
-	for (int i = 0; i < SPECIAL_MOVE_SIZE; i++)
+	for (int client = 1; client < MaxClients; client++)
 	{
-		if(special_day == special_move[i])
+		// not interested is they are dead or not here
+		if(is_valid_client(client) && is_on_team(client) && IsPlayerAlive(client))
 		{
 			
-			for (int client = 1; client < MaxClients; client++)
+			// if it is different from the old one
+			// and the old one is a ladder and we are on a sd
+			// with different movement settings
+			// reset the players move type
+			MoveType cur_type = GetEntityMoveType(client);
+			MoveType old_type = player_last_movement_type[client];
+			if(cur_type != old_type && old_type == MOVETYPE_LADDER)
 			{
-				// not interested is they are dead or not here
-				if(IsClientInGame(client) && is_on_team(client) && IsPlayerAlive(client))
+				switch(special_day)
 				{
 					
-					// if it is different from the old one
-					// and the old one is a ladder and we are on a sd
-					// with different movement settings
-					// reset the players move type
-					MoveType cur_type = GetEntityMoveType(client);
-					MoveType old_type = player_last_movement_type[client];
-					if(cur_type != old_type && old_type == MOVETYPE_LADDER)
+					case zombie_day:
 					{
-						switch(special_day)
+						if(GetClientTeam(client) == CS_TEAM_T && sd_state == sd_active)
 						{
-							
-							case zombie_day:
-							{
-								if(GetClientTeam(client) == CS_TEAM_T && sd_state == sd_active)
-								{
-									set_zombie_speed(client);
-								}
-							}
-							
-							case fly_day:
-							{
-								client_fly(client);
-							}
-
-							// we dont have team swaps or weapon picks on these days
-							// so just call the default handler :)
-							default: 
-							{
-								sd_player_init(client);
-							}
+							set_zombie_speed(client);
 						}
 					}
 					
-					//cache the last movement type
-					player_last_movement_type[client] = cur_type
+					case fly_day:
+					{
+						client_fly(client);
+					}
+
+					// we dont have team swaps or weapon picks on these days
+					// so just call the default handler :)
+					default: 
+					{
+						sd_player_init(client);
+					}
 				}
 			}
 			
+			//cache the last movement type
+			player_last_movement_type[client] = cur_type
 		}
-	}
-	
+	}	
+
+		
 	return Plugin_Continue;
 }
