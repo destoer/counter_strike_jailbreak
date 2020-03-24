@@ -323,26 +323,12 @@ int teams[64]; // should store in a C struct but cant
 int player_kills[64] =  { 0 };
 
 
-// gun game current progression
-#define GUNGAME_SIZE 9
 
-
-
-new const String:guns_list[GUNGAME_SIZE][] = 
-{
-	"weapon_ak47",
-	"weapon_awp",
-	"weapon_m4a1",
-	"weapon_mp5navy",
-	"weapon_deagle",
-	"weapon_elite",
-	"weapon_p90",
-	"weapon_famas",
-	"weapon_usp"
-};
+// holds indexes into the gun list so we can randomize what guns are on each sd
+int gungame_gun_idx[GUNS_SIZE] = {0};
 
 // level of progression the player is on
-int gun_counter[64] =  { 0 };
+int gungame_level[64] =  { 0 };
 
 
 // backups
@@ -353,7 +339,7 @@ int gun_counter[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "2.0.1 - Violent Intent Jailbreak"
+#define VERSION "2.1 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -437,6 +423,14 @@ public OnPluginStart()
 	// timer for printing current sd info
 	CreateTimer(1.0, print_specialday_text_all, _, TIMER_REPEAT);
 	CreateTimer(0.1, check_movement, _, TIMER_REPEAT);
+	
+	
+	
+	// init gun game list
+	for (int i = 0; i < GUNS_SIZE; i++)
+	{
+		gungame_gun_idx[i] = i;
+	}
 }
 
 
@@ -1277,41 +1271,42 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 		}	
 	}
 
-	switch(special_day)
+	if(sd_state != sd_inactive)
 	{
-	
-		case dodgeball_day:
+		switch(special_day)
 		{
-			// any damage kills 
-			// prevents cheaters from healing 
-			damage = 500.0;
-			return Plugin_Changed;
-		}
 		
-		
-		case zombie_day:
-		{
-			if (!is_valid_client(attacker)) { return Plugin_Continue; }
-			
-			if(GetClientTeam(victim) == CS_TEAM_T)
+			case dodgeball_day:
 			{
-				CreateKnockBack(victim, attacker, damage);
+				// any damage kills 
+				// prevents cheaters from healing 
+				damage = 500.0;
 			}
 			
-			else if(GetClientTeam(attacker) == CS_TEAM_T)
+			
+			case zombie_day:
 			{
-				// patient zero instantly kills
-				if(attacker == patient_zero)
+				if (!is_valid_client(attacker)) { return Plugin_Continue; }
+				
+				if(GetClientTeam(victim) == CS_TEAM_T)
 				{
-					damage = 120.0;
-					return Plugin_Changed;
+					CreateKnockBack(victim, attacker, damage);
+				}
+				
+				else if(GetClientTeam(attacker) == CS_TEAM_T)
+				{
+					// patient zero instantly kills
+					if(attacker == patient_zero)
+					{
+						damage = 120.0;
+					}
 				}
 			}
+		
+			default: {}
 		}
-	
-		default: {}
+		return Plugin_Changed;
 	}
-	
 
 	return Plugin_Continue;
 }
@@ -1395,6 +1390,10 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 		SetEntityHealth(attacker, health);
 	}
 	
+	if(sd_state == sd_inactive)
+	{
+		return Plugin_Continue;
+	}
 	
 	switch(special_day)
 	{
@@ -1478,13 +1477,13 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 			GetClientWeapon(attacker, weapon_name, sizeof(weapon_name));
 			
 			// kill with current weapon
-			if(gun_counter[attacker] < GUNGAME_SIZE && StrEqual(weapon_name, guns_list[gun_counter[attacker]]))
+			if(gungame_level[attacker] < GUNS_SIZE && StrEqual(weapon_name, gun_give_list[gungame_gun_idx[gungame_level[attacker]]]))
 			{
-				gun_counter[attacker]++;
-				if(gun_counter[attacker] >= GUNGAME_SIZE)
+				gungame_level[attacker]++;
+				if(gungame_level[attacker] >= GUNS_SIZE)
 				{
 					// end the round
-					gun_counter[attacker] = 0;
+					gungame_level[attacker] = 0;
 					
 					// renable loss conds
 					enable_round_end();
@@ -1506,10 +1505,10 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 			// killed with knife dec the enemies weapon
 			else if(StrEqual(weapon_name,"weapon_knife"))
 			{
-				gun_counter[victim]--;
-				if(gun_counter[victim] < 0)
+				gungame_level[victim]--;
+				if(gungame_level[victim] < 0)
 				{
-					gun_counter[victim] = 0;
+					gungame_level[victim] = 0;
 				}
 			}
 			
@@ -1525,6 +1524,7 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 		default: {}
 	
 	}
+	
 	return Plugin_Continue;
 }
 
@@ -1746,9 +1746,20 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 				// reset the gun counter
 				for (int i = 0; i < MaxClients; i++)
 				{
-					gun_counter[i] = 0;
+					gungame_level[i] = 0;
 				}
 				
+				// shuffle the game game indexes to randomize weapons
+				for (int i = 0; i < GUNS_SIZE; i++)
+				{
+					int p1 = GetRandomInt(0, GUNS_SIZE - 1);
+					int p2 = GetRandomInt(0, GUNS_SIZE - 1);
+					
+					int tmp = gungame_gun_idx[p1];
+					gungame_gun_idx[p1] = gungame_gun_idx[p2];
+					gungame_gun_idx[p2] = tmp;
+				}
+					
 				sd_player_init_fptr = gun_game_player_init;
 			}
 			
@@ -1980,8 +1991,9 @@ public void GiveGunGameGun(int client)
 	strip_all_weapons(client);
 	GivePlayerItem(client, "weapon_knife");
 	GivePlayerItem(client, "item_assaultsuit");
-	GivePlayerItem(client, guns_list[gun_counter[client]]);
-	PrintToChat(client, "%s Current level: %s", SPECIALDAY_PREFIX, guns_list[gun_counter[client]]);
+	GivePlayerItem(client, gun_give_list[gungame_gun_idx[gungame_level[client]]]);
+	PrintToChat(client, "%s Current level: %s (%d of %d)", 
+		SPECIALDAY_PREFIX, gun_list[gungame_gun_idx[gungame_level[client]]],gungame_level[client]+1,GUNS_SIZE);
 }
 
 
@@ -2207,6 +2219,12 @@ public void StartDodgeball()
 public OnEntityCreated(int entity, const String:classname[])
 {
 	
+	
+	if(sd_state != sd_active)
+	{
+		return;
+	}	
+	
 	switch(special_day)
 	{
 	
@@ -2306,7 +2324,12 @@ public Action GiveGrenade(Handle timer, any entity)
 
 public Action OnWeaponEquip(int client, int weapon) 
 {
-	
+
+	if(sd_state != sd_inactive)
+	{
+		return Plugin_Continue;
+	}
+
 	switch(special_day)
 	{
 		

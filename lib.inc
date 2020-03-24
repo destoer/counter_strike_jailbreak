@@ -257,7 +257,8 @@ stock void strip_all_weapons(int client)
 		SetEntProp(client, Prop_Send, "m_iAmmo", 0, _, 11 + i);
 	}
 }
- 
+
+
 const int GUNS_SIZE = 14;
 
 new const String:gun_list[GUNS_SIZE][] =
