@@ -339,7 +339,7 @@ int gungame_level[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "2.2.4 - Violent Intent Jailbreak"
+#define VERSION "2.2.5 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -614,15 +614,14 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 	else if(client == patient_zero && sd_state == sd_active)
 	{
 		SaveTeams(false);
-
 		int rand = GetRandomInt( 0, validclients - 1 );
 		patient_zero = game_clients[rand]; // select the lucky client
+		CS_RespawnPlayer(patient_zero);
 		CS_SwitchTeam(patient_zero, CS_TEAM_T);
 		MakeZombie(patient_zero);
 		SetEntityHealth(patient_zero, 1000 * (validclients+1) );
 		SetEntityRenderColor(patient_zero, 255, 0, 0, 255);	
-		PrintCenterTextAll("%N is patient zero!", patient_zero);
-		
+		PrintCenterTextAll("%N is patient zero!", patient_zero);	
 	}	
 	
 	
