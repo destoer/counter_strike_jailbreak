@@ -2291,7 +2291,7 @@ public Action GiveGrenade(Handle timer, any entity)
 public Action OnWeaponEquip(int client, int weapon) 
 {
 
-	if(sd_state != sd_inactive)
+	if(sd_state == sd_inactive)
 	{
 		return Plugin_Continue;
 	}
