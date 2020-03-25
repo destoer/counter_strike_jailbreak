@@ -339,7 +339,7 @@ int gungame_level[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "2.2.2 - Violent Intent Jailbreak"
+#define VERSION "2.2.4 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -393,7 +393,7 @@ public OnPluginStart()
 	HookEvent("player_disconnect", PlayerDisconnect_Event, EventHookMode_Pre);
 
 	// hook disonnect incase a vital member leaves
-	HookEvent("player_activate", player_activate_event, EventHookMode_Post);
+	//HookEvent("player_activate", player_activate_event, EventHookMode_Post);
 	
 
 	g_hFriendlyFire = FindConVar("mp_friendlyfire"); // get the friendly fire var
@@ -587,17 +587,6 @@ public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &
 		return Plugin_Continue;
 }
 
-
-public Action player_activate_event(Handle event, const String:name[], bool dontBroadcast)
-{
-	int client = GetClientOfUserId(GetEventInt(event,"userid"));
-	
-	// if valid and sd is active toggle noblock on them
-	if(is_valid_client(client) && sd_state != sd_inactive)
-	{
-		unblock_client(client);
-	}
-}
 
 public Action PlayerDisconnect_Event(Handle event, const String:name[], bool dontBroadcast)
 {
@@ -1576,8 +1565,6 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 		// special done begun but not active
 		sd_state = sd_started; 
 		
-		PrintToConsole(client, "You selected item: %d", param2); /* Debug */
-		
 		
 		force_open();
 		// re-spawn all players
@@ -1656,7 +1643,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 				// allow player to pick for 20 seconds
 				PrintToChatAll("%s Please wait 20 seconds for friendly fire to be enabled", SPECIALDAY_PREFIX);
 				
-				PrintToConsole(client, "Timer started at : %d", sdtimer);
+
 			}
 			
 			case fly_day: // flying day
@@ -2422,12 +2409,23 @@ public Action check_movement(Handle Timer)
 						client_fly(client);
 					}
 
-					// we dont have team swaps or weapon picks on these days
-					// so just call the default handler :)
-					default: 
+
+					case dodgeball_day: 
 					{
 						sd_player_init(client);
 					}
+					
+					case grenade_day: 
+					{
+						sd_player_init(client);
+					}					
+
+					case scoutknife_day: 
+					{
+						sd_player_init(client);
+					}
+					
+					default: {}
 				}
 			}
 			

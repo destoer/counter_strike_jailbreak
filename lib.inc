@@ -72,16 +72,21 @@ stock void block_all_clients()
 	
   	for(int i=1; i <= MaxClients; i++)
 	{
-		if (is_valid_client(i))
-		{
-			SetEntProp(i, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_PLAYER, 4);
-		}
+		block_client(i);
 	}
+}
+
+stock void block_client(int client)
+{
+	if (is_valid_client(client) && !is_client_blocked(client))
+	{
+		SetEntProp(client, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_PLAYER, 4);
+	}		
 }
 
 stock void unblock_client(int client)
 {
-	if (is_valid_client(client))
+	if (is_valid_client(client) && is_client_blocked(client))
 	{
 		SetEntProp(client, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_DEBRIS_TRIGGER, 4);
 	}	
@@ -101,6 +106,12 @@ stock void unblock_all_clients()
 	}
 }
 
+
+stock bool is_client_blocked(int client)
+{
+	return (GetEntProp(client, Prop_Data, "m_CollisionGroup") != COLLISION_GROUP_DEBRIS_TRIGGER);
+}
+
 // not even gonna bother assuming things will go thru the above functions
 stock bool noblock_enabled()
 {
@@ -110,15 +121,12 @@ stock bool noblock_enabled()
 		return false;
 	}
 	
-	// if a single player who is valid does not have no block then its not on
+	// if a single player  does not have no block then its not on
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if(is_valid_client(i))
+		if(is_client_blocked(i))
 		{
-			if(GetEntProp(i, Prop_Data,"m_CollisionGroup") == COLLISION_GROUP_PLAYER)
-			{
-				return false;
-			}
+			return false;
 		}
 	}
 	
