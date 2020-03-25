@@ -392,8 +392,6 @@ public OnPluginStart()
 	// hook disonnect incase a vital member leaves
 	HookEvent("player_disconnect", PlayerDisconnect_Event, EventHookMode_Pre);
 
-	// hook disonnect incase a vital member leaves
-	//HookEvent("player_activate", player_activate_event, EventHookMode_Post);
 	
 
 	g_hFriendlyFire = FindConVar("mp_friendlyfire"); // get the friendly fire var

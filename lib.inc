@@ -109,7 +109,7 @@ stock void unblock_all_clients()
 
 stock bool is_client_blocked(int client)
 {
-	return (GetEntProp(client, Prop_Data, "m_CollisionGroup") != COLLISION_GROUP_DEBRIS_TRIGGER);
+	return (GetEntProp(client, Prop_Data, "m_CollisionGroup") != COLLISION_GROUP_DEBRIS_TRIGGER);	
 }
 
 // not even gonna bother assuming things will go thru the above functions
@@ -121,10 +121,10 @@ stock bool noblock_enabled()
 		return false;
 	}
 	
-	// if a single player  does not have no block then its not on
+	// if a single valid player  does not have no block then its not on
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if(is_client_blocked(i))
+		if(is_valid_client(i) && is_client_blocked(i))
 		{
 			return false;
 		}
