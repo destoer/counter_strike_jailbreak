@@ -657,7 +657,7 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 	
 	}
 
-	return Plugin_Handled;
+	return Plugin_Continue;
 }
 
 
