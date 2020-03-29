@@ -78,7 +78,7 @@ stock void block_all_clients()
 
 stock void block_client(int client)
 {
-	if (is_valid_client(client) && !is_client_blocked(client))
+	if (is_valid_client(client) && !is_client_blocked(client) && is_on_team(client))
 	{
 		SetEntProp(client, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_PLAYER, 4);
 	}		
@@ -86,7 +86,7 @@ stock void block_client(int client)
 
 stock void unblock_client(int client)
 {
-	if (is_valid_client(client) && is_client_blocked(client))
+	if (is_valid_client(client) && is_client_blocked(client) && is_on_team(client))
 	{
 		SetEntProp(client, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_DEBRIS_TRIGGER, 4);
 	}	
@@ -124,7 +124,7 @@ stock bool noblock_enabled()
 	// if a single valid player  does not have no block then its not on
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if(is_valid_client(i) && is_client_blocked(i))
+		if(is_valid_client(i) && is_client_blocked(i) && is_on_team(i))
 		{
 			return false;
 		}
