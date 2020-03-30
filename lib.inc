@@ -78,7 +78,7 @@ stock void block_all_clients()
 
 stock void block_client(int client)
 {
-	if (is_valid_client(client) && !is_client_blocked(client) && is_on_team(client))
+	if (is_valid_client(client) && !is_client_blocked(client))
 	{
 		SetEntProp(client, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_PLAYER, 4);
 	}		
@@ -86,7 +86,7 @@ stock void block_client(int client)
 
 stock void unblock_client(int client)
 {
-	if (is_valid_client(client) && is_client_blocked(client) && is_on_team(client))
+	if (is_valid_client(client) && is_client_blocked(client))
 	{
 		SetEntProp(client, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_DEBRIS_TRIGGER, 4);
 	}	
