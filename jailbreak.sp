@@ -41,7 +41,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.8.9 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.8.9.1 - Violent Intent Jailbreak"
 
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
@@ -65,7 +65,7 @@ TODO make all names consistent
 
 bool use_draw_laser_settings[MAXPLAYERS + 1];
 
-bool use_kill_laser = false;
+bool laser_kill = false;
 
 EngineVersion g_Game;
 
@@ -96,7 +96,7 @@ int empty_uses = 2;
 bool laser_use[MAXPLAYERS+1];
 float prev_pos[MAXPLAYERS+1][3];
 int g_lbeam;
-int g_lpont;
+int g_lpoint;
 
 
 public int native_get_warden_id(Handle plugin, int numParam)
@@ -119,7 +119,7 @@ public Action laser_draw(Handle timer)
 	if(warden_id != WARDEN_INVALID && use_draw_laser_settings[warden_id] && laser_use[warden_id])
 	{
 		float cur_pos[3];
-		GetClientSightEnd(warden_id, cur_pos);
+		get_client_sight_end(warden_id, cur_pos);
 		
 		// check we are not on the first laser shine
 		bool initial_draw = prev_pos[warden_id][0] == 0.0 && prev_pos[warden_id][1] == 0.0 
@@ -214,22 +214,19 @@ enum laser_type
 
 public void SetupLaser(int client,int color[4])
 {
-	// setup laser
-	float m_fOrigin[3];
-	float m_fImpact[3];
-	GetClientEyePosition(client, m_fOrigin);
-	GetClientSightEnd(client, m_fImpact);	
-	TE_SetupBeamPoints(m_fOrigin, m_fImpact, g_lbeam, 0, 0, 0, 0.1, 0.8, 0.8, 2, 0.0,color , 0);
-	TE_SendToAll();
-	
-	
-	// setup laser end "glow"
-	TE_SetupGlowSprite(m_fImpact, g_lpont, 0.1, 0.2, 255);
-	TE_SendToAll();
+	setup_laser(client, color, g_lbeam, g_lpoint, laser_kill);
 }
 
 public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon)
 {
+
+	// if on a laser day dont allow lasers
+	if(sd_current_day() == laser_day && sd_current_state() != sd_inactive)
+	{
+		return Plugin_Continue;
+	}
+	
+	
 	// reset laser cords we are no longer drawing
 	if(!(buttons & IN_USE))
 	{
@@ -308,7 +305,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 		// first time drawing store the 1st pos
 		if(!laser_use[client])
 		{
-			GetClientSightEnd(client, prev_pos[client]);
+			get_client_sight_end(client, prev_pos[client]);
 		}
 		laser_use[client] = true;
 	}
@@ -327,20 +324,6 @@ public void OnClientSpeakingEx(client)
 }
 
 
-
-public void GetClientSightEnd(client, float out[3])
-{
-	float m_fEyes[3];
-	float m_fAngles[3];
-	int kill_settings = use_kill_laser? client + MAXPLAYERS : client;
-	GetClientEyePosition(client, m_fEyes);
-	GetClientEyeAngles(client, m_fAngles);
-	TR_TraceRayFilter(m_fEyes, m_fAngles, MASK_PLAYERSOLID, RayType_Infinite, trace_ignore_players,kill_settings);
-	if(TR_DidHit())
-	{
-		TR_GetEndPosition(out);
-	}
-}
 
 // circle stuff
 
@@ -381,7 +364,7 @@ public OnMapStart()
 	
 	// precache laser sprites
 	g_lbeam = PrecacheModel("materials/sprites/laserbeam.vmt");
-	g_lpont = PrecacheModel("materials/sprites/glow07.vmt");
+	g_lpoint = PrecacheModel("materials/sprites/glow07.vmt");
 	PrecacheSound("bot\\what_have_you_done.wav");
 	
 	// laser draw timer
@@ -645,12 +628,12 @@ public OnPluginStart()
 
 public Action kill_laser (int client, int args)
 {
-	use_kill_laser = true;
+	laser_kill = true;
 }
 
 public Action safe_laser (int client, int args)
 {
-	use_kill_laser = false;
+	laser_kill = false;
 }
 
 public Action force_open_callback (int client, int args)
@@ -680,7 +663,7 @@ public Action print_warden_text_all(Handle timer)
 {
 
 	
-	if(sd_active())
+	if(sd_current_state() != sd_inactive)
 	{
 		return Plugin_Continue;
 	}
@@ -871,7 +854,7 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 	// there is no warden
 	warden_id = -1;
 	
-	use_kill_laser = false;
+	laser_kill = false;
 	
 	// 1 ct only on team auto warden them at start of round
 	int client = 0;

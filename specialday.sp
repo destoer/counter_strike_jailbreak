@@ -5,6 +5,7 @@
 #include <entity>
 #include "colorvariables.inc"
 #include "lib.inc"
+#include "specialday.inc"
 
 // if running gangs or ct bans with this define to prevent issues :)
 #define GANGS
@@ -45,7 +46,7 @@ Menu gun_menu;
 
 
 
-const int SD_SIZE = 12;
+const int SD_SIZE = 13;
 new const String:sd_list[SD_SIZE][] =
 {	
 	"Friendly Fire Day", 
@@ -59,35 +60,11 @@ new const String:sd_list[SD_SIZE][] =
 	"Gun Game",
 	"Knife",
 	"Scout Knifes",
-	"Death Match"
+	"Death Match",
+	"Laser Wars"
 };
 
 
-// sadly we cant scope these
-enum SpecialDay
-{
-	friendly_fire_day,
-	tank_day,
-	juggernaut_day,
-	fly_day,
-	hide_day,
-	dodgeball_day,
-	grenade_day,
-	zombie_day,
-	gungame_day,
-	knife_day,
-	scoutknife_day,
-	deathmatch_day,
-	normal_day,
-};
-
-
-enum SdState
-{
-	sd_started,
-	sd_active,
-	sd_inactive
-};
 
 SpecialDay special_day = normal_day;
 SdState sd_state = sd_inactive;
@@ -240,6 +217,11 @@ void deathmatch_player_init(int client)
 }
 
 
+void laser_player_init(int client)
+{
+	WeaponMenu(client);
+}
+
 // sd modifiers
 
 // underlying convar handles
@@ -339,7 +321,7 @@ int gungame_level[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "2.2.5 - Violent Intent Jailbreak"
+#define VERSION "2.2.6 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -352,10 +334,16 @@ public Plugin myinfo = {
 
 
 
-public int native_sd_active(Handle plugin, int numParam)
+public int native_sd_state(Handle plugin, int numParam)
 {
-	return sd_state != sd_inactive;
+	return view_as<int>(sd_state);
 }
+
+public int native_current_day(Handle plugin, int numParam)
+{
+	return view_as<int>(special_day);
+}
+
 
 // register our call
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
@@ -365,7 +353,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	MarkNativeAsOptional("Store_SetClientCredits");
 #endif
 
-   CreateNative("sd_active", native_sd_active);
+   CreateNative("sd_current_state", native_sd_state);
+   CreateNative("sd_current_day", native_current_day);
    return APLRes_Success;
 }
 
@@ -499,6 +488,11 @@ public Action sd_spawn(int client, int args)
 			case scoutknife_day:
 			{
 				CreateTimer(3.0, ReviveScout, client);
+			}
+			
+			case laser_day:
+			{
+				CreateTimer(3.0, ReviveLaser, client);
 			}
 			
 			default: {}
@@ -729,9 +723,16 @@ int fog_ent;
 Menu sd_menu;
 Menu sd_list_menu;
 
+int g_lbeam;
+int g_lpoint;
+
 // Clean up our variables just to be on the safe side
 public OnMapStart()
 {
+	
+	g_lbeam = PrecacheModel("materials/sprites/laserbeam.vmt");
+	g_lpoint = PrecacheModel("materials/sprites/glow07.vmt");	
+	
 	sd_state = sd_inactive;
 	special_day = normal_day;
 	disable_friendly_fire();
@@ -878,6 +879,7 @@ void EndSd(bool forced=false)
 		case fly_day: {}
 		case grenade_day: {}
 		case knife_day: {}
+		case laser_day: {}
 		
 		case scoutknife_day:
 		{
@@ -1049,7 +1051,10 @@ public Action print_specialday_text_all(Handle timer)
 				Format(buf, sizeof(buf), "death match: %d", round_delay_timer);	
 			}			
 			
-
+			case laser_day:
+			{
+				Format(buf, sizeof(buf), "laser: %d", round_delay_timer);	
+			}
 			
 			default:
 			{
@@ -1487,6 +1492,12 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 			
 		}
 		
+		case laser_day:
+		{
+			int victim = GetClientOfUserId(GetEventInt(event, "userid"));
+			CreateTimer(3.0, ReviveLaser, victim);
+		}
+		
 		default: {}
 	
 	}
@@ -1502,6 +1513,13 @@ public Action ReviveScout(Handle Timer, int client)
 
 
 public Action ReviveDeathMatch(Handle Timer, int client)
+{
+	CS_RespawnPlayer(client);
+	sd_player_init(client);
+}
+
+
+public Action ReviveLaser(Handle Timer, int client)
 {
 	CS_RespawnPlayer(client);
 	sd_player_init(client);
@@ -1760,6 +1778,13 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 					player_kills[i] = 0;
 				}		
 			}
+			
+			case laser_day: // laser day
+			{
+				PrintToChatAll("%s laser day started hold e after timer", SPECIALDAY_PREFIX);
+				special_day = laser_day;
+				sd_player_init_fptr = laser_player_init;
+			}
 		}
 
 		// call the initial init for all players on the function pointers we just set
@@ -1912,6 +1937,11 @@ public StartSD()
 			StartDeathMatch();
 		}
 		
+		case laser_day:
+		{
+			StartLaser();
+		}
+		
 		default:
 		{
 			ThrowNativeError(SP_ERROR_NATIVE, "attempted to start invalid sd %d", special_day);
@@ -1948,6 +1978,11 @@ public void StartScout()
 	start_round_delay(60 * 2);
 	CreateTimer(1.0, RemoveGuns);
 	enable_friendly_fire();
+}
+
+public void StartLaser()
+{
+	start_round_delay(60 * 2);
 }
 
 public void GiveGunGameGun(int client)
@@ -2432,5 +2467,34 @@ public Action check_movement(Handle Timer)
 	}	
 
 		
+	return Plugin_Continue;
+}
+
+
+
+
+
+
+// hook for laser day :)
+public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon)
+{
+	// cant use while dead	
+	if(!IsPlayerAlive(client))
+	{
+		return Plugin_Continue;
+	}
+	
+	// if not an active laser day we dont care
+	if(sd_state != sd_active || special_day != laser_day)	
+	{
+		return Plugin_Continue;
+	}
+	
+	// kill laser
+	if((buttons & IN_USE))
+	{
+		setup_laser(client,{ 1, 153, 255, 255 },g_lbeam,g_lpoint,true);
+	}	
+	
 	return Plugin_Continue;
 }

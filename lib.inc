@@ -179,6 +179,38 @@ stock bool trace_ignore_players(int entity, int contents_mask, int kill_settings
 }
 
 
+stock void get_client_sight_end(int client, float out[3],bool use_kill_laser=false)
+{
+	float m_fEyes[3];
+	float m_fAngles[3];
+	int kill_settings = use_kill_laser? client + MAXPLAYERS : client;
+	GetClientEyePosition(client, m_fEyes);
+	GetClientEyeAngles(client, m_fAngles);
+	TR_TraceRayFilter(m_fEyes, m_fAngles, MASK_PLAYERSOLID, RayType_Infinite, trace_ignore_players,kill_settings);
+	if(TR_DidHit())
+	{
+		TR_GetEndPosition(out);
+	}
+}
+
+
+stock setup_laser(int client,int color[4],int beam_model, int point_model, bool use_kill_laser=false)
+{
+	// setup laser
+	float m_fOrigin[3];
+	float m_fImpact[3];
+	GetClientEyePosition(client, m_fOrigin);
+	get_client_sight_end(client, m_fImpact,use_kill_laser);	
+	TE_SetupBeamPoints(m_fOrigin, m_fImpact, beam_model, 0, 0, 0.1, 0.1, 0.8, 0.8, 2, 0.0,color , 0);
+	TE_SendToAll();
+	
+	
+	
+	// setup laser end "glow"
+	TE_SetupGlowSprite(m_fImpact, point_model, 0.1, 0.2, 255);
+	TE_SendToAll();
+}
+
 stock bool is_valid_client(int client)
 {
 	if(client <= 0) 
