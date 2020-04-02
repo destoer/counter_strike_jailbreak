@@ -201,7 +201,7 @@ stock setup_laser(int client,int color[4],int beam_model, int point_model, bool 
 	float m_fImpact[3];
 	GetClientEyePosition(client, m_fOrigin);
 	get_client_sight_end(client, m_fImpact,use_kill_laser);	
-	TE_SetupBeamPoints(m_fOrigin, m_fImpact, beam_model, 0, 0, 0.1, 0.1, 0.8, 0.8, 2, 0.0,color , 0);
+	TE_SetupBeamPoints(m_fOrigin, m_fImpact, beam_model, 0, 0, 0, 0.1, 0.8, 0.8, 2, 0.0,color , 0);
 	TE_SendToAll();
 	
 	

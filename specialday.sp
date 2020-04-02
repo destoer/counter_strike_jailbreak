@@ -321,7 +321,7 @@ int gungame_level[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "2.2.6 - Violent Intent Jailbreak"
+#define VERSION "2.3 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -1135,7 +1135,7 @@ public Action WeaponMenuAll()
 
 public int WeaponHandler(Menu menu, MenuAction action, int client, int param2) 
 {
-	if(action == MenuAction_Select) 
+	if(action == MenuAction_Select && IsPlayerAlive(client)) 
 	{
 		// if sd is now inactive dont give any guns
 		if(sd_state == sd_inactive)
@@ -1983,6 +1983,8 @@ public void StartScout()
 public void StartLaser()
 {
 	start_round_delay(60 * 2);
+	CreateTimer(1.0, RemoveGuns);
+	enable_friendly_fire();
 }
 
 public void GiveGunGameGun(int client)
