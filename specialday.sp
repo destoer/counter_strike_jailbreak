@@ -12,7 +12,7 @@
 #define CT_BAN
 #define STORE
 
-#define USE_CUSTOM_ZOMBIE_MODEL
+//#define USE_CUSTOM_ZOMBIE_MODEL
 
 #define SD_ADMIN_FLAG ADMFLAG_GENERIC
 
@@ -34,7 +34,8 @@
 #endif
 
 //#define SPECIALDAY_PREFIX "\x04[Vi Special Day]\x07F8F8FF"
-#define SPECIALDAY_PREFIX "\x04[GK Special Day]\x07F8F8FF"
+//#define SPECIALDAY_PREFIX "\x04[GK Special Day]\x07F8F8FF"
+#define SPECIALDAY_PREFIX "\x04[Special Day]\x07F8F8FF"
 #define FFA_CONDITION(%1,%2) (1 <= %1 <= MaxClients && 1 <= %2 <= MaxClients && %1 != %2 && GetClientTeam(%1) == GetClientTeam(%2))
 
 // set up sv_cheats in server config so we can add test bots lol
@@ -352,6 +353,11 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	MarkNativeAsOptional("Store_GetClientCredits");
 	MarkNativeAsOptional("Store_SetClientCredits");
 #endif
+
+#if defined CT_BAN
+	MarkNativeAsOptional("CTBan_IsClientBanned");
+#endif
+
 
    CreateNative("sd_current_state", native_sd_state);
    CreateNative("sd_current_day", native_current_day);
@@ -929,19 +935,6 @@ void EndSd(bool forced=false)
 		disable_friendly_fire();
 	}	
 	
-#if defined CT_BAN
-	if(sd_state != sd_inactive && check_command_exists("sm_ctban"))
-	{
-		for (int i = 1; i < MaxClients; i++)
-		{
-			if(IsClientInGame(i))
-			{
-				CTBan_UnForceCT(i);
-			}
-		}
-	}
-#endif
-
 
 	if(ff)
 	{

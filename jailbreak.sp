@@ -50,12 +50,20 @@ TODO make all names consistent
 #define WARDEN_PLAYER_PREFIX "\x07FF0000[VI Warden]\x07F8F8FF"
 #define PTS_PREFIX "\x07F8F8FF"
 */
-
+/*
 #define ANTISTUCK_PREFIX "\x07FF0000[GK Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[GameKick Jailbreak]"
 #define WARDEN_PREFIX "\x07FFFF33[GameKick - Warden]\x07F8F8FF"
 #define WARDEN_PLAYER_PREFIX "\x0700008B[Warden]\x07F8F8FF"
 #define PTS_PREFIX "\x07F8F8FF"
+*/
+
+#define ANTISTUCK_PREFIX "\x07FF0000[Antistuck]\x07F8F8FF"
+#define JB_PREFIX "[Jailbreak]"
+#define WARDEN_PREFIX "\x07FFFF33[Warden]\x07F8F8FF"
+#define WARDEN_PLAYER_PREFIX "\x0700008B[Warden]\x07F8F8FF"
+#define PTS_PREFIX "\x07F8F8FF"
+
 
 #include <sourcemod>
 #include <sdktools>
