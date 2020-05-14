@@ -60,7 +60,7 @@ new const String:sd_list[SD_SIZE][] =
 	"Zombie",
 	"Gun Game",
 	"Knife",
-	"Scout Knifes",
+	"Scout Knives",
 	"Death Match",
 	"Laser Wars"
 };
