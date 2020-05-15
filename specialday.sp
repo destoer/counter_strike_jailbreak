@@ -322,7 +322,7 @@ int gungame_level[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "2.3 - Violent Intent Jailbreak"
+#define VERSION "2.3.1 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -760,6 +760,7 @@ public OnMapStart()
 	#endif
 	
 	PrecacheSound("npc/zombie/zombie_voice_idle1.wav");
+	PrecacheSound("music/ravenholm_1.mp3");
 	
 	// create fog controller
 	int ent;
@@ -2075,6 +2076,8 @@ public void StartZombie()
 	SetEntityRenderColor(patient_zero, 255, 0, 0, 255);	
 	PrintCenterTextAll("%N is patient zero!", patient_zero);
 	AcceptEntityInput(fog_ent, "TurnOn");
+	// dont know if we should loop this
+	EmitSoundToAll("music/ravenholm_1.mp3");
 }
 
 public void StartGrenade()

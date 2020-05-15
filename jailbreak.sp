@@ -591,23 +591,25 @@ public OnPluginStart()
 	RegAdminCmd("block", enable_block_admin, ADMFLAG_BAN);
 	RegAdminCmd("ublock",disable_block_admin, ADMFLAG_BAN);	
 	RegAdminCmd("force_open", force_open_callback, ADMFLAG_BAN);
-	
+
+#if defined LASER_DEATH
 	// toggle kill and safe laser
 	RegAdminCmd("kill_laser", kill_laser, ADMFLAG_CUSTOM6);
 	RegAdminCmd("safe_laser", safe_laser, ADMFLAG_CUSTOM6);
 	
+#endif
 	// custom flag required to do draw laser
-	#if defined DRAW_CUSTOM_FLAGS 
+#if defined DRAW_CUSTOM_FLAGS 
 	RegAdminCmd("laser", laser_menu, ADMFLAG_CUSTOM1);
-	#else
+#else
 	RegConsoleCmd("laser", laser_menu);
-	#endif
+#endif
 	
-	#if defined LASER_COLOR_CUSTOM_FLAGS
+#if defined LASER_COLOR_CUSTOM_FLAGS
 	RegAdminCmd("laser_color", command_laser_color, ADMFLAG_CUSTOM4);
-	#else
+#else
 	RegConsoleCmd("laser_color", command_laser_color);
-	#endif
+#endif
 	
 	
 	// hooks
@@ -620,11 +622,11 @@ public OnPluginStart()
 	CreateTimer(1.0, print_warden_text_all, _, TIMER_REPEAT);
 	
 	// if no block is default
-	#if defined NOBLOCK_DEFAULT
+#if defined NOBLOCK_DEFAULT
 		disable_block_all();
-	#else
+#else
 		enable_block_all();
-	#endif
+#endif
 	
 	
 	// Start a circle timer
