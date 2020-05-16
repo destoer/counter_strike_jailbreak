@@ -566,7 +566,7 @@ public OnPluginStart()
 	RegConsoleCmd("uw", leave_warden);
 	// RegConsoleCmd("wempty", empty_menu);
 	// RegConsoleCmd("guns", weapon_menu);
-	RegConsoleCmd("is_blocked", is_blocked_cmd);
+	//RegConsoleCmd("is_blocked", is_blocked_cmd);
 	
 	// disabled
 	// command_stuck is push out callback

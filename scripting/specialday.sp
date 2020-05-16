@@ -14,7 +14,7 @@
 
 #define USE_CUSTOM_ZOMBIE_MODEL
 
-#define SD_ADMIN_FLAG ADMFLAG_BAN
+#define SD_ADMIN_FLAG ADMFLAG_UNBAN
 
 #if defined CT_BAN
 #undef REQUIRE_PLUGIN
@@ -760,11 +760,13 @@ public OnMapStart()
 	#endif
 	
 	PrecacheSound("npc/zombie/zombie_voice_idle1.wav");
-	PrecacheSound("music/ravenholm_1.mp3");
-	
+	AddFileToDownloadsTable("sound/music/HLA.mp3");
+	PrecacheSound("music/HLA.mp3");
+
 	// create fog controller
 	int ent;
 
+	ServerCommand("ent_fire ent_create env_fogcontroller");
 	ent = FindEntityByClassname(-1, "env_fog_controller");
 
 	if(ent == -1)
@@ -2078,7 +2080,7 @@ public void StartZombie()
 	SetEntityRenderColor(patient_zero, 255, 0, 0, 255);	
 	PrintCenterTextAll("%N is patient zero!", patient_zero);
 	AcceptEntityInput(fog_ent, "TurnOn");
-	EmitSoundToAll("music/ravenholm_1.mp3");
+	EmitSoundToAll("music/HLA.mp3");
 }
 
 public void StartGrenade()
