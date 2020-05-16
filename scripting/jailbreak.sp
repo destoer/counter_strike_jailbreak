@@ -43,14 +43,13 @@ TODO make all names consistent
 
 #define DEBUG
 
-#define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.9 - Violent Intent Jailbreak (GP Branch)"
+#define PLUGIN_AUTHOR 			"organharvester, jordi"
+#define PLUGIN_VERSION 			"V2.9 - Violent Intent Jailbreak (GP Branch)"
 
-#define ANTISTUCK_PREFIX "\x07FF0000[GP Antistuck]\x07F8F8FF"
-#define JB_PREFIX "[GP Jailbreak]"
-#define WARDEN_PREFIX "\x07FFFF33[GP Warden]\x07F8F8FF"
-#define WARDEN_PLAYER_PREFIX "\x0700008B[GP Warden]\x07F8F8FF"
-#define PTS_PREFIX "\x07F8F8FF"
+#define ANTISTUCK_PREFIX 		"\x04[GP Antistuck]\x07F8F8FF"
+#define JB_PREFIX 				"\x04[GP Jailbreak]\x07F8F8FF"
+#define WARDEN_PREFIX 			"\x04[GP Warden]\x07F8F8FF"
+#define WARDEN_PLAYER_PREFIX 	"\x04[GP Warden]\x0700BFFF"
 
 
 #include <sourcemod>
@@ -218,6 +217,12 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 
 	// if on a laser day dont allow lasers
 	if(sd_current_day() == laser_day && sd_current_state() != sd_inactive)
+	{
+		return Plugin_Continue;
+	}
+
+	// Don't allow dead to use it
+	if(!IsPlayerAlive(client))
 	{
 		return Plugin_Continue;
 	}
@@ -504,7 +509,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
             {    
                     if (!CheckCommandAccess(client, "sm_say", ADMFLAG_CHAT))
                     {
-                        PrintToChatAll("%s %N : %s", WARDEN_PLAYER_PREFIX, client, sArgs);
+                        PrintToChatAll("%s %N \x07000000: \x07FFC0CB%s", WARDEN_PLAYER_PREFIX, client, sArgs);
                         LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
                         return Plugin_Handled;                    
                     }
@@ -512,7 +517,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
                     {
                         if (sArgs[0] != '@')
                         {
-                            PrintToChatAll("%s %N : %s", WARDEN_PLAYER_PREFIX, client, sArgs);
+                            PrintToChatAll("%s %N \x07000000: \x07FFC0CB%s", WARDEN_PLAYER_PREFIX, client, sArgs);
                             LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
                             return Plugin_Handled;
                         }
@@ -526,7 +531,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
                     {
                         if (sArgs[0] != '@')
                         {
-                            PrintToChat(i, "(Counter-Terrorist) %s %N : %s", WARDEN_PLAYER_PREFIX, client, sArgs);
+                            PrintToChat(i, "\x01(Counter-Terrorist) %s %N \x07000000: \x07FFC0CB%s", WARDEN_PLAYER_PREFIX, client, sArgs);
                             LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
                         }
                     }
@@ -536,7 +541,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
         }
         else
         {
-            PrintToChatAll("%s %N : %s", WARDEN_PLAYER_PREFIX, client, sArgs);
+            PrintToChatAll("%s %N \x01: %s", WARDEN_PLAYER_PREFIX, client, sArgs);
             LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
             return Plugin_Handled;
         }   
@@ -590,7 +595,7 @@ public OnPluginStart()
 	#endif
 	
 	#if defined LASER_COLOR_CUSTOM_FLAGS
-	RegAdminCmd("laser_color", command_laser_color, ADMFLAG_CUSTOM4);
+	RegAdminCmd("laser_color", command_laser_color, MEMBER);
 	#else
 	RegConsoleCmd("laser_color", command_laser_color);
 	#endif

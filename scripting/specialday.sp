@@ -760,6 +760,7 @@ public OnMapStart()
 	#endif
 	
 	PrecacheSound("npc/zombie/zombie_voice_idle1.wav");
+	PrecacheSound("music/ravenholm_1.mp3");
 	
 	// create fog controller
 	int ent;
@@ -1545,11 +1546,12 @@ public Action ReviveZombie(Handle timer, int client)
 		// pull cords so we can tele player to patient zero
 		float cords[3];
 		GetClientAbsOrigin(patient_zero, cords);
+
 		CS_RespawnPlayer(client);
 		TeleportEntity(client, cords, NULL_VECTOR, NULL_VECTOR);
 		CS_SwitchTeam(client, CS_TEAM_T);
 		MakeZombie(client);
-	}				
+	}			
 }
 
 
@@ -1960,7 +1962,7 @@ public void make_invis_t()
 
 public void StartDeathMatch()
 {
-	start_round_delay(60 * 2);
+	start_round_delay(90);
 	CreateTimer(1.0, RemoveGuns);
 	enable_friendly_fire();
 }
@@ -1968,14 +1970,14 @@ public void StartDeathMatch()
 
 public void StartScout()
 {
-	start_round_delay(60 * 2);
+	start_round_delay(90);
 	CreateTimer(1.0, RemoveGuns);
 	enable_friendly_fire();
 }
 
 public void StartLaser()
 {
-	start_round_delay(60 * 2);
+	start_round_delay(90);
 	CreateTimer(1.0, RemoveGuns);
 	enable_friendly_fire();
 }
@@ -2049,6 +2051,7 @@ public void MakeZombie(int client)
 	#else
 		SetEntityModel(client, "models/zombie/classic.mdl");
 	#endif
+	unblock_client(client);
 	
 }
 
@@ -2075,6 +2078,7 @@ public void StartZombie()
 	SetEntityRenderColor(patient_zero, 255, 0, 0, 255);	
 	PrintCenterTextAll("%N is patient zero!", patient_zero);
 	AcceptEntityInput(fog_ent, "TurnOn");
+	EmitSoundToAll("music/ravenholm.mp3");
 }
 
 public void StartGrenade()
