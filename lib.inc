@@ -161,7 +161,7 @@ stock void set_reserve_ammo(int client, int weapon, int ammo)
 // client is kill_settings - max players
 stock bool trace_ignore_players(int entity, int contents_mask, int kill_settings)
 {
-	if(entity > 0 && entity < MAXPLAYERS)
+	if(is_valid_client(entity))
 	{
 		// kill players (if toggled)
 		// ugly hack i know
