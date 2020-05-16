@@ -2078,7 +2078,7 @@ public void StartZombie()
 	SetEntityRenderColor(patient_zero, 255, 0, 0, 255);	
 	PrintCenterTextAll("%N is patient zero!", patient_zero);
 	AcceptEntityInput(fog_ent, "TurnOn");
-	EmitSoundToAll("music/ravenholm.mp3");
+	EmitSoundToAll("music/ravenholm_1.mp3");
 }
 
 public void StartGrenade()
