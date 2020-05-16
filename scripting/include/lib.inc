@@ -163,16 +163,20 @@ stock bool trace_ignore_players(int entity, int contents_mask, int kill_settings
 {
 	if(entity > 0 && entity < MAXPLAYERS)
 	{
-		// kill players (if toggled)
-		// ugly hack i know
-		bool kill = kill_settings > MAXPLAYERS;
-		int cli_ignore = kill_settings - MAXPLAYERS;
-		if (kill && entity != cli_ignore)
+		if(is_valid_client(entity))
 		{
-			ForcePlayerSuicide(entity);
+			// kill players (if toggled)
+			// ugly hack i know
+			bool kill = kill_settings > MAXPLAYERS;
+			int cli_ignore = kill_settings - MAXPLAYERS;
+			if (kill && entity != cli_ignore)
+			{
+				ForcePlayerSuicide(entity);
+			}
+			return false;
+
 		}
 		
-		return false;
 	}
 	
 	return true;
