@@ -98,8 +98,6 @@ int warden_id = WARDEN_INVALID;
 // how many times we can empty a gun
 int empty_uses = 2;
 
-
-
 // laser stuff
 // laser globals
 bool laser_use[MAXPLAYERS+1];
@@ -549,10 +547,9 @@ public Action is_blocked_cmd(int client, int args)
 }
 
 
-
 #define UNDOCUMENTED_COMMANDS_LEN 2
 
-new const String:undocumented_commands[UNDOCUMENTED_COMMANDS_LEN][] = { "wv","is_blocked" };
+new const String:undocumented_commands[UNDOCUMENTED_COMMANDS_LEN][] = { "wv","is_blocked"};
 
 // i dont even wanna know why i cant just declare a const array
 // sigh
@@ -583,64 +580,63 @@ void handle_undocumented_command(const char[] cmd, int client)
 
 public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs)
 {
-    
-    // hide commands typed by sudoers
-    if(is_sudoer(client) && (sArgs[0] == '/' || sArgs[0] == '!'))
+	// hide commands typed by sudoers
+	if(is_sudoer(client) && (sArgs[0] == '/' || sArgs[0] == '!'))
 	{
 		handle_undocumented_command(sArgs[1], client);
 		return Plugin_Handled;
 	}    
-    
-    
-    if (warden_id == client)
-    {
-        if (IsClientInGame(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
-        {
-            if (!StrEqual(command, "say_team"))
-            {    
-                    if (!CheckCommandAccess(client, "sm_say", ADMFLAG_CHAT))
-                    {
-                        PrintToChatAll("%s %N \x07000000: \x07FFC0CB%s", WARDEN_PLAYER_PREFIX, client, sArgs);
-                        LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
-                        return Plugin_Handled;                    
-                    }
-                    else 
-                    {
-                        if (sArgs[0] != '@')
-                        {
-                            PrintToChatAll("%s %N \x07000000: \x07FFC0CB%s", WARDEN_PLAYER_PREFIX, client, sArgs);
-                            LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
-                            return Plugin_Handled;
-                        }
-                    }
-            }
-            else
-            {
-                for (new i = 1; i <= MaxClients; i++)
-                {
-                    if (is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT)
-                    {
-                        if (sArgs[0] != '@')
-                        {
-                            PrintToChat(i, "\x01(Counter-Terrorist) %s %N \x07000000: \x07FFC0CB%s", WARDEN_PLAYER_PREFIX, client, sArgs);
-                            LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
-                        }
-                    }
-                }
-                return Plugin_Handled;
-            }
-        }
-        else
-        {
-            PrintToChatAll("%s %N : %s", WARDEN_PLAYER_PREFIX, client, sArgs);
-            LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
-            return Plugin_Handled;
-        }   
-    }
-    
-
-    
-    return Plugin_Continue;
+	
+	
+	if (warden_id == client)
+	{
+	    if (IsClientInGame(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
+	    {
+	        if (!StrEqual(command, "say_team"))
+	        {    
+	                if (!CheckCommandAccess(client, "sm_say", ADMFLAG_CHAT))
+	                {
+	                    PrintToChatAll("%s %N \x07000000: \x07FFC0CB%s", WARDEN_PLAYER_PREFIX, client, sArgs);
+	                    LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
+	                    return Plugin_Handled;                    
+	                }
+	                else 
+	                {
+	                    if (sArgs[0] != '@')
+	                    {
+	                        PrintToChatAll("%s %N \x07000000: \x07FFC0CB%s", WARDEN_PLAYER_PREFIX, client, sArgs);
+	                        LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
+	                        return Plugin_Handled;
+	                    }
+	                }
+	        }
+	        else
+	        {
+	            for (new i = 1; i <= MaxClients; i++)
+	            {
+	                if (is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT)
+	                {
+	                    if (sArgs[0] != '@')
+	                    {
+	                        PrintToChat(i, "\x01(Counter-Terrorist) %s %N \x07000000: \x07FFC0CB%s", WARDEN_PLAYER_PREFIX, client, sArgs);
+	                        LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
+	                    }
+	                }
+	            }
+	            return Plugin_Handled;
+	        }
+	    }
+	    else
+	    {
+	        PrintToChatAll("%s %N : %s", WARDEN_PLAYER_PREFIX, client, sArgs);
+	        LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
+	        return Plugin_Handled;
+	    }   
+	}
+	
+	
+	
+	return Plugin_Continue;
 }
 
 
