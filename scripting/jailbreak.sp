@@ -466,7 +466,7 @@ public Action disable_block_warden_callback(client, args)
 		return Plugin_Handled;
 	}
 
-	PrintCenterTextAll("%s Player Collision: OFF", JB_PREFIX);
+	PrintCenterTextAll("Player Collision: OFF");
 	disable_block_all();
 	return Plugin_Handled;
 }
@@ -475,7 +475,7 @@ public Action disable_block_warden_callback(client, args)
 // disable block for an admin no warden check
 public Action disable_block_admin(client, args)
 {
-	PrintCenterTextAll("%s Player Collision: OFF!", JB_PREFIX);
+	PrintCenterTextAll("Player Collision: OFF!");
 	disable_block_all();
 	return Plugin_Handled;
 }
@@ -483,7 +483,7 @@ public Action disable_block_admin(client, args)
 // same but to enable blocking
 public Action enable_block_admin(client, args)
 {
-	PrintCenterTextAll("%s Player Collision: ON", JB_PREFIX);
+	PrintCenterTextAll("Player Collision: ON");
 	enable_block_all();	
 }
 
@@ -501,7 +501,7 @@ public Action enable_block_warden_callback(client, args)
 		return Plugin_Handled;
 	}
 
-	PrintCenterTextAll("%s Player Collision: ON", JB_PREFIX);
+	PrintCenterTextAll("Player Collision: ON");
 	enable_block_all();
 	return Plugin_Handled;
 }
@@ -549,7 +549,7 @@ public Action is_blocked_cmd(int client, int args)
 
 #define UNDOCUMENTED_COMMANDS_LEN 2
 
-new const String:undocumented_commands[UNDOCUMENTED_COMMANDS_LEN][] = { "wv","is_blocked"};
+static const char undocumented_commands[UNDOCUMENTED_COMMANDS_LEN][] = { "wv","is_blocked"};
 
 // i dont even wanna know why i cant just declare a const array
 // sigh
@@ -557,6 +557,7 @@ ConCmd undocumented_command_callbacks[UNDOCUMENTED_COMMANDS_LEN];
 
 void register_undocumented_commands()
 {
+
 	undocumented_command_callbacks[0] = jailbreak_version;
 	undocumented_command_callbacks[1] = is_blocked_cmd;
 }
