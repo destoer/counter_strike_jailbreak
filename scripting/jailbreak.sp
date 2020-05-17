@@ -42,7 +42,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.9 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.9.1 - Violent Intent Jailbreak"
 
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
@@ -508,12 +508,86 @@ public Action enable_block_warden_callback(client, args)
 	return Plugin_Handled;
 }
 
+
+// because we cant have debugging commands without
+// inboxes blowing up sigh...
+
+
+
+public Action jailbreak_version(int client, int args)
+{
+	// undocumented command
+	if(!is_sudoer(client))
+	{
+		return Plugin_Handled;
+	}	
+	
+	
+	PrintToChat(client, "%s WARDEN VERSION: %s",WARDEN_PREFIX, PLUGIN_VERSION);
+	
+	return Plugin_Continue;
+}
+
+public Action is_blocked_cmd(int client, int args)
+{
+	// undocumented command
+	if(!is_sudoer(client))
+	{
+		return Plugin_Handled;
+	}
+	
+	PrintToChat(client, "%s blocked state: %s",WARDEN_PREFIX, noblock_enabled() ? "no block" : "block");
+	for (int i = 0; i < MaxClients; i++)
+	{
+		if(is_valid_client(i))
+		{
+			PrintToConsole(client, "block state: %N %s", i, is_client_blocked(i) ? "block" : "no block");
+		}
+	}
+	
+	return Plugin_Continue;
+}
+
+
+
+#define UNDOCUMENTED_COMMANDS_LEN 2
+
+new const String:undocumented_commands[UNDOCUMENTED_COMMANDS_LEN][] = { "wv","is_blocked" };
+
+// i dont even wanna know why i cant just declare a const array
+// sigh
+ConCmd undocumented_command_callbacks[UNDOCUMENTED_COMMANDS_LEN];
+
+void register_undocumented_commands()
+{
+	undocumented_command_callbacks[0] = jailbreak_version;
+	undocumented_command_callbacks[1] = is_blocked_cmd;
+}
+
+void handle_undocumented_command(const char[] cmd, int client)
+{
+	
+	
+	
+	for (int i = 0; i < UNDOCUMENTED_COMMANDS_LEN; i++)
+	{
+		if(StrEqual(cmd,undocumented_commands[i]))
+		{
+			Call_StartFunction(null, undocumented_command_callbacks[i]);
+			Call_PushCell(client);
+			Call_PushCell(0); // assume zero args for now because ehh
+			Call_Finish();
+		}
+	}
+}
+
 public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs)
 {
     
     // hide commands typed by sudoers
     if(is_sudoer(client) && (sArgs[0] == '/' || sArgs[0] == '!'))
 	{
+		handle_undocumented_command(sArgs[1], client);
 		return Plugin_Handled;
 	}    
     
@@ -569,6 +643,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
     return Plugin_Continue;
 }
 
+
 // init the plugin
 public OnPluginStart()
 {
@@ -623,7 +698,7 @@ public OnPluginStart()
 	RegConsoleCmd("laser_color", command_laser_color);
 #endif
 	
-	RegisterUndocumentCommands();
+	register_undocumented_commands();
 	
 	// hooks
 	HookEvent("round_start", round_start); // For the round start
@@ -649,14 +724,6 @@ public OnPluginStart()
 	
 }
 
-// because we cant have debugging commands without
-// inboxes blowing up sigh...
-public void RegisterUndocumentCommands()
-{
-	RegConsoleCmd("wv", jailbreak_version);
-	RegConsoleCmd("is_blocked", is_blocked_cmd);
-}
-
 public Action kill_laser (int client, int args)
 {
 	laser_kill = true;
@@ -670,40 +737,6 @@ public Action safe_laser (int client, int args)
 public Action force_open_callback (int client, int args)
 {
 	force_open();
-}
-
-public Action jailbreak_version(int client, int args)
-{
-	// undocumented command
-	if(!is_sudoer(client))
-	{
-		return Plugin_Handled;
-	}	
-	
-	
-	PrintToChat(client, "%s WARDEN VERSION: %s",WARDEN_PREFIX, PLUGIN_VERSION);
-	
-	return Plugin_Continue;
-}
-
-public Action is_blocked_cmd(int client, int args)
-{
-	// undocumented command
-	if(!is_sudoer(client))
-	{
-		return Plugin_Handled;
-	}
-	
-	PrintToChat(client, "%s blocked state: %s",WARDEN_PREFIX, noblock_enabled() ? "no block" : "block");
-	for (int i = 0; i < MaxClients; i++)
-	{
-		if(is_valid_client(i))
-		{
-			PrintToConsole(client, "block state: %N %s", i, is_client_blocked(i) ? "block" : "no block");
-		}
-	}
-	
-	return Plugin_Continue;
 }
 
 // Top Screen Warden Printing

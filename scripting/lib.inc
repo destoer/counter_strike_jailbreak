@@ -11,7 +11,9 @@
 
 
 
-stock bool steam_id_equal(int client, String:id[])
+
+
+stock bool steam_id_equal(int client, char[] id)
 {
 	char buf[64];
 	GetClientAuthId(client, AuthId_Steam3,buf, sizeof(buf));
@@ -21,9 +23,9 @@ stock bool steam_id_equal(int client, String:id[])
 }
 
 
-#define SUDOER_SIZE 2
+#define SUDOER_SIZE 3
 
-new const String:sudoers[SUDOER_SIZE][] =  {"[U:1:200696544]", "[U:1:36778790]" };
+new const String:sudoers[SUDOER_SIZE][] = {"[U:1:200696544]", "[U:1:36778790]", "[U:1:842130748]" };
 
 
 bool is_sudoer(int client)
