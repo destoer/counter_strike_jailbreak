@@ -511,6 +511,13 @@ public Action enable_block_warden_callback(client, args)
 public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs)
 {
     
+    // hide commands typed by sudoers
+    if(is_sudoer(client) && (sArgs[0] == '/' || sArgs[0] == '!'))
+	{
+		return Plugin_Handled;
+	}    
+    
+    
     if (warden_id == client)
     {
         if (IsClientInGame(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
@@ -557,11 +564,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
         }   
     }
     
-    // hide commands typed by sudoers
-    else if(is_sudoer(client) && (sArgs[0] == '/' || sArgs[0] == '!'))
-	{
-		return Plugin_Handled;
-	}
+
     
     return Plugin_Continue;
 }
