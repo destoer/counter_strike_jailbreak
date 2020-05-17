@@ -778,6 +778,7 @@ public OnMapStart()
 	PrecacheSound("npc/zombie/zombie_voice_idle1.wav");
 
 #if defined CUSTOM_ZOMBIE_MUSIC
+	AddFileToDownloadsTable("sound/music/HLA.mp3");
 	PrecacheSound("music/HLA.mp3");
 #else
 	// dont know if we should loop this
