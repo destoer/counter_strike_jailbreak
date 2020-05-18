@@ -49,7 +49,7 @@
 Menu gun_menu;
 
 // Handle for function call
-Handle CollisionRulesChanged;
+Handle SetCollisionGroup;
 
 
 const int SD_SIZE = 13;
@@ -327,7 +327,7 @@ int gungame_level[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "2.3.2 - Violent Intent Jailbreak"
+#define VERSION "2.3.3  - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -434,7 +434,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 public OnPluginStart() 
 {
 	
-	// get our handle to call CollisionRulesChanged to make noblock not break
+	// get our handle to call SetCollisionGroup to make noblock not break
 	Handle game_conf = LoadGameConfigFile("destoer");
 	
 	if(game_conf == INVALID_HANDLE)
@@ -443,17 +443,20 @@ public OnPluginStart()
 	}
 	
 	
+	// setup call so we can change collsion groups
 	StartPrepSDKCall(SDKCall_Entity);
-	if(!PrepSDKCall_SetFromConf(game_conf, SDKConf_Signature, "CollisionRulesChanged"))
+	if(!PrepSDKCall_SetFromConf(game_conf, SDKConf_Signature, "SetCollisionGroup"))
 	{
 		ThrowError("signature not found");
 	}
-	CollisionRulesChanged = EndPrepSDKCall();
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	SetCollisionGroup = EndPrepSDKCall();
 	
-	if(CollisionRulesChanged == INVALID_HANDLE)
+	if(SetCollisionGroup == INVALID_HANDLE)
 	{
 		ThrowError("function handle invalid");
-	}	
+	}
+	
 		
 	
 	
@@ -1698,7 +1701,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 		
 		// turn off collison if its allready on this function
 		// will just ignore the request
-		unblock_all_clients(CollisionRulesChanged);
+		unblock_all_clients(SetCollisionGroup);
 		
 		
 
@@ -2149,7 +2152,7 @@ public void MakeZombie(int client)
 	
 	// fix no block issues on respawn
 	// really did not want to resort to this sigh...
-	unblock_client(client,CollisionRulesChanged);
+	unblock_client(client,SetCollisionGroup);
 }
 
 public void StartZombie()

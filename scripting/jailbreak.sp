@@ -42,7 +42,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.9.2 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.9.3 - Violent Intent Jailbreak"
 
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
@@ -108,7 +108,7 @@ int g_lpoint;
 
 
 // handle for sdkcall
-Handle CollisionRulesChanged;
+Handle SetCollisionGroup;
 
 public int native_get_warden_id(Handle plugin, int numParam)
 {
@@ -459,7 +459,7 @@ public Action block_timer_callback(Handle timer)
 
 public disable_block_all()
 {
-	unblock_all_clients(CollisionRulesChanged);
+	unblock_all_clients(SetCollisionGroup);
 }
 
 public Action disable_block_warden_callback(client, args)
@@ -493,7 +493,7 @@ public Action enable_block_admin(client, args)
 
 public enable_block_all()
 {
-	block_all_clients(CollisionRulesChanged);
+	block_all_clients(SetCollisionGroup);
 }
 
 public Action enable_block_warden_callback(client, args)
@@ -654,7 +654,7 @@ public OnPluginStart()
 		SetFailState("This plugin is for CSGO/CSS only.");	
 	}
 	
-	// get our handle to call CollisionRulesChanged to make noblock not break
+	// get our handle to call SetCollisionGroup to make noblock not break
 	Handle game_conf = LoadGameConfigFile("destoer");
 	
 	if(game_conf == INVALID_HANDLE)
@@ -663,17 +663,19 @@ public OnPluginStart()
 	}
 	
 	
+	// setup call so we can change collsion groups
 	StartPrepSDKCall(SDKCall_Entity);
-	if(!PrepSDKCall_SetFromConf(game_conf, SDKConf_Signature, "CollisionRulesChanged"))
+	if(!PrepSDKCall_SetFromConf(game_conf, SDKConf_Signature, "SetCollisionGroup"))
 	{
 		ThrowError("signature not found");
 	}
-	CollisionRulesChanged = EndPrepSDKCall();
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	SetCollisionGroup = EndPrepSDKCall();
 	
-	if(CollisionRulesChanged == INVALID_HANDLE)
+	if(SetCollisionGroup == INVALID_HANDLE)
 	{
 		ThrowError("function handle invalid");
-	}	
+	}
 	
 	
 	// user commands
