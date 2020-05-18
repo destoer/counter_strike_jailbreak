@@ -48,6 +48,8 @@
 // gun menu
 Menu gun_menu;
 
+// Handle for function call
+Handle CollisionRulesChanged;
 
 
 const int SD_SIZE = 13;
@@ -325,7 +327,7 @@ int gungame_level[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "2.3.1 - Violent Intent Jailbreak"
+#define VERSION "2.3.2 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -431,6 +433,30 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 
 public OnPluginStart() 
 {
+	
+	// get our handle to call CollisionRulesChanged to make noblock not break
+	Handle game_conf = LoadGameConfigFile("destoer");
+	
+	if(game_conf == INVALID_HANDLE)
+	{
+		ThrowError("game data handle invalid");
+	}
+	
+	
+	StartPrepSDKCall(SDKCall_Entity);
+	if(!PrepSDKCall_SetFromConf(game_conf, SDKConf_Signature, "CollisionRulesChanged"))
+	{
+		ThrowError("signature not found");
+	}
+	CollisionRulesChanged = EndPrepSDKCall();
+	
+	if(CollisionRulesChanged == INVALID_HANDLE)
+	{
+		ThrowError("function handle invalid");
+	}	
+		
+	
+	
 	HookEvent("player_death", OnPlayerDeath,EventHookMode_Post);
 
 
@@ -1672,7 +1698,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 		
 		// turn off collison if its allready on this function
 		// will just ignore the request
-		unblock_all_clients();
+		unblock_all_clients(CollisionRulesChanged);
 		
 		
 
@@ -2123,7 +2149,7 @@ public void MakeZombie(int client)
 	
 	// fix no block issues on respawn
 	// really did not want to resort to this sigh...
-	unblock_client(client);
+	unblock_client(client,CollisionRulesChanged);
 }
 
 public void StartZombie()

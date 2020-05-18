@@ -93,7 +93,7 @@ stock bool check_command_exists(const String:command[])
 	return GetCommandFlags(command) != INVALID_FCVAR_FLAGS;
 }
 
-stock void block_all_clients()
+stock void block_all_clients(Handle func)
 {
 	// block is allready on dont bother
 	if(!noblock_enabled())
@@ -104,27 +104,39 @@ stock void block_all_clients()
 	
   	for(int i=1; i <= MaxClients; i++)
 	{
-		block_client(i);
+		block_client(i,func);
 	}
 }
 
-stock void block_client(int client)
+// https://bugs.alliedmods.net/show_bug.cgi?id=6348
+// https://web.archive.org/web/20190406220848/https://forum.facepunch.com/gmoddev/likl/Crazy-Physics-cause-found/1/
+// setting this directly will cause problems so we have to do a sdkcall to CBaseEntity::CollisionRulesChanged()
+// or we will have fun
+
+stock void UpdateCollisionRules(int entity,Handle func)
+{
+	SDKCall(func, entity);
+}
+
+stock void block_client(int client, Handle func)
 {
 	if (is_valid_client(client) && !is_client_blocked(client))
 	{
 		SetEntProp(client, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_PLAYER, 4);
+		UpdateCollisionRules(client, func);
 	}		
 }
 
-stock void unblock_client(int client)
+stock void unblock_client(int client,Handle func)
 {
 	if (is_valid_client(client) && is_client_blocked(client))
 	{
 		SetEntProp(client, Prop_Data,"m_CollisionGroup", COLLISION_GROUP_DEBRIS_TRIGGER, 4);
+		UpdateCollisionRules(client,func);
 	}	
 }
 
-stock void unblock_all_clients()
+stock void unblock_all_clients(Handle func)
 {
 	// noblock allready enabled dont bother
 	if(noblock_enabled())
@@ -134,7 +146,7 @@ stock void unblock_all_clients()
 	
   	for(int i=1; i <= MaxClients; i++)
 	{
-		unblock_client(i);
+		unblock_client(i,func);
 	}
 }
 

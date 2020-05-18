@@ -42,7 +42,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.9.1 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.9.2 - Violent Intent Jailbreak"
 
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
@@ -105,6 +105,10 @@ float prev_pos[MAXPLAYERS+1][3];
 int g_lbeam;
 int g_lpoint;
 
+
+
+// handle for sdkcall
+Handle CollisionRulesChanged;
 
 public int native_get_warden_id(Handle plugin, int numParam)
 {
@@ -455,7 +459,7 @@ public Action block_timer_callback(Handle timer)
 
 public disable_block_all()
 {
-	unblock_all_clients();
+	unblock_all_clients(CollisionRulesChanged);
 }
 
 public Action disable_block_warden_callback(client, args)
@@ -489,7 +493,7 @@ public Action enable_block_admin(client, args)
 
 public enable_block_all()
 {
-	block_all_clients();
+	block_all_clients(CollisionRulesChanged);
 }
 
 public Action enable_block_warden_callback(client, args)
@@ -649,6 +653,28 @@ public OnPluginStart()
 	{
 		SetFailState("This plugin is for CSGO/CSS only.");	
 	}
+	
+	// get our handle to call CollisionRulesChanged to make noblock not break
+	Handle game_conf = LoadGameConfigFile("destoer");
+	
+	if(game_conf == INVALID_HANDLE)
+	{
+		ThrowError("game data handle invalid");
+	}
+	
+	
+	StartPrepSDKCall(SDKCall_Entity);
+	if(!PrepSDKCall_SetFromConf(game_conf, SDKConf_Signature, "CollisionRulesChanged"))
+	{
+		ThrowError("signature not found");
+	}
+	CollisionRulesChanged = EndPrepSDKCall();
+	
+	if(CollisionRulesChanged == INVALID_HANDLE)
+	{
+		ThrowError("function handle invalid");
+	}	
+	
 	
 	// user commands
 	RegConsoleCmd("wb", enable_block_warden_callback);
