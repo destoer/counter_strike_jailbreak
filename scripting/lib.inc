@@ -118,6 +118,35 @@ stock void SetClientCollision(int entity,Handle func, int type)
 	SDKCall(func, entity, type);
 }
 
+stock Handle init_set_collision()
+{
+	// get our handle to call SetCollisionGroup to make noblock not break
+	Handle game_conf = LoadGameConfigFile("destoer");
+	
+	if(game_conf == INVALID_HANDLE)
+	{
+		ThrowError("game data handle invalid");
+	}
+	
+	
+	// setup call so we can change collsion groups
+	StartPrepSDKCall(SDKCall_Entity);
+	if(!PrepSDKCall_SetFromConf(game_conf, SDKConf_Signature, "SetCollisionGroup"))
+	{
+		ThrowError("signature not found");
+	}
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	Handle handle = EndPrepSDKCall();
+	
+	if(handle == INVALID_HANDLE)
+	{
+		ThrowError("function handle invalid");
+	}
+	
+	return handle;
+}
+
+
 stock void block_client(int client, Handle func)
 {
 	if (is_valid_client(client))

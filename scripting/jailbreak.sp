@@ -659,29 +659,8 @@ public OnPluginStart()
 		SetFailState("This plugin is for CSGO/CSS only.");	
 	}
 	
-	// get our handle to call SetCollisionGroup to make noblock not break
-	Handle game_conf = LoadGameConfigFile("destoer");
 	
-	if(game_conf == INVALID_HANDLE)
-	{
-		ThrowError("game data handle invalid");
-	}
-	
-	
-	// setup call so we can change collsion groups
-	StartPrepSDKCall(SDKCall_Entity);
-	if(!PrepSDKCall_SetFromConf(game_conf, SDKConf_Signature, "SetCollisionGroup"))
-	{
-		ThrowError("signature not found");
-	}
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	SetCollisionGroup = EndPrepSDKCall();
-	
-	if(SetCollisionGroup == INVALID_HANDLE)
-	{
-		ThrowError("function handle invalid");
-	}
-	
+	SetCollisionGroup = init_set_collision();
 	
 	// user commands
 	RegConsoleCmd("wb", enable_block_warden_callback);
