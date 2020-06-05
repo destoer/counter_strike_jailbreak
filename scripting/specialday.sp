@@ -6,6 +6,8 @@
 #include "colorvariables.inc"
 #include "lib.inc"
 #include "specialday.inc"
+// make this possible to be standalone later
+#include "jailbreak.inc"
 
 // if running gangs or ct bans with this define to prevent issues :)
 //#define GANGS
@@ -52,7 +54,7 @@ Menu gun_menu;
 Handle SetCollisionGroup;
 
 
-const int SD_SIZE = 13;
+const int SD_SIZE = 14;
 new const String:sd_list[SD_SIZE][] =
 {	
 	"Friendly Fire Day", 
@@ -67,7 +69,8 @@ new const String:sd_list[SD_SIZE][] =
 	"Knife",
 	"Scout Knives",
 	"Death Match",
-	"Laser Wars"
+	"Laser Wars",
+	"Spectre"
 };
 
 
@@ -228,6 +231,12 @@ void laser_player_init(int client)
 	WeaponMenu(client);
 }
 
+void spectre_player_init(int client)
+{
+	WeaponMenu(client);
+}
+
+
 // sd modifiers
 
 // underlying convar handles
@@ -299,7 +308,7 @@ int sdtimer = 20; // timer for sd
 // sd specific vars
 int tank = -1; // hold client id of the tank
 int patient_zero = -1;
-
+int spectre = -1;
 
 
 // team saves
@@ -327,7 +336,7 @@ int gungame_level[64] =  { 0 };
 // gun removal
 int g_WeaponParent;
 
-#define VERSION "2.3.3  - Violent Intent Jailbreak"
+#define VERSION "2.3.4  - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -692,6 +701,16 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 		tank = game_clients[rand]; // select the lucky client
 	}
 	
+	
+	// if the spectre disconnects
+	if(client == tank && sd_state == sd_inactive)
+	{
+		SaveTeams(true);
+
+		int rand = GetRandomInt( 0, validclients - 1 );
+		spectre = game_clients[rand]; // select the lucky client
+	}		
+	
 	// if the patient_zero disconnects
 	else if(client == patient_zero && sd_state == sd_inactive)
 	{
@@ -700,21 +719,6 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 		int rand = GetRandomInt( 0, validclients - 1 );
 		patient_zero = game_clients[rand]; // select the lucky client
 	}
-	
-	// if the patient_zero disconnects
-	else if(client == patient_zero && sd_state == sd_active)
-	{
-		SaveTeams(false);
-		int rand = GetRandomInt( 0, validclients - 1 );
-		patient_zero = game_clients[rand]; // select the lucky client
-		CS_RespawnPlayer(patient_zero);
-		CS_SwitchTeam(patient_zero, CS_TEAM_T);
-		MakeZombie(patient_zero);
-		SetEntityHealth(patient_zero, 1000 * (validclients+1) );
-		SetEntityRenderColor(patient_zero, 255, 0, 0, 255);	
-		PrintCenterTextAll("%N is patient zero!", patient_zero);	
-	}	
-	
 	
 	// tankday is allready active
 	else if(client == tank && sd_state == sd_active)
@@ -736,16 +740,31 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 		}
 		
 		
+		MakeTank(tank);
+	}
 
-		SetEntityHealth(tank, 250 * GetClientCount(true));
-		
-		
-		
-		//reroll the tank restore hp
-		CS_SwitchTeam(tank,CS_TEAM_CT);
-		SetEntityRenderColor(tank, 255, 0, 0, 255);
-		PrintCenterTextAll("%N is the TANK!", tank);
+
+
+	// spectre is allready active
+	else if(client == spectre && sd_state == sd_active)
+	{
 	
+	
+		// restore the hp
+		for(new i = 1; i < MaxClients; i++)
+			if(IsClientInGame(i)) // check the client is in the game
+				SetEntityHealth(i, 100);	
+	
+	
+	
+		// while the current disconnecter
+		while(spectre == client)
+		{
+			int rand = GetRandomInt( 0, (validclients-1) );
+			spectre = game_clients[rand]; // select the lucky client
+		}
+		
+		MakeSpectre(spectre);
 	}
 
 	return Plugin_Continue;
@@ -986,7 +1005,14 @@ void EndSd(bool forced=false)
 		case grenade_day: {}
 		case knife_day: {}
 		case laser_day: {}
-		
+
+		case spectre_day: 
+		{
+			RestoreTeams();
+			SetEntityRenderColor(spectre,255,255,255, 255)
+			spectre = -1;
+		}
+
 		case scoutknife_day:
 		{
 			int cli = get_client_max_kills();
@@ -1148,7 +1174,12 @@ public Action print_specialday_text_all(Handle timer)
 			{
 				Format(buf, sizeof(buf), "laser: %d", round_delay_timer);	
 			}
-			
+
+			case spectre_day:
+			{
+				Format(buf, sizeof(buf), "spectre: %N", spectre);
+			}
+
 			default:
 			{
 				Format(buf, sizeof(buf), "%s", sd_list[special_day]);
@@ -1357,16 +1388,25 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 					CreateKnockBack(victim, attacker, damage);
 				}
 				
-				else if(GetClientTeam(attacker) == CS_TEAM_T)
+
+				// patient zero instantly kills
+				else if(attacker == patient_zero)
 				{
-					// patient zero instantly kills
-					if(attacker == patient_zero)
-					{
-						damage = 120.0;
-					}
+					damage = 120.0;
 				}
+				
 			}
-		
+			
+			// spectre instant kills everyone
+			case spectre_day:
+			{
+				if(attacker == spectre)
+				{
+					damage = 120.0;
+				}	
+			}
+
+
 			default: {}
 		}
 		return Plugin_Changed;
@@ -1878,6 +1918,33 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 				special_day = laser_day;
 				sd_player_init_fptr = laser_player_init;
 			}
+			
+
+			// spectre
+			case spectre_day:
+			{
+				PrintToChatAll("%s spectre day started", SPECIALDAY_PREFIX);
+				special_day = spectre_day;
+				sd_player_init_fptr = spectre_player_init;
+				
+				
+				// save teams so we can swap them back later and select the "spectre"
+				SaveTeams(true);
+				
+				if(validclients == 0)
+				{
+					PrintToChatAll("%s You are all freekillers!", SPECIALDAY_PREFIX);
+					return -1;
+				}
+
+			
+				int rand = GetRandomInt( 0, (validclients-1) );
+				spectre = game_clients[rand]; // select the lucky client
+
+
+			}
+			
+			
 		}
 
 		// call the initial init for all players on the function pointers we just set
@@ -1966,6 +2033,9 @@ public StartSD()
 	}
 #endif
 
+	// sd is active so dont have a warden
+	remove_warden();
+
 
 	switch(special_day)
 	{
@@ -2034,7 +2104,14 @@ public StartSD()
 		{
 			StartLaser();
 		}
+
+		case spectre_day:
+		{
+			StartSpectre();
+		}
 		
+
+
 		default:
 		{
 			ThrowNativeError(SP_ERROR_NATIVE, "attempted to start invalid sd %d", special_day);
@@ -2064,6 +2141,45 @@ public void StartDeathMatch()
 	CreateTimer(1.0, RemoveGuns);
 	enable_friendly_fire();
 }
+
+public void MakeSpectre(int client)
+{
+	// ensure player has only a knife
+	strip_all_weapons(client);
+	
+	GivePlayerItem(client, "weapon_knife"); 
+	
+	CS_SwitchTeam(client,CS_TEAM_CT);
+	// spectre is invis
+	SetEntityRenderMode(client, RENDER_TRANSCOLOR);
+	SetEntityRenderColor(client, 0, 0, 0, 0);
+	set_client_speed(client, 2.0);
+	PrintCenterTextAll("%N is the SPECTRE!", client);		
+}
+
+public void StartSpectre()
+{
+	SetEntityHealth(spectre, 250 * GetClientCount(true));
+	
+	
+	
+	
+	// swap everyone other than the tank to the t side
+	// if they were allready in ct or t
+	for(int i = 1; i < MaxClients; i++)
+	{
+		if(IsClientInGame(i))
+		{
+			if(is_on_team(i))
+			{
+				CS_SwitchTeam(i,CS_TEAM_T);
+			}
+		}
+	}
+	
+	MakeSpectre(spectre);
+}
+
 
 
 public void StartScout()
@@ -2233,6 +2349,19 @@ public void StartFly()
 {
 	enable_friendly_fire();
 }
+
+
+public void MakeTank(int client)
+{
+		SetEntityHealth(client, 250 * GetClientCount(true));
+		
+		
+	
+		CS_SwitchTeam(client,CS_TEAM_CT);
+		SetEntityRenderColor(client, 255, 0, 0, 255);
+		PrintCenterTextAll("%N is the TANK!", client);
+}
+
 
 public void StartTank()
 {	
@@ -2493,7 +2622,25 @@ public Action OnWeaponEquip(int client, int weapon)
 				}
 			}
 		}
+
+		// spectre can only use knife
+		case spectre_day:
+		{
+			if(sd_state == sd_active)
+			{
+				char weapon_string[32];
+				GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
+				if(client == spectre)
+				{
+					if(!StrEqual(weapon_string,"weapon_knife"))
+					{
+						return Plugin_Handled;
+					}					
+				}				
+			}
+		}
 		
+
 		default: {}
 	
 	}

@@ -6,3 +6,4 @@
 
 
 native int get_warden_id();
+native int remove_warden();

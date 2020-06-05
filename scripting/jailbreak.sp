@@ -42,7 +42,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.9.3 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V2.9.4 - Violent Intent Jailbreak"
 
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
@@ -110,19 +110,24 @@ int g_lpoint;
 // handle for sdkcall
 Handle SetCollisionGroup;
 
-public int native_get_warden_id(Handle plugin, int numParam)
+public int native_get_warden_id(Handle plugin, int num_param)
 {
 	return warden_id;
 }
+
+public int native_remove_warden(Handle plugin, int num_param)
+{
+	remove_warden();
+}
+
 
 // register our call
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
    CreateNative("get_warden_id", native_get_warden_id);
+   CreateNative("remove_warden", native_remove_warden);
    return APLRes_Success;
 }
-
-
 
 // timer here to draw connected points
 public Action laser_draw(Handle timer)
@@ -883,6 +888,12 @@ public print_warden_commands(client)
 public set_warden(int client)
 {
 
+
+	// dont bother doing this on sds
+	if(sd_current_state() == sd_active)
+	{
+		return;
+	}
 
 	if(is_sudoer(client))
 	{
