@@ -8,6 +8,7 @@
 
 #define COLLISION_GROUP_PLAYER 5 // normal player collision
 #define COLLISION_GROUP_DEBRIS_TRIGGER 2 // noblock
+#define COLLISION_GROUP_PUSHAWAY 17 // antistuck
 
 
 

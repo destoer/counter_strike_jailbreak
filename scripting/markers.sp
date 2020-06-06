@@ -1,7 +1,7 @@
 #include <sourcemod>
 #include <sdktools>
 #include <sdktools>
-#include "jailbreak.inc"
+#include "jailbreak/jailbreak.inc"
 
 #define PLUGIN_VERSION "1.0"
 

@@ -1,10 +1,10 @@
 #pragma semicolon 1
 
 /* credits to authors of original plugins
-*	https://forums.alliedmods.net/showthread.php?p=1476638 "ecca"
-*   https://forums.alliedmods.net/attachment.php?attachmentid=152002&d=1455721170 "Xines"
-*   https://forums.alliedmods.net/attachment.php?attachmentid=152808&d=1458004535 "Franc1sco franug"
-*	https://forums.alliedmods.net/showthread.php?p=2317717 "Invex | Byte"
+*	https://forums.alliedmods.net/showthread.php?p=1476638 "ecca" (warden core (has mostly been rewritten at this point though))
+*   https://forums.alliedmods.net/attachment.php?attachmentid=152002&d=1455721170 "Xines" (laser)
+*   https://forums.alliedmods.net/attachment.php?attachmentid=152808&d=1458004535 "Franc1sco franug" (circle)
+*	https://forums.alliedmods.net/showthread.php?p=2317717 "Invex | Byte" (zero guns code)
 */
 
 
@@ -32,7 +32,7 @@ TODO make all names consistent
 
 #define CT_ARMOUR  // 50 armour for ct on spawn
 //#define CT_KEVLAR_HELMET // kevlar + helment for cts 
-//#define STUCK
+#define STUCK
 //#define LASER_DEATH
 //#define GUN_COMMANDS
 
@@ -42,7 +42,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V2.9.4 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.0 - Violent Intent Jailbreak"
 
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
@@ -66,15 +66,36 @@ TODO make all names consistent
 #define PTS_PREFIX "\x07F8F8FF"
 
 
+
+const int WARDEN_INVALID = -1;
+// global vars
+
+// client id of current warden
+int warden_id = WARDEN_INVALID;
+
+
+// handle for sdkcall
+Handle SetCollisionGroup;
+
+
+
+
 #include <sourcemod>
 #include <sdktools>
 #include <cstrike>
 #include "lib.inc"
-#include "specialday.inc"
+#include "specialday/specialday.inc"
 
-bool use_draw_laser_settings[MAXPLAYERS + 1];
 
-bool laser_kill = false;
+
+// split files for this plugin
+#include "jailbreak/stuck.inc"
+#include "jailbreak/guns.inc"
+#include "jailbreak/laser.inc"
+#include "jailbreak/circle.inc"
+#include "jailbreak/block.inc"
+#include "jailbreak/debug.inc"
+
 
 EngineVersion g_Game;
 
@@ -87,28 +108,6 @@ public Plugin:myinfo =
 	url = "https://github.com/destoer/css_jailbreak_plugins"
 };
 
-
-
-const int WARDEN_INVALID = -1;
-// global vars
-
-// client id of current warden
-int warden_id = WARDEN_INVALID;
-
-// how many times we can empty a gun
-int empty_uses = 2;
-
-// laser stuff
-// laser globals
-bool laser_use[MAXPLAYERS+1];
-float prev_pos[MAXPLAYERS+1][3];
-int g_lbeam;
-int g_lpoint;
-
-
-
-// handle for sdkcall
-Handle SetCollisionGroup;
 
 public int native_get_warden_id(Handle plugin, int num_param)
 {
@@ -129,109 +128,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
    return APLRes_Success;
 }
 
-// timer here to draw connected points
-public Action laser_draw(Handle timer)
-{
-	if(warden_id != WARDEN_INVALID && use_draw_laser_settings[warden_id] && laser_use[warden_id])
-	{
-		float cur_pos[3];
-		get_client_sight_end(warden_id, cur_pos);
-		
-		// check we are not on the first laser shine
-		bool initial_draw = prev_pos[warden_id][0] == 0.0 && prev_pos[warden_id][1] == 0.0 
-			&& prev_pos[warden_id][2] == 0.0;
-		
-		if(!initial_draw)
-		{
-			// draw a line from the last laser end to the current one
-			TE_SetupBeamPoints(prev_pos[warden_id], cur_pos, g_lbeam, 0, 0, 0, 25.0, 2.0, 2.0, 10, 0.0, {1,153,255,255}, 0);
-			TE_SendToAll();
-		}
-		prev_pos[warden_id] = cur_pos;
-	}
-}
-
-
-// what has the clients picked for laser color
-int laser_color[64];
-
-int laser_colors[7][4] =
-{
-	{ 1, 153, 255, 255 }, // cyan
-	{255, 0, 251,255} , // pink
-	{255,0,0,255}, // red
-	{118, 9, 186, 255}, // purple
-	{66, 66, 66, 255}, // grey
-	{0,255,0,255}, // green
-	{ 255, 255, 0, 255 } // yellow
-};
-
-int rainbow_color = 0;
-
-int laser_rainbow[7][4] = 
-{
-	{255,0,0,255}, // red
-	{255,165,0,255}, // orange
-	{ 255, 255, 0, 255 }, // yellow
-	{0,255,0,255}, // green
-	{0,0,255,255}, // blue
-	{75,0,130,255}, //indigo
-	{138,43,226,255} // violet
-};
-
-
-public Action rainbow_timer(Handle timer)
-{
-	rainbow_color = (rainbow_color + 1) % 7;
-}
-
-public Action command_laser_color(int client, int args)
-{
-	Panel lasers = new Panel();
-	lasers.SetTitle("Laser Color Selection");
-	lasers.DrawItem("cyan");
-	lasers.DrawItem("pink");
-	lasers.DrawItem("red");
-	lasers.DrawItem("purple");
-	lasers.DrawItem("grey");
-	lasers.DrawItem("green");
-	lasers.DrawItem("yellow");
-	lasers.Send(client,color_handler,20);
-
-}
-
-
-public int color_handler(Menu menu, MenuAction action, int client, int choice) 
-{
-	if(action == MenuAction_Select) 
-	{
-		laser_color[client] = choice - 1;
-	}
-
-	
-	else if (action == MenuAction_Cancel) 
-	{
-		PrintToServer("Client %d's menu was cancelled. Reason: %d", client, choice);
-	}
-	
-	
-	return 0;
-}
-
-enum laser_type
-{
-	warden,
-	admin,
-	donator,
-	none	
-};
-
-
-
-public void SetupLaser(int client,int color[4])
-{
-	setup_laser(client, color, g_lbeam, g_lpoint, laser_kill);
-}
 
 public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon)
 {
@@ -329,7 +225,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	return Plugin_Continue;
 }
 
-
+/*
 // used for hooking voice command (USEUD)
 public void OnClientSpeakingEx(client)
 {
@@ -338,36 +234,7 @@ public void OnClientSpeakingEx(client)
 		set_warden(client);
 	}
 }
-
-
-
-// circle stuff
-
-// circle globals
-new g_BeamSprite;
-new g_HaloSprite;
-
-public Action Repetidor(Handle timer)
-{
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if(IsClientInGame(i) && IsPlayerAlive(i) && i == warden_id)
-		{
-			SetupBeacon(i);
-		}
-	}
-}
-
-public void SetupBeacon(client)
-{
-	float vec[3];
-	GetClientAbsOrigin(client, vec);
-	vec[2] += 10;
-	TE_SetupBeamRingPoint(vec, 35.0, 35.1, g_BeamSprite, g_HaloSprite, 0, 5, 0.1, 5.2, 0.0, {1, 153, 255, 255}, 1000, 0);
-	TE_SendToAll();
-}
-
-Menu gun_menu;
+*/
 
 
 public OnMapStart()
@@ -425,168 +292,6 @@ public void OnClientDisconnect(client)
 	}
 }
 
-// enable and disables no block
-// might want to add a default round setting...
-// also give newly spawned players this setting...
-
-
-// no block
-#if defined STUCK
-public Action stuck_callback(client,args)
-{	
-	static int next = 0;
-	
-	if(GetTime() < next)
-	{
-		PrintToChat(client, "%s stuck is on cooldown!", ANTISTUCK_PREFIX);
-		return Plugin_Handled;
-	}
-	
-	if(!noblock_enabled() && IsPlayerAlive(client))
-	{
-		// 3 second usage delay
-		next = GetTime() + 5;
-		
-		
-		PrintToChatAll("%s Player %N unstuck everyone!", ANTISTUCK_PREFIX, client);
-		disable_block_all();
-		
-		CreateTimer(3.0, block_timer_callback);
-	}
-	return Plugin_Handled;
-}
-
-public Action block_timer_callback(Handle timer)
-{
-	enable_block_all();
-}
-#endif
-
-public disable_block_all()
-{
-	unblock_all_clients(SetCollisionGroup);
-}
-
-public Action disable_block_warden_callback(client, args)
-{
-	
-	if(client != warden_id)
-	{
-		return Plugin_Handled;
-	}
-
-	PrintCenterTextAll("Player Collision: OFF");
-	disable_block_all();
-	return Plugin_Handled;
-}
-
-
-// disable block for an admin no warden check
-public Action disable_block_admin(client, args)
-{
-	PrintCenterTextAll("Player Collision: OFF!");
-	disable_block_all();
-	return Plugin_Handled;
-}
-
-// same but to enable blocking
-public Action enable_block_admin(client, args)
-{
-	PrintCenterTextAll("Player Collision: ON");
-	enable_block_all();	
-}
-
-public enable_block_all()
-{
-	block_all_clients(SetCollisionGroup);
-}
-
-public Action enable_block_warden_callback(client, args)
-{
-	
-
-	if(client != warden_id)
-	{
-		return Plugin_Handled;
-	}
-
-	PrintCenterTextAll("Player Collision: ON");
-	enable_block_all();
-	return Plugin_Handled;
-}
-
-
-// because we cant have debugging commands without
-// inboxes blowing up sigh...
-
-
-
-public Action jailbreak_version(int client, int args)
-{
-	// undocumented command
-	if(!is_sudoer(client))
-	{
-		return Plugin_Handled;
-	}	
-	
-	
-	PrintToChat(client, "%s WARDEN VERSION: %s",WARDEN_PREFIX, PLUGIN_VERSION);
-	
-	return Plugin_Continue;
-}
-
-public Action is_blocked_cmd(int client, int args)
-{
-	// undocumented command
-	if(!is_sudoer(client))
-	{
-		return Plugin_Handled;
-	}
-	
-	PrintToChat(client, "%s blocked state: %s",WARDEN_PREFIX, noblock_enabled() ? "no block" : "block");
-	for (int i = 0; i < MaxClients; i++)
-	{
-		if(is_valid_client(i))
-		{
-			PrintToConsole(client, "block state: %N %s", i, is_client_blocked(i) ? "block" : "no block");
-		}
-	}
-	
-	return Plugin_Continue;
-}
-
-
-#define UNDOCUMENTED_COMMANDS_LEN 2
-
-static const char undocumented_commands[UNDOCUMENTED_COMMANDS_LEN][] = { "wv","is_blocked"};
-
-// i dont even wanna know why i cant just declare a const array
-// sigh
-ConCmd undocumented_command_callbacks[UNDOCUMENTED_COMMANDS_LEN];
-
-void register_undocumented_commands()
-{
-
-	undocumented_command_callbacks[0] = jailbreak_version;
-	undocumented_command_callbacks[1] = is_blocked_cmd;
-}
-
-void handle_undocumented_command(const char[] cmd, int client)
-{
-	
-	
-	
-	for (int i = 0; i < UNDOCUMENTED_COMMANDS_LEN; i++)
-	{
-		if(StrEqual(cmd,undocumented_commands[i]))
-		{
-			Call_StartFunction(null, undocumented_command_callbacks[i]);
-			Call_PushCell(client);
-			Call_PushCell(0); // assume zero args for now because ehh
-			Call_Finish();
-		}
-	}
-}
 
 public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs)
 {
@@ -677,7 +382,7 @@ public OnPluginStart()
 	// command_stuck is push out callback
 	// we currently use the noblock toggle callback
 	#if defined STUCK
-	RegConsoleCmd("stuck", stuck_callback);
+	RegConsoleCmd("stuck", command_stuck);
 	#endif		
 	RegConsoleCmd("sm_samira", samira_EE);
 	
@@ -731,16 +436,6 @@ public OnPluginStart()
 	CreateTimer(0.3, rainbow_timer, _, TIMER_REPEAT);
 	PrecacheSound("bot\\what_have_you_done.wav");
 	
-}
-
-public Action kill_laser (int client, int args)
-{
-	laser_kill = true;
-}
-
-public Action safe_laser (int client, int args)
-{
-	laser_kill = false;
 }
 
 public Action force_open_callback (int client, int args)
@@ -921,7 +616,7 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 // give ct equitment on spawn
 public Action player_spawn(Handle event, const String:name[], bool dontBroadcast)
 {
-	new client = GetClientOfUserId(GetEventInt(event, "userid"));
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	if(IsClientInGame(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
 	{
 		#if defined CT_KEVLAR_HELMET
@@ -1006,230 +701,3 @@ public Action samira_EE(int client, int args)
     PrintToChat(client,"\x07FFFF00( ͡° ͜ʖ ͡°)\x07F8F8FF----------\x078B0000Organ\x07FF69B4♥\x076A5ACD( ͡° ͜ʖ ͡°)\x07FF69B4♥\x078B0000Jordi\x07F8F8FF-------\x07EE82EE( ͡° ͜ʖ ͡°)");
     return Plugin_Handled;
 } 
-
-
-
-// this antistuck command is unused
-// uses the push out method
-/*
-bool timer_active = false;
-
-
-#define COLLISION_GROUP_PUSHAWAY            17
-#define COLLISION_GROUP_PLAYER              5
-
-public Action command_stuck(int client, int args)
-{
-    if (IsClientInGame(client) && IsPlayerAlive(client) && !timer_active)
-    {
-        PrintToChatAll("%s %N unstuck all players", ANTISTUCK_PREFIX, client);    
-        timer_active = true;
-        CreateTimer(1.0, timer_unblock_player, client);
-        
-        for (int i = 1; i <= MaxClients; i++)
-        {    
-            if (IsClientInGame(i) && IsPlayerAlive(i))
-            {
-                enable_anti_stuck(i);
-            }
-        }
-    }
-    else if (timer_active)
-    {
-        PrintToChat(client, "%s Command is already in use", ANTISTUCK_PREFIX);
-    }
-    else
-    {
-        PrintToChat(client, "%s You must be alive to use this command", ANTISTUCK_PREFIX);
-    }
-    
-    return Plugin_Handled;
-    
-}
-
-
-
-public Action timer_unblock_player(Handle timer, int client)
-{
-  	timer_active = false;
-    
-	for (int i = 1; i <= MaxClients; i++)
-    {    
-        if (IsClientInGame(i) && IsPlayerAlive(i))
-        {
-            disable_anti_stuck(i);
-        }
-    }
-    
-	return Plugin_Continue;
-    
-}
-
-void disable_anti_stuck(int client)
-{
-    SetEntProp(client, Prop_Data, "m_CollisionGroup", COLLISION_GROUP_PLAYER);
-}
-
-void enable_anti_stuck(int client)
-{
-    SetEntProp(client, Prop_Data, "m_CollisionGroup", COLLISION_GROUP_PUSHAWAY);
-}
-*/
-
-// empty weapon handler
-public empty_handler(Menu menu, MenuAction action, int client, int menu_option) 
-{
-	// only warden can quick empty	
-	if(client == warden_id && empty_uses > 0 ) 
-	{
-		if(action == MenuAction_Select) 
-		{
-			new weapon;
-			if(menu_option == 1) // primary
-			{
-				weapon = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);
-			}
-			
-			if(menu_option == 2) // secondary
-			{
-				weapon = GetPlayerWeaponSlot(client, CS_SLOT_SECONDARY);
-			
-			}
-
-		
-			PrintToChat(client, "%s emptying gun.", WARDEN_PREFIX);
-			empty_weapon(client, weapon);
-			
-			 // decrement uses
-			PrintToChat(client, "%s You have %d uses left.", WARDEN_PREFIX, empty_uses--);
-		}
-		
-		else if (action == MenuAction_Cancel) 
-		{
-			PrintToServer("%N's menu was cancelled. Reason: %d", client ,menu_option);
-		}
-	}
-	
-	
-	else if(client != warden_id)
-	{
-		PrintToChat(client, "%s Only warden is allowed to quick emtpy guns.", WARDEN_PREFIX);
-	}
-	
-	else // uses must be zero 
-	{
-		PrintToChat(client, "%s You cannot empty any more guns this round.", WARDEN_PREFIX);
-	}
-}
-
-// menu for emptying guns
-public Action empty_menu(client,args)
-{
-	
-	Panel panel = new Panel();
-	panel.SetTitle("EmptyGun");
-	panel.DrawItem("Primary");
-	panel.DrawItem("Secondary"); 
-	
-	panel.Send(client, empty_handler, 20);
-
-	delete panel;
-			
-	return Plugin_Handled;	
-}
-
-// empty a clients specified weapon
-public empty_weapon(client, weapon)
-{ 
- 	if (IsValidEntity(weapon)) 
- 	{
-	    //primary ammo
-	    set_reserve_ammo(client, weapon, 0);
-	    
-	    //clip
-	    set_clip_ammo(client, weapon, 0);
-	}
-}
-
-// laser menu
-public Action laser_menu(client,args) {
-	Panel options = new Panel();
-	options.SetTitle("Laser selection");
-	options.DrawItem("normal laser");
-	options.DrawItem("draw laser");
-	
-	if(IsClientInGame(client) && GetClientTeam(client) == CS_TEAM_CT || GetClientTeam(client) == CS_TEAM_T )
-	{
-		options.Send(client, laser_handler, 20);
-	}
-	
-	delete options;
-	return Plugin_Handled;
-}
-
-public laser_handler(Menu menu, MenuAction action, int param1, int param2) 
-{
-	if(action == MenuAction_Select) 
-	{
-		switch(param2)
-		{
-			case 1:
-				use_draw_laser_settings[param1] = false;
-				
-			case 2:
-				use_draw_laser_settings[param1] = true;
-		}
-	}
-	
-	else if (action == MenuAction_Cancel) 
-	{
-		PrintToServer("Client %d's menu was cancelled. Reason: %d",param1,param2);
-	}	
-}
-
-
-public int WeaponHandler(Menu menu, MenuAction action, int client, int param2) 
-{
-	if(action == MenuAction_Select) 
-	{
-		// if they aernt alive or are not on ct they cant use this
-		if(!(IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT))
-		{
-			return -1;
-		}
-
-		strip_all_weapons(client);
-		
-	
-		GivePlayerItem(client, "weapon_knife"); // give back a knife
-		GivePlayerItem(client, "weapon_deagle"); // all ways give a deagle
-		
-		
-		// give them plenty of deagle ammo
-		int weapon = GetPlayerWeaponSlot(client, CS_SLOT_SECONDARY);
-		set_reserve_ammo(client, weapon, 999);
-		
-		
-		GivePlayerItem(client, gun_give_list[param2]);
-
-		
-		// give them plenty of primary ammo
-		weapon = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);
-		set_reserve_ammo(client, weapon, 999);
-	}
-
-	
-	else if (action == MenuAction_Cancel) 
-	{
-		PrintToServer("Client %d's menu was cancelled. Reason: %d", client, param2);
-	}
-	return 0;
-}
-
-public Action weapon_menu(int client, int args)
-{
-	if(IsClientConnected(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
-	{
-		gun_menu.Display(client,20);
-	}
-}
