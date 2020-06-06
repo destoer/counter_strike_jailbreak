@@ -307,7 +307,7 @@ public OnPluginStart()
 	HookEvent("round_start", OnRoundStart); // reset variables after a sd
 	HookEvent("round_end", OnRoundEnd);
 	
-	register_undocumented_commands();
+	RegConsoleCmd("sdv", sd_version);
 	
 	for(int i = 1;i < MaxClients;i++)
 	{

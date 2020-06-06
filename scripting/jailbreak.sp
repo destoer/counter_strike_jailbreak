@@ -298,7 +298,6 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	// hide commands typed by sudoers
 	if(is_sudoer(client) && (sArgs[0] == '/' || sArgs[0] == '!'))
 	{
-		handle_undocumented_command(sArgs[1], client);
 		return Plugin_Handled;
 	}    
 	
@@ -412,7 +411,8 @@ public OnPluginStart()
 	RegConsoleCmd("laser_color", command_laser_color);
 #endif
 	
-	register_undocumented_commands();
+	RegConsoleCmd("wv", jailbreak_version);
+	RegConsoleCmd("is_blocked", is_blocked_cmd);
 	
 	// hooks
 	HookEvent("round_start", round_start); // For the round start
