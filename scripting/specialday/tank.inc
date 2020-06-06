@@ -48,23 +48,15 @@ void end_tank()
 
 public void MakeTank(int client)
 {
-		SetEntityHealth(client, 250 * GetClientCount(true));
-		
-		
-	
-		CS_SwitchTeam(client,CS_TEAM_CT);
-		SetEntityRenderColor(client, 255, 0, 0, 255);
-		PrintCenterTextAll("%N is the TANK!", client);
+	SetEntityHealth(client, 250 * GetClientCount(true));
+	CS_SwitchTeam(client,CS_TEAM_CT);
+	SetEntityRenderColor(client, 255, 0, 0, 255);
+	PrintCenterTextAll("%N is the TANK!", client);
 }
 
 
 public void StartTank()
 {	
-	SetEntityHealth(tank, 250 * GetClientCount(true));
-	
-	
-	
-	
 	// swap everyone other than the tank to the t side
 	// if they were allready in ct or t
 	for(int i = 1; i < MaxClients; i++)
@@ -78,9 +70,7 @@ public void StartTank()
 		}
 	}
 	
-	CS_SwitchTeam(tank,CS_TEAM_CT);
-	SetEntityRenderColor(tank, 255, 0, 0, 255);
-	PrintCenterTextAll("%N is the TANK!", tank);
+	MakeTank(tank);
 }
 
 
