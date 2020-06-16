@@ -7,7 +7,16 @@
 #define _FFD_INCLUDE_included
 
 
-#define FFA_CONDITION(%1,%2) (1 <= %1 <= MaxClients && 1 <= %2 <= MaxClients && %1 != %2 && GetClientTeam(%1) == GetClientTeam(%2))
+bool is_ffa(int attacker,int victim)
+{
+	if(is_valid_client(attacker) && is_valid_client(victim))
+	{
+		return GetClientTeam(attacker) == GetClientTeam(victim);
+	}
+	
+	return false;
+}
+
 
 // ffd do a gun menu
 void ffd_player_init(int client)

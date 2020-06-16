@@ -1062,7 +1062,7 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 	// scale ff damage so its the same as standard dmg
 	else if(ff)
 	{
-		if (FFA_CONDITION(victim, attacker) && inflictor == attacker)
+		if (is_ffa(victim, attacker) && inflictor == attacker)
 		{
 			damage /= 0.35;
 		}	
@@ -1198,43 +1198,43 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 	{
 		return Plugin_Continue;
 	}
-	
+
+
+	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+	int victim = GetClientOfUserId(GetEventInt(event, "userid"));
+
+	// if the kill is from friendly fire
+	// set the score so it goes up instead of down
+	if(is_ffa(victim, attacker) && is_valid_client(attacker))
+	{
+		int frags = GetEntProp(attacker,Prop_Data, "m_iFrags");
+		SetEntProp(attacker, Prop_Data, "m_iFrags", frags + 2);
+	}
+
 	switch(special_day)
 	{
 		case zombie_day:
 		{
-			int victim = GetClientOfUserId(GetEventInt(event, "userid"));
 			zombie_death(victim);
 		}
 		
 		case scoutknife_day:
-		{
-			int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-			int victim = GetClientOfUserId(GetEventInt(event, "userid"));
-			
+		{	
 			scoutknife_death(attacker, victim);
 		}
 		
 		case deathmatch_day:
 		{
-			int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-			int victim = GetClientOfUserId(GetEventInt(event, "userid"));
-			
 			deathmatch_death(attacker, victim);
 		}	
 		
 		case gungame_day:
 		{
-			int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-			int victim = GetClientOfUserId(GetEventInt(event, "userid"));
-			
 			gungame_death(attacker, victim);
 		}
 		
 		case laser_day:
 		{
-			int victim = GetClientOfUserId(GetEventInt(event, "userid"));
-			
 			laser_death(victim);
 		}
 		
