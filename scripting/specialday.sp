@@ -44,6 +44,8 @@ public Plugin myinfo = {
 
 #if defined STORE
 #undef REQUIRE_PLUGIN
+ConVar store_kill_ammount_cvar;
+int store_kill_ammount_backup = 0;
 #include "thirdparty/store.inc"
 #define REQUIRE_PLUGIN
 #endif
@@ -151,6 +153,7 @@ int g_WeaponParent;
 
 
 
+
 // split files for sd
 #include "specialday/ffd.inc"
 #include "specialday/tank.inc"
@@ -224,6 +227,12 @@ void disable_friendly_fire()
 
 void disable_round_end()
 {
+	// if we have a "indefinite" game
+	// do not award credits for kills
+#if defined STORE
+	SetConVarInt(store_kill_ammount_cvar, 0); 
+#endif
+	
 	ignore_round_end = true;
 	SetConVarBool(g_ignore_round_win, true);
 }
@@ -543,6 +552,15 @@ Menu sd_list_menu;
 public OnMapStart()
 {
 	
+#if defined STORE
+	store_kill_ammount_cvar = FindConVar("sm_store_credit_amount_kill");
+	if(store_kill_ammount_cvar != null)
+	{
+		store_kill_ammount_backup = GetConVarInt(store_kill_ammount_cvar);
+	}
+#endif
+	
+	
 	g_lbeam = PrecacheModel("materials/sprites/laserbeam.vmt");
 	g_lpoint = PrecacheModel("materials/sprites/glow07.vmt");	
 	
@@ -764,6 +782,14 @@ void EndSd(bool forced=false)
 	patient_zero = -1;
 	sd_winner = -1;
 	
+	// reset the store kill ammount
+#if defined STORE
+	if(store_kill_ammount_cvar != null)
+	{
+		SetConVarInt(store_kill_ammount_cvar, store_kill_ammount_backup);
+	}		
+#endif
+
 	// reset the alpha just to be safe
 	for(int i = 1; i <= MaxClients; i++)
 	{
