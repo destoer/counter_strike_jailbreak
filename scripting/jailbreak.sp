@@ -27,14 +27,14 @@ TODO make all names consistent
 */
 
 //uncomment to make noblock default 
-//#define NOBLOCK_DEFAULT
+#define NOBLOCK_DEFAULT
 
 
 #define CT_ARMOUR  // 50 armour for ct on spawn
 //#define CT_KEVLAR_HELMET // kevlar + helment for cts 
 #define STUCK
-//#define LASER_DEATH
-//#define GUN_COMMANDS
+#define LASER_DEATH
+#define GUN_COMMANDS
 
 #define DONATOR 	ADMFLAG_CUSTOM1
 #define MEMBER 		ADMFLAG_CUSTOM2
@@ -44,13 +44,13 @@ TODO make all names consistent
 #define PLUGIN_AUTHOR "organharvester, jordi"
 #define PLUGIN_VERSION "V3.0 - Violent Intent Jailbreak"
 
-/*
+
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
 #define WARDEN_PREFIX "\x07FF0000[VI Warden]\x07F8F8FF"
 #define WARDEN_PLAYER_PREFIX "\x07FF0000[VI Warden]\x07F8F8FF"
 #define PTS_PREFIX "\x07F8F8FF"
-*/
+
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[GK Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[GameKick Jailbreak]"
@@ -58,13 +58,13 @@ TODO make all names consistent
 #define WARDEN_PLAYER_PREFIX "\x0700008B[Warden]\x07F8F8FF"
 #define PTS_PREFIX "\x07F8F8FF"
 */
-
+/*
 #define ANTISTUCK_PREFIX "\x07FF0000[Antistuck]\x07F8F8FF"
 #define JB_PREFIX "\x04[GP Jailbreak]\x07F8F8FF"
 #define WARDEN_PREFIX "\x04[GP Warden]\x07F8F8FF"
 #define WARDEN_PLAYER_PREFIX "\x04[GP Warden]\x0700BFFF"
 #define PTS_PREFIX "\x07F8F8FF"
-
+*/
 
 
 const int WARDEN_INVALID = -1;

@@ -34,7 +34,7 @@ public Plugin myinfo = {
 
 #define SD_ADMIN_FLAG ADMFLAG_UNBAN
 
-//#define FREEZE_COMMANDS
+#define FREEZE_COMMANDS
 
 #if defined CT_BAN
 #undef REQUIRE_PLUGIN
@@ -57,9 +57,9 @@ int store_kill_ammount_backup = 0;
 
 #endif
 
-//#define SPECIALDAY_PREFIX "\x04[Vi Special Day]\x07F8F8FF"
+#define SPECIALDAY_PREFIX "\x04[Vi Special Day]\x07F8F8FF"
 //#define SPECIALDAY_PREFIX "\x04[GK Special Day]\x07F8F8FF"
-#define SPECIALDAY_PREFIX "\x04[GP Special Day]\x07F8F8FF"
+//#define SPECIALDAY_PREFIX "\x04[GP Special Day]\x07F8F8FF"
 
 
 // set up sv_cheats in server config so we can add test bots lol
