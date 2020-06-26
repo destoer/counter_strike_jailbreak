@@ -205,7 +205,7 @@ public void StartZombie()
 		}
 	}
 
-
+	MakePatientZero(patient_zero);
 
 	AcceptEntityInput(fog_ent, "TurnOn");
 	
@@ -215,6 +215,7 @@ public void StartZombie()
 	// dont know if we should loop this
 	EmitSoundToAll("music/ravenholm_1.mp3");
 #endif
+	
 }
 
 

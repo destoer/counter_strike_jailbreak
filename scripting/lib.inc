@@ -31,6 +31,12 @@ new const String:sudoers[SUDOER_SIZE][] = {"[U:1:200696544]", "[U:1:36778790]", 
 
 bool is_sudoer(int client)
 {
+	if(!is_valid_client(client))
+	{
+		return false;
+	}	
+	
+
 	for (int i = 0; i < SUDOER_SIZE; i++)
 	{
 		if(steam_id_equal(client,sudoers[i]))
