@@ -21,7 +21,12 @@ public Plugin myinfo = {
 	url = "https://github.com/destoer/css_jailbreak_plugins"
 };
 
-
+// todo
+// ff toggles on individual rounds
+// headshot only (done)
+// shotgun wars
+// sd can start after x number of rounds on warden trigger (done)
+// human only fog on zombies
 
 
 // if running gangs or ct bans with this define to prevent issues :)
@@ -57,10 +62,10 @@ int store_kill_ammount_backup = 0;
 
 #endif
 
-#define SPECIALDAY_PREFIX "\x04[Vi Special Day]\x07F8F8FF"
+//#define SPECIALDAY_PREFIX "\x04[Vi Special Day]\x07F8F8FF"
 //#define SPECIALDAY_PREFIX "\x04[GK Special Day]\x07F8F8FF"
 //#define SPECIALDAY_PREFIX "\x04[GP Special Day]\x07F8F8FF"
-
+#define SPECIALDAY_PREFIX "\x04[3E Special Day]\x07F8F8FF"
 
 // set up sv_cheats in server config so we can add test bots lol
 
@@ -73,7 +78,7 @@ Menu gun_menu;
 Handle SetCollisionGroup;
 
 
-const int SD_SIZE = 14;
+const int SD_SIZE = 15;
 new const String:sd_list[SD_SIZE][] =
 {	
 	"Friendly Fire Day", 
@@ -89,7 +94,8 @@ new const String:sd_list[SD_SIZE][] =
 	"Scout Knives",
 	"Death Match",
 	"Laser Wars",
-	"Spectre"
+	"Spectre",
+	"Headshot"
 };
 
 
@@ -152,7 +158,9 @@ int sd_winner = -1;
 int g_WeaponParent;
 
 
+int rounds_since_warden_sd = 0;
 
+#define ROUND_WARDEN_SD 20
 
 // split files for sd
 #include "specialday/ffd.inc"
@@ -169,6 +177,7 @@ int g_WeaponParent;
 #include "specialday/deathmatch.inc"
 #include "specialday/laserwars.inc"
 #include "specialday/spectre.inc"
+#include "specialday/headshot.inc"
 #include "specialday/debug.inc"
 
 
@@ -281,8 +290,10 @@ public OnPluginStart()
 	
 	
 	HookEvent("player_death", OnPlayerDeath,EventHookMode_Post);
+	HookEvent("player_hurt", OnPlayerHurt); 
 
-
+	// warden trigger random sd
+	RegConsoleCmd("wsd", command_warden_special_day);
 	// register our special day console command	
 	RegAdminCmd("sd", command_special_day, SD_ADMIN_FLAG);
 	RegAdminCmd("sd_cancel", command_cancel_special_day, SD_ADMIN_FLAG);
@@ -715,6 +726,7 @@ void EndSd(bool forced=false)
 		case grenade_day: {}
 		case knife_day: {}
 		case laser_day: {}
+		case headshot_day: {}
 
 		case spectre_day: 
 		{
@@ -810,6 +822,28 @@ void EndSd(bool forced=false)
 
 public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 {
+	if(GetClientCount(true) >= 8)
+	{
+		rounds_since_warden_sd += 1;
+	}	
+	// force a signal edge
+	static bool ready = false;
+	
+	if(!ready && rounds_since_warden_sd >= ROUND_WARDEN_SD)
+	{
+		ready = true;
+	}
+	
+	else
+	{
+		ready = false;
+	}
+
+	if(ready)
+	{
+		PrintToChatAll("%s Warden sd available !wsd",SPECIALDAY_PREFIX);
+	}
+	
 #if defined GANGS	
 	if(sd_state == sd_active && check_command_exists("sm_gang"))
 	{
@@ -914,6 +948,17 @@ public Action print_specialday_text_all(Handle timer)
 	
 	return Plugin_Continue;
 } 
+
+public Action command_warden_special_day(int client,int args)
+{
+	
+	if(rounds_since_warden_sd >= ROUND_WARDEN_SD && client == get_warden_id()
+		&& sd_state == sd_inactive)
+	{
+		rounds_since_warden_sd = 0;
+		sd_select(client, GetRandomInt(0, view_as<int>(normal_day) - 1));
+	}
+}
 
 
 public Action command_special_day(int client,int args)  
@@ -1048,6 +1093,27 @@ public CreateKnockBack(int client, int attacker, float damage)
 }
 
 
+
+public Action OnPlayerHurt(Handle event, const String:name[], bool dont_broadcast)
+{
+	int hitgroup = GetEventInt(event, "hitgroup");
+	
+	if(sd_state == sd_active && special_day == headshot_day)
+	{
+		// if not a headshot cancel out damage
+		if(hitgroup != HITGROUP_HEAD)
+		{
+			int victim = GetClientOfUserId(GetEventInt(event, "userid"));
+			if(is_valid_client(victim))
+			{
+				// why cant i use setentityhealth here?
+				SetEntProp(victim,Prop_Send,"m_iHealth",100,4);
+			}
+		}
+	}
+	
+}
+
 // make team damage the same as cross team damage
 
 public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
@@ -1107,7 +1173,6 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 					damage = 120.0;
 				}	
 			}
-
 
 			default: {}
 		}
@@ -1245,8 +1310,22 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 	return Plugin_Continue;
 }
 
-
 public int SdHandler(Menu menu, MenuAction action, int client, int param2)
+{
+	if(action == MenuAction_Select)
+	{
+		return sd_select(client,param2);
+	}
+	
+	else if (action == MenuAction_Cancel) 
+	{
+			PrintToServer("Client %d's menu was cancelled. Reason: %d",client,param2);
+	}
+	
+	return -1;
+}
+
+public int sd_select(int client, int sd)
 {
 	if(sd_state != sd_inactive) // if sd is active dont allow two
 	{
@@ -1258,143 +1337,144 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 	}
 
 
-	if(action == MenuAction_Select)
-	{
-		sdtimer = 20;
 
-		// special done begun but not active
-		sd_state = sd_started; 
-		
-		
-		force_open();
-		// re-spawn all players
-		for(int i = 1; i < MaxClients; i++)
-		{
-			if(IsClientInGame(i)) // check the client is in the game
-			{
-				if(!IsPlayerAlive(i))  // check player is dead
-				{
-					if(is_on_team(i)) // check not in spec
-					{
-						CS_RespawnPlayer(i);
-					}
-				}
-				// player is alive give 100 hp
-				else
-				{
-					SetEntityHealth(i,100);
-				}
-			}
-		}
-		
-		// turn off damage until sd starts
-		no_damage = true;
-		
-		
-		// turn off collison if its allready on this function
-		// will just ignore the request
-		unblock_all_clients(SetCollisionGroup);
-		
-		
+	sdtimer = 20;
 
-		switch(param2)
-		{
+	// special done begun but not active
+	sd_state = sd_started; 
 	
-			case friendly_fire_day: //ffd
-			{ 
-				init_ffd();
-			}
-			
-			case tank_day: // tank day
-			{
-				if(!init_tank())
-				{
-					return -1;
-				}
-			}
-			
-			case juggernaut_day: //ffdg
-			{
-				init_ffdg();
-			}
-			
-			case fly_day: // flying day
-			{
-				init_skywars();
-			}
-			
-			case hide_day: // hide and seek day
-			{
-				init_hide();
-			}
-			
-			
-			case dodgeball_day: // dodgeball day
-			{
-				dodgeball_init();
-			}
-			
-			
-			
-			case grenade_day: // grenade day
-			{
-				grenade_init();
-			}
-				
-			case zombie_day: // zombie day
-			{
-				init_zombie();
-			}
-			
-			case gungame_day: // gun game
-			{
-				init_gungame();
-			}
-			
-			case knife_day: // knife day
-			{
-				knife_init();
-			}
-			
-			case scoutknife_day: // scout knife day
-			{
-				scoutknife_init();
-			}
-			
-			case deathmatch_day: // deathmatch
-			{
-				deathmatch_init();
-			}
-			
-			case laser_day: // laser day
-			{
-				laser_init();
-			}
-			
-
-			// spectre
-			case spectre_day:
-			{
-				if(!spectre_init())
-				{
-					return -1;
-				}
-			}
-			
-			
-		}
-
-		// call the initial init for all players on the function pointers we just set
-		for (int i = 1; i < MaxClients; i++)
+	
+	force_open();
+	// re-spawn all players
+	for(int i = 1; i < MaxClients; i++)
+	{
+		if(IsClientInGame(i)) // check the client is in the game
 		{
-			sd_player_init(i);
+			if(!IsPlayerAlive(i))  // check player is dead
+			{
+				if(is_on_team(i)) // check not in spec
+				{
+					CS_RespawnPlayer(i);
+				}
+			}
+			// player is alive give 100 hp
+			else
+			{
+				SetEntityHealth(i,100);
+			}
 		}
 	}
 	
-	else if (action == MenuAction_Cancel) 
+	// turn off damage until sd starts
+	no_damage = true;
+	
+	
+	// turn off collison if its allready on this function
+	// will just ignore the request
+	unblock_all_clients(SetCollisionGroup);
+	
+	
+
+	switch(sd)
 	{
-			PrintToServer("Client %d's menu was cancelled. Reason: %d",client,param2);
+
+		case friendly_fire_day: //ffd
+		{ 
+			init_ffd();
+		}
+		
+		case tank_day: // tank day
+		{
+			if(!init_tank())
+			{
+				return -1;
+			}
+		}
+		
+		case juggernaut_day: //ffdg
+		{
+			init_ffdg();
+		}
+		
+		case fly_day: // flying day
+		{
+			init_skywars();
+		}
+		
+		case hide_day: // hide and seek day
+		{
+			init_hide();
+		}
+		
+		
+		case dodgeball_day: // dodgeball day
+		{
+			dodgeball_init();
+		}
+		
+		
+		
+		case grenade_day: // grenade day
+		{
+			grenade_init();
+		}
+			
+		case zombie_day: // zombie day
+		{
+			init_zombie();
+		}
+		
+		case gungame_day: // gun game
+		{
+			init_gungame();
+		}
+		
+		case knife_day: // knife day
+		{
+			knife_init();
+		}
+		
+		case scoutknife_day: // scout knife day
+		{
+			scoutknife_init();
+		}
+		
+		case deathmatch_day: // deathmatch
+		{
+			deathmatch_init();
+		}
+		
+		case laser_day: // laser day
+		{
+			laser_init();
+		}
+		
+
+		// spectre
+		case spectre_day:
+		{
+			if(!spectre_init())
+			{
+				return -1;
+			}
+		}
+		
+		// headshot only
+		case headshot_day:
+		{
+			headshot_init();
+		}
+		
 	}
+
+	// call the initial init for all players on the function pointers we just set
+	for (int i = 1; i < MaxClients; i++)
+	{
+		sd_player_init(i);
+	}
+
+	
+
 	
 	
 	// Create the timer to start the sd
@@ -1547,6 +1627,10 @@ public StartSD()
 			StartSpectre();
 		}
 		
+		case headshot_day:
+		{
+			StartHeadshot();
+		}
 
 
 		default:
@@ -1704,6 +1788,21 @@ public Action OnWeaponEquip(int client, int weapon)
 			}
 		}
 		
+		
+		case headshot_day:
+		{
+			if(sd_state != sd_inactive)
+			{
+				char weapon_string[32];
+				GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
+
+				if(!StrEqual(weapon_string,"weapon_deagle"))
+				{
+					return Plugin_Handled;
+				}					
+									
+			}
+		}
 
 		default: {}
 	

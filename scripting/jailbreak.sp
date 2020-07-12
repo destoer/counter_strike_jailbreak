@@ -14,8 +14,8 @@ TODO make all names consistent
 
 
 // if defined these two features are locked behind custom admin flags
-#define DRAW_CUSTOM_FLAGS
-#define LASER_COLOR_CUSTOM_FLAGS
+//#define DRAW_CUSTOM_FLAGS
+//#define LASER_COLOR_CUSTOM_FLAGS
 
 /*
 	admin flags
@@ -44,12 +44,14 @@ TODO make all names consistent
 #define PLUGIN_AUTHOR "organharvester, jordi"
 #define PLUGIN_VERSION "V3.0 - Violent Intent Jailbreak"
 
-
+/*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
 #define JB_PREFIX "[VI Jailbreak]"
 #define WARDEN_PREFIX "\x07FF0000[VI Warden]\x07F8F8FF"
 #define WARDEN_PLAYER_PREFIX "\x07FF0000[VI Warden]\x07F8F8FF"
 #define PTS_PREFIX "\x07F8F8FF"
+*/
+
 
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[GK Antistuck]\x07F8F8FF"
@@ -65,6 +67,13 @@ TODO make all names consistent
 #define WARDEN_PLAYER_PREFIX "\x04[GP Warden]\x0700BFFF"
 #define PTS_PREFIX "\x07F8F8FF"
 */
+
+
+#define ANTISTUCK_PREFIX "\x07FF0000[3E Antistuck]\x07F8F8FF"
+#define JB_PREFIX "[3E Jailbreak]"
+#define WARDEN_PREFIX "\x07FF0000[3E Warden]\x07F8F8FF"
+#define WARDEN_PLAYER_PREFIX "\x07FF0000[3E Warden]\x07F8F8FF"
+#define PTS_PREFIX "\x07F8F8FF"
 
 
 const int WARDEN_INVALID = -1;
@@ -107,6 +116,11 @@ public Plugin:myinfo =
 	version = PLUGIN_VERSION,
 	url = "https://github.com/destoer/css_jailbreak_plugins"
 };
+
+// todo
+// lr leaderboard (hard)
+// draw toggle for t's
+// trivia generator (hard)
 
 
 public int native_get_warden_id(Handle plugin, int num_param)
@@ -556,6 +570,7 @@ public print_warden_commands(client)
 	PrintToChat(client,"\x07FF0000!laser       \x07800080- \x07F8F8FFswitch point/draw laser");
 	PrintToChat(client,"\x07FF0000!laser_color       \x07800080- \x07F8F8FFchange laser color");
 	PrintToChat(client,"\x07FF0000!marker  \x07800080- \x07F8F8FF+marker, use mouse to adjust size, then -marker");
+	PrintToChat(client,"\x07FF0000!wsd           \x07800080- \x07F8F8FFstart sd after enough rounds");
 
 }
 
