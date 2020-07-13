@@ -15,32 +15,8 @@ int g_lbeam;
 int g_lpoint;
 
 bool use_draw_laser_settings[MAXPLAYERS + 1];
-
+bool t_use_draw_laser[MAXPLAYERS + 1];
 bool laser_kill = false;
-
-
-
-// timer here to draw connected points
-public Action laser_draw(Handle timer)
-{
-	if(warden_id != WARDEN_INVALID && use_draw_laser_settings[warden_id] && laser_use[warden_id])
-	{
-		float cur_pos[3];
-		get_client_sight_end(warden_id, cur_pos);
-		
-		// check we are not on the first laser shine
-		bool initial_draw = prev_pos[warden_id][0] == 0.0 && prev_pos[warden_id][1] == 0.0 
-			&& prev_pos[warden_id][2] == 0.0;
-		
-		if(!initial_draw)
-		{
-			// draw a line from the last laser end to the current one
-			TE_SetupBeamPoints(prev_pos[warden_id], cur_pos, g_lbeam, 0, 0, 0, 25.0, 2.0, 2.0, 10, 0.0, {1,153,255,255}, 0);
-			TE_SendToAll();
-		}
-		prev_pos[warden_id] = cur_pos;
-	}
-}
 
 
 // what has the clients picked for laser color
@@ -124,10 +100,64 @@ public void SetupLaser(int client,int color[4])
 	setup_laser(client, color, g_lbeam, g_lpoint, laser_kill);
 }
 
+int t_client_list[64] = 0;
 
+
+public Action t_laser_menu(int client,int args)
+{
+
+	if(client != warden_id)
+	{
+		return Plugin_Handled;
+	}
+
+	Menu menu = new Menu(t_laser_handler);
+	
+	int idx = 0;
+	for (int i = 1; i < MaxClients; i++)
+	{
+		if(is_valid_client(i) && GetClientTeam(i) == CS_TEAM_T)
+		{
+			t_client_list[idx++] = i;
+		}
+	}
+	
+	char buf[64];
+
+	for (int i = 0; i < idx; i++)
+	{
+		Format(buf, sizeof(buf), "%N", t_client_list[i]);
+		menu.AddItem(buf,buf);
+	}
+	menu.SetTitle("t draw laser");
+	menu.Display(client, 20);
+	
+	return Plugin_Continue;
+}
+
+public t_laser_handler(Menu menu, MenuAction action, int param1, int param2) 
+{
+
+    if (action == MenuAction_Select)
+    {
+		t_use_draw_laser[t_client_list[param2]] = !t_use_draw_laser[t_client_list[param2]];
+    }
+
+    else if (action == MenuAction_Cancel)
+    {
+        PrintToServer("Client %d's menu was cancelled.  Reason: %d", param1, param2);
+    }
+    
+
+    else if (action == MenuAction_End)
+    {
+        delete menu;
+    }
+}
 
 // laser menu
-public Action laser_menu(client,args) {
+public Action laser_menu(int client,int args) 
+{
 	Panel options = new Panel();
 	options.SetTitle("Laser selection");
 	options.DrawItem("normal laser");
@@ -160,6 +190,61 @@ public laser_handler(Menu menu, MenuAction action, int param1, int param2)
 	{
 		PrintToServer("Client %d's menu was cancelled. Reason: %d",param1,param2);
 	}	
+}
+
+
+// reset the laser draw for t's
+void reset_laser_setting()
+{
+	for (int i = 1; i < MaxClients; i++)
+	{
+		if(is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT)
+		{
+			t_use_draw_laser[i] = false;
+		}
+	}
+}
+
+// timer here to draw connected points
+public Action laser_draw(Handle timer)
+{
+	if(warden_id != WARDEN_INVALID && use_draw_laser_settings[warden_id] && laser_use[warden_id])
+	{
+		do_draw(warden_id, { 1, 153, 255, 255 } );
+	}
+	
+	// now check if any of our t's happen to be drawing
+	for (int i = 1; i < MaxClients; i++)
+	{
+		if(!is_valid_client(i) || GetClientTeam(i) != CS_TEAM_T)
+		{
+			continue;
+		}
+		
+		if(t_use_draw_laser[i])
+		{
+			do_draw(i, { 255, 0, 0, 255 } );
+		}
+	}
+}
+
+
+void do_draw(int client, int color[4])
+{
+		float cur_pos[3];
+		get_client_sight_end(client, cur_pos);
+		
+		// check we are not on the first laser shine
+		bool initial_draw = prev_pos[client][0] == 0.0 && prev_pos[client][1] == 0.0 
+			&& prev_pos[client][2] == 0.0;
+		
+		if(!initial_draw)
+		{
+			// draw a line from the last laser end to the current one
+			TE_SetupBeamPoints(prev_pos[client], cur_pos, g_lbeam, 0, 0, 0, 25.0, 2.0, 2.0, 10, 0.0, color, 0);
+			TE_SendToAll();
+		}
+		prev_pos[client] = cur_pos;		
 }
 
 

@@ -42,7 +42,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V3.0 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.1 - Violent Intent Jailbreak"
 
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
@@ -419,6 +419,8 @@ public OnPluginStart()
 	RegConsoleCmd("laser", laser_menu);
 #endif
 	
+	RegConsoleCmd("tlaser", t_laser_menu);
+	
 #if defined LASER_COLOR_CUSTOM_FLAGS
 	RegAdminCmd("laser_color", command_laser_color, ADMFLAG_CUSTOM4);
 #else
@@ -571,6 +573,7 @@ public print_warden_commands(client)
 	PrintToChat(client,"\x07FF0000!laser_color       \x07800080- \x07F8F8FFchange laser color");
 	PrintToChat(client,"\x07FF0000!marker  \x07800080- \x07F8F8FF+marker, use mouse to adjust size, then -marker");
 	PrintToChat(client,"\x07FF0000!wsd           \x07800080- \x07F8F8FFstart sd after enough rounds");
+	PrintToChat(client,"\x07FF0000!tlaser           \x07800080- \x07F8F8FFtoggle laser for t's'");	
 
 }
 
@@ -646,6 +649,8 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 
 public Action round_start(Handle event, const String:name[], bool dontBroadcast) 
 {
+	reset_laser_setting();
+	
 	// if we are running with block on reset the status on round start
 	#if defined NOBLOCK_DEFAULT // does sourcemod have #ifndef?
 		disable_block_all();

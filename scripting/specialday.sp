@@ -11,7 +11,7 @@
 #include "jailbreak/jailbreak.inc"
 
 
-#define VERSION "2.4  - Violent Intent Jailbreak"
+#define VERSION "2.5  - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
