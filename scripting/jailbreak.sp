@@ -119,7 +119,7 @@ public Plugin:myinfo =
 
 // todo
 // lr leaderboard (hard)
-// draw toggle for t's
+// draw toggle for t's (done)
 // trivia generator (hard)
 
 
