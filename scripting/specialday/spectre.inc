@@ -40,7 +40,7 @@ bool spectre_init()
 
 public void MakeSpectre(int client)
 {
-	SetEntityHealth(client, 150 * GetClientCount(true));
+	SetEntityHealth(client, 60 * GetClientCount(true));
 	
 	
 	// ensure player has only a knife
