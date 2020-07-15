@@ -826,20 +826,9 @@ public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 	{
 		rounds_since_warden_sd += 1;
 	}	
-	// force a signal edge
-	static bool ready = false;
-	
-	if(!ready && rounds_since_warden_sd >= ROUND_WARDEN_SD)
-	{
-		ready = true;
-	}
-	
-	else
-	{
-		ready = false;
-	}
 
-	if(ready)
+
+	if(rounds_since_warden_sd >= ROUND_WARDEN_SD)
 	{
 		PrintToChatAll("%s Warden sd available !wsd",SPECIALDAY_PREFIX);
 	}
