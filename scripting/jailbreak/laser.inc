@@ -198,10 +198,7 @@ void reset_laser_setting()
 {
 	for (int i = 1; i < MaxClients; i++)
 	{
-		if(is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT)
-		{
-			t_use_draw_laser[i] = false;
-		}
+		t_use_draw_laser[i] = false;	
 	}
 }
 
