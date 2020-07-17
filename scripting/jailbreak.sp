@@ -318,7 +318,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	
 	if (warden_id == client)
 	{
-	    if (IsClientInGame(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
+	    if (is_valid_client(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
 	    {
 	        if (!StrEqual(command, "say_team"))
 	        {    

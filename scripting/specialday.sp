@@ -840,6 +840,7 @@ public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 	}
 #endif
 	fr = false;
+	no_damage = false;
 	EndSd();
 	return Plugin_Handled;
 }
