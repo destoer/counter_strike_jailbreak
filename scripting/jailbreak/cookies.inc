@@ -20,8 +20,6 @@ void register_cookies()
 
 public void OnClientCookiesCached(int client)
 {
-	PrintToChatAll("cookkies cached!");
-	
 	// get draw laser setting
 	char cookie_str[12];
 	GetClientCookie(client, client_laser_color_pref, cookie_str, sizeof(cookie_str));
