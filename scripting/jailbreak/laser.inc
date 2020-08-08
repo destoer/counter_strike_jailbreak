@@ -22,7 +22,8 @@ bool laser_kill = false;
 // what has the clients picked for laser color
 int laser_color[64];
 
-int laser_colors[7][4] =
+#define LASER_COLOR_SIZE 7
+int laser_colors[LASER_COLOR_SIZE][4] =
 {
 	{ 1, 153, 255, 255 }, // cyan
 	{255, 0, 251,255} , // pink
@@ -73,6 +74,13 @@ public int color_handler(Menu menu, MenuAction action, int client, int choice)
 	if(action == MenuAction_Select) 
 	{
 		laser_color[client] = choice - 1;
+		
+
+		char cookie[12];
+		IntToString(laser_color[client], cookie, sizeof(cookie));
+		
+		SetClientCookie(client, client_laser_color_pref, cookie);
+
 	}
 
 	
@@ -172,23 +180,29 @@ public Action laser_menu(int client,int args)
 	return Plugin_Handled;
 }
 
-public laser_handler(Menu menu, MenuAction action, int param1, int param2) 
+public laser_handler(Menu menu, MenuAction action, int client, int param2) 
 {
 	if(action == MenuAction_Select) 
 	{
 		switch(param2)
 		{
 			case 1:
-				use_draw_laser_settings[param1] = false;
+				use_draw_laser_settings[client] = false;
 				
 			case 2:
-				use_draw_laser_settings[param1] = true;
+				use_draw_laser_settings[client] = true;
 		}
+		
+		char cookie[12];
+		IntToString(use_draw_laser_settings[client], cookie, sizeof(cookie));
+		
+		SetClientCookie(client, client_laser_draw_pref, cookie);
+	
 	}
 	
 	else if (action == MenuAction_Cancel) 
 	{
-		PrintToServer("Client %d's menu was cancelled. Reason: %d",param1,param2);
+		PrintToServer("Client %d's menu was cancelled. Reason: %d",client,param2);
 	}	
 }
 

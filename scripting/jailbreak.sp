@@ -95,6 +95,12 @@ Handle SetCollisionGroup;
 #include "lib.inc"
 #include "specialday/specialday.inc"
 
+// cookies
+#include <clientprefs>
+
+Handle client_laser_draw_pref;
+Handle client_laser_color_pref;
+
 
 
 // split files for this plugin
@@ -104,6 +110,7 @@ Handle SetCollisionGroup;
 #include "jailbreak/circle.inc"
 #include "jailbreak/block.inc"
 #include "jailbreak/debug.inc"
+#include "jailbreak/cookies.inc"
 
 
 EngineVersion g_Game;
@@ -290,11 +297,14 @@ public OnMapEnd()
 public void OnClientConnected(int client)
 {
 	laser_use[client] = false;
-	use_draw_laser_settings[client] = false;
-	laser_color[client] = 0;
+	if(!AreClientCookiesCached(client))
+	{
+		use_draw_laser_settings[client] = false;
+		laser_color[client] = 0;
+	}
 }
 
-public void OnClientDisconnect(client)
+public void OnClientDisconnect(int client)
 {
 	laser_use[client] = false;
 	use_draw_laser_settings[client] = false;
@@ -452,6 +462,7 @@ public OnPluginStart()
 	CreateTimer(0.3, rainbow_timer, _, TIMER_REPEAT);
 	PrecacheSound("bot\\what_have_you_done.wav");
 	
+	register_cookies();
 }
 
 public Action force_open_callback (int client, int args)
