@@ -11,7 +11,7 @@
 #include "jailbreak/jailbreak.inc"
 
 
-#define VERSION "2.5  - Violent Intent Jailbreak"
+#define VERSION "2.6  - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -664,6 +664,7 @@ public SetupFog()
 
 public Action OnRoundStart(Handle event, const String:name[], bool dontBroadcast)
 {
+	reset_use_key();
 	EndSd();
 }
 
@@ -1841,9 +1842,10 @@ public Action check_movement(Handle Timer)
 						}
 					}
 					
+					// we use a button toggle i dont think we need this anymore
 					case fly_day:
 					{
-						client_fly(client);
+						//client_fly(client);
 					}
 
 
@@ -1877,7 +1879,15 @@ public Action check_movement(Handle Timer)
 
 
 
+bool use_key[MAXPLAYERS+1] = false;
 
+void reset_use_key()
+{
+	for (int i = 0; i < MAXPLAYERS + 1; i++)
+	{
+		use_key[i] = false;
+	}
+}
 
 
 // hook for laser day :)
@@ -1890,17 +1900,35 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 		return Plugin_Continue;
 	}
 	
-	// if not an active laser day we dont care
-	if(sd_state != sd_active || special_day != laser_day)	
+	// if not an sd we dont care
+	if(sd_state == sd_inactive)	
 	{
 		return Plugin_Continue;
 	}
 	
+	bool in_use = (buttons & IN_USE) == IN_USE;
+	
 	// kill laser
-	if((buttons & IN_USE))
+	if(in_use && special_day == laser_day)
 	{
 		setup_laser(client,{ 1, 153, 255, 255 },g_lbeam,g_lpoint,true);
 	}	
+
+	// use key press toggle fly day move type
+	else if(in_use && !use_key[client] && special_day == fly_day)
+	{
+		if(GetEntityMoveType(client) == MOVETYPE_FLY)
+		{
+			SetEntityMoveType(client, MOVETYPE_WALK);
+		}
+		
+		else
+		{
+			SetEntityMoveType(client, MOVETYPE_FLY);
+		}
+	}
+
+	use_key[client] = in_use;
 	
 	return Plugin_Continue;
 }

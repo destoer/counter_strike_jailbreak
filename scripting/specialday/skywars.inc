@@ -29,7 +29,7 @@ void flying_player_init(int client)
 void init_skywars()
 {
 	special_day = fly_day;
-	PrintToChatAll("%s Sky wars started", SPECIALDAY_PREFIX);
+	PrintToChatAll("%s Sky wars started, press e to toggle flying", SPECIALDAY_PREFIX);
 	sd_player_init_fptr = flying_player_init;
 }
 
