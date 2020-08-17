@@ -42,7 +42,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V3.2 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.3 - Violent Intent Jailbreak"
 
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
@@ -111,6 +111,7 @@ Handle client_laser_color_pref;
 #include "jailbreak/block.inc"
 #include "jailbreak/debug.inc"
 #include "jailbreak/cookies.inc"
+#include "jailbreak/color.inc"
 
 
 EngineVersion g_Game;
@@ -437,6 +438,8 @@ public OnPluginStart()
 	RegConsoleCmd("laser_color", command_laser_color);
 #endif
 	
+	RegConsoleCmd("color", warden_color_t);
+	
 	RegConsoleCmd("wv", jailbreak_version);
 	RegConsoleCmd("is_blocked", is_blocked_cmd);
 	
@@ -585,6 +588,7 @@ public print_warden_commands(client)
 	PrintToChat(client,"\x07FF0000!marker  \x07800080- \x07F8F8FF+marker, use mouse to adjust size, then -marker");
 	PrintToChat(client,"\x07FF0000!wsd           \x07800080- \x07F8F8FFstart sd after enough rounds");
 	PrintToChat(client,"\x07FF0000!tlaser           \x07800080- \x07F8F8FFtoggle laser for t's'");	
+	PrintToChat(client,"\x07FF0000!color           \x07800080- \x07F8F8FFcolor players t's'");	
 
 }
 
