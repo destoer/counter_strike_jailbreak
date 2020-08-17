@@ -56,9 +56,9 @@ public void StartHide()
 
 public void make_invis_t()
 {
-	for(new i = 1; i < MaxClients; i++)
+	for(int i = 1; i < MaxClients; i++)
 	{
-		if(IsClientInGame(i) && IsPlayerAlive(i))
+		if(is_valid_client(i) && IsPlayerAlive(i))
 		{
 			if(GetClientTeam(i) == CS_TEAM_T)
 			{

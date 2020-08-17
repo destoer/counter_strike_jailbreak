@@ -50,11 +50,30 @@ stock int get_client_at_sight(int client)
 	return client_sight;
 }
 
-
-
-public Action warden_color_t(int client, int args)
+public Action warden_reset_color(int client, int args)
 {
-	// make it set a client to a fixed color for now :P
+	if(client != warden_id)
+	{
+		return Plugin_Handled;
+	}	
+	
+	for(int i = 1; i < MaxClients; i++)
+	{
+		if(is_valid_client(i) && IsPlayerAlive(i))
+		{
+			if(i != warden_id)
+			{
+				// make players invis
+				SetEntityRenderColor(i, 255, 255, 255, 255);
+			}
+		}
+	}
+
+	return Plugin_Continue;
+}
+
+public Action warden_color(int client, int args)
+{
 	if(client != warden_id)
 	{
 		return Plugin_Handled;

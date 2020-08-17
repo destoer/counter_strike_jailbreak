@@ -438,7 +438,8 @@ public OnPluginStart()
 	RegConsoleCmd("laser_color", command_laser_color);
 #endif
 	
-	RegConsoleCmd("color", warden_color_t);
+	RegConsoleCmd("color", warden_color);
+	RegConsoleCmd("reset_color", warden_reset_color);
 	
 	RegConsoleCmd("wv", jailbreak_version);
 	RegConsoleCmd("is_blocked", is_blocked_cmd);
@@ -588,7 +589,8 @@ public print_warden_commands(client)
 	PrintToChat(client,"\x07FF0000!marker  \x07800080- \x07F8F8FF+marker, use mouse to adjust size, then -marker");
 	PrintToChat(client,"\x07FF0000!wsd           \x07800080- \x07F8F8FFstart sd after enough rounds");
 	PrintToChat(client,"\x07FF0000!tlaser           \x07800080- \x07F8F8FFtoggle laser for t's'");	
-	PrintToChat(client,"\x07FF0000!color           \x07800080- \x07F8F8FFcolor players t's'");	
+	PrintToChat(client,"\x07FF0000!color           \x07800080- \x07F8F8FFcolor players'");	
+	PrintToChat(client,"\x07FF0000!reset_color           \x07800080- \x07F8F8FFreset player colors'");	
 
 }
 
