@@ -12,6 +12,11 @@
 
 
 
+#include <sourcemod>
+#include <sdktools>
+#include <cstrike>
+#include <sdkhooks>
+#include <entity>
 
 
 stock bool steam_id_equal(int client, char[] id)
@@ -102,8 +107,22 @@ stock bool check_command_exists(const String:command[])
 
 stock void block_all_clients(Handle func)
 {
+	if(GetEngineVersion() == Engine_CSGO && func == INVALID_HANDLE)
+	{
+		ConVar solid_teamates = FindConVar("mp_solid_teammates");
+		if(solid_teamates == null)
+		{
+			return;
+		}
+		// allready solid
+		if(GetConVarInt(solid_teamates) == 1)
+		{
+			return;
+		}
+	}
+
 	// block is allready on dont bother
-	if(!noblock_enabled())
+	else if(!noblock_enabled())
 	{
 		return;
 	}
@@ -122,7 +141,43 @@ stock void block_all_clients(Handle func)
 
 stock void SetClientCollision(int entity,Handle func, int type)
 {
-	SDKCall(func, entity, type);
+	if(func != INVALID_HANDLE)
+	{
+		SDKCall(func, entity, type);
+	}
+
+	else
+	{
+		EngineVersion game = GetEngineVersion();
+
+		if(game == Engine_CSS)
+		{
+			// causes crashes
+			SetEntProp(entity, Prop_Data, "m_CollisionGroup", type);
+		}
+
+		else if(game == Engine_CSGO)
+		{
+			// for no block we can just turn team collision on as a workaround
+			// this is good enough for now
+
+			if(type == COLLISION_GROUP_PLAYER)
+			{
+				ServerCommand("mp_solid_teammates 1");
+			}
+
+			else if(type == COLLISION_GROUP_DEBRIS_TRIGGER)
+			{
+				ServerCommand("mp_solid_teammates 0");
+			}
+		}
+	}
+}
+
+stock PrintCollisionWarning()
+{
+	PrintToServer("invalid handle, setcollisiongroup will not work failling back to setentprop(css), mp_solid_teammates(csgo)");
+	PrintToServer("setentprop may result in physics bugs, and mp_solid_teamates wont no block the other team");
 }
 
 stock Handle init_set_collision()
@@ -132,7 +187,9 @@ stock Handle init_set_collision()
 	
 	if(game_conf == INVALID_HANDLE)
 	{
-		ThrowError("game data handle invalid");
+		PrintToServer("[warn] game data handle invalid");
+		PrintCollisionWarning();
+		return INVALID_HANDLE;
 	}
 	
 	
@@ -140,14 +197,18 @@ stock Handle init_set_collision()
 	StartPrepSDKCall(SDKCall_Entity);
 	if(!PrepSDKCall_SetFromConf(game_conf, SDKConf_Signature, "SetCollisionGroup"))
 	{
-		ThrowError("signature not found");
+		PrintToServer("[warn] signature not found");
+		PrintCollisionWarning();
+		return INVALID_HANDLE;
 	}
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	Handle handle = EndPrepSDKCall();
 	
 	if(handle == INVALID_HANDLE)
 	{
-		ThrowError("function handle invalid");
+		PrintToServer("[warn] function handle invalid");
+		PrintCollisionWarning();
+		return handle;
 	}
 	
 	return handle;
@@ -172,8 +233,22 @@ stock void unblock_client(int client,Handle func)
 
 stock void unblock_all_clients(Handle func)
 {
+	if(GetEngineVersion() == Engine_CSGO && func == INVALID_HANDLE)
+	{
+		ConVar solid_teamates = FindConVar("mp_solid_teammates");
+		if(solid_teamates == null)
+		{
+			return;
+		}
+		// allready non solid
+		if(GetConVarInt(solid_teamates) == 0)
+		{
+			return;
+		}
+	}
+
 	// noblock allready enabled dont bother
-	if(noblock_enabled())
+	else if(noblock_enabled())
 	{
 		return;
 	}
@@ -387,7 +462,7 @@ new const String:gun_list[GUNS_SIZE][] =
 	"FAMAS", "XM"
 };
 
-new const String:gun_give_list[GUNS_SIZE][] =
+new const String:gun_give_list_css[GUNS_SIZE][] =
 {	
 	"weapon_ak47", "weapon_m4a1", "weapon_awp","weapon_m3",
 	"weapon_p90", "weapon_m249", "weapon_scout", "weapon_mp5navy",
@@ -395,6 +470,16 @@ new const String:gun_give_list[GUNS_SIZE][] =
 	"weapon_famas", "weapon_xm1014"
 	
 };
+
+new const String:gun_give_list_csgo[GUNS_SIZE][] =
+{	
+	"weapon_ak47", "weapon_m4a1_silencer", "weapon_awp","weapon_nova",
+	"weapon_p90", "weapon_m249", "weapon_ssg08", "weapon_mp5sd",
+	"weapon_galilar", "weapon_sg556","weapon_bizon", "weapon_aug",
+	"weapon_famas", "weapon_xm1014"
+	
+};
+
 
 stock Menu build_gun_menu(MenuHandler menu_handler)
 {

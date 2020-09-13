@@ -52,7 +52,19 @@ public void GiveGunGameGun(int client)
 	strip_all_weapons(client);
 	GivePlayerItem(client, "weapon_knife");
 	GivePlayerItem(client, "item_assaultsuit");
-	GivePlayerItem(client, gun_give_list[gungame_gun_idx[gungame_level[client]]]);
+
+	EngineVersion game = GetEngineVersion();
+
+	if(game == Engine_CSS)
+	{
+		GivePlayerItem(client, gun_give_list_css[gungame_gun_idx[gungame_level[client]]]);
+	}
+
+	if(game == Engine_CSGO)
+	{
+		GivePlayerItem(client, gun_give_list_csgo[gungame_gun_idx[gungame_level[client]]]);
+	}
+
 	PrintToChat(client, "%s Current level: %s (%d of %d)", 
 		SPECIALDAY_PREFIX, gun_list[gungame_gun_idx[gungame_level[client]]],gungame_level[client]+1,GUNS_SIZE);
 }
@@ -94,8 +106,22 @@ void gungame_death(int attacker, int victim)
 	char weapon_name[64];
 	GetClientWeapon(attacker, weapon_name, sizeof(weapon_name));
 	
+	bool kill_gungame_weapon = false;
+
+	EngineVersion game = GetEngineVersion();
+
+	if(game == Engine_CSS)
+	{
+		kill_gungame_weapon = StrEqual(weapon_name, gun_give_list_css[gungame_gun_idx[gungame_level[attacker]]]);
+	}
+
+	else if(game == Engine_CSGO)
+	{
+		kill_gungame_weapon = StrEqual(weapon_name, gun_give_list_csgo[gungame_gun_idx[gungame_level[attacker]]]);
+	}
+
 	// kill with current weapon
-	if(gungame_level[attacker] < GUNS_SIZE && StrEqual(weapon_name, gun_give_list[gungame_gun_idx[gungame_level[attacker]]]))
+	if(gungame_level[attacker] < GUNS_SIZE && kill_gungame_weapon)
 	{
 		gungame_level[attacker]++;
 		if(gungame_level[attacker] >= GUNS_SIZE)

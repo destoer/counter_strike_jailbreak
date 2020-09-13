@@ -2,7 +2,7 @@
 	#endinput
 #endif
 #define _store_included
-
+/*
 new g_cvarChatTag = -1;
 #define CHAT_TAG g_eCvars[g_cvarChatTag][sCache]
 
@@ -69,8 +69,10 @@ native Store_GetEquippedItem(client, String:type[], slot=0);
 native Store_IsClientLoaded(client);
 native Store_DisplayPreviousMenu(client);
 native Store_SetClientMenu(client, num);
+*/
 native Store_GetClientCredits(client);
 native Store_SetClientCredits(client, credits);
+/*
 native Store_IsClientVIP(client);
 native Store_IsItemInBoughtPackage(client, itemid, uid=-1);
 native Store_ShouldConfirm();
@@ -86,6 +88,7 @@ native Store_HasClientItem(client, itemid);
 native Store_IterateEquippedItems(client, &start, bool:attributes=false);
 
 forward Store_OnClientModelChanged(client, String:model[]);
+*/
 
 public Extension:__ext_store_sm =
 {

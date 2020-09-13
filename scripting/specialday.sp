@@ -65,7 +65,10 @@ int store_kill_ammount_backup = 0;
 //#define SPECIALDAY_PREFIX "\x04[Vi Special Day]\x07F8F8FF"
 //#define SPECIALDAY_PREFIX "\x04[GK Special Day]\x07F8F8FF"
 //#define SPECIALDAY_PREFIX "\x04[GP Special Day]\x07F8F8FF"
-#define SPECIALDAY_PREFIX "\x04[3E Special Day]\x07F8F8FF"
+#define SPECIALDAY_PREFIX_CSS "\x04[3E Special Day]\x07F8F8FF"
+#define SPECIALDAY_PREFIX_CSGO "\x04[3E Special Day]\x02"
+
+char SPECIALDAY_PREFIX[] = SPECIALDAY_PREFIX_CSS
 
 // set up sv_cheats in server config so we can add test bots lol
 
@@ -160,6 +163,10 @@ int g_WeaponParent;
 
 int rounds_since_warden_sd = 0;
 
+// csgo ff
+ConVar convar_mp_teammates_are_enemies;
+bool mp_teammates_are_enemies;
+
 #define ROUND_WARDEN_SD 20
 
 // split files for sd
@@ -225,13 +232,25 @@ public Action round_delay_tick(Handle Timer)
 void enable_friendly_fire()
 {
 	ff = true;
-	SetConVarBool(g_hFriendlyFire, true); 	
+	SetConVarBool(g_hFriendlyFire, true); 
+
+	if(GetEngineVersion() == Engine_CSGO)
+	{
+		SetConVarBool(convar_mp_teammates_are_enemies,true);
+	}
+
 }
 
 void disable_friendly_fire()
 {
 	ff = false;
 	SetConVarBool(g_hFriendlyFire, false); 	
+
+	if(GetEngineVersion() == Engine_CSGO)
+	{
+		SetConVarBool(convar_mp_teammates_are_enemies,mp_teammates_are_enemies);
+	}
+
 }
 
 void disable_round_end()
@@ -239,7 +258,10 @@ void disable_round_end()
 	// if we have a "indefinite" game
 	// do not award credits for kills
 #if defined STORE
-	SetConVarInt(store_kill_ammount_cvar, 0); 
+	if(store_kill_ammount_cvar != null)
+	{
+		SetConVarInt(store_kill_ammount_cvar, 0); 
+	}
 #endif
 	
 	ignore_round_end = true;
@@ -283,12 +305,17 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public OnPluginStart() 
 {
-	
+	// init text
+	EngineVersion game = GetEngineVersion();
+	if(game == Engine_CSGO)
+	{
+		Format(SPECIALDAY_PREFIX,strlen(SPECIALDAY_PREFIX),SPECIALDAY_PREFIX_CSGO);
+	}
+
 	SetCollisionGroup = init_set_collision();
 	
 		
-	
-	
+
 	HookEvent("player_death", OnPlayerDeath,EventHookMode_Post);
 	HookEvent("player_hurt", OnPlayerHurt); 
 
@@ -317,6 +344,13 @@ public OnPluginStart()
 	
 
 	g_hFriendlyFire = FindConVar("mp_friendlyfire"); // get the friendly fire var
+	if(game == Engine_CSGO)
+	{
+		convar_mp_teammates_are_enemies = FindConVar("mp_teammates_are_enemies");
+		mp_teammates_are_enemies = GetConVarBool(convar_mp_teammates_are_enemies);
+	}
+	// note on csgo this will prevent it when one team dies
+	// but not both!
 	g_ignore_round_win = FindConVar("mp_ignore_round_win_conditions");
 	g_autokick = FindConVar("mp_autokick");
 	SetConVarBool(g_autokick, false);	
@@ -762,7 +796,9 @@ void EndSd(bool forced=false)
 		}
 	}
 	
-	
+	// just in case
+	enable_round_end();
+
 	if(ff == true)
 	{
 		disable_friendly_fire();
@@ -1024,9 +1060,18 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 		// and kevlar
 		GivePlayerItem(client, "item_assaultsuit"); 
 		
-		// finally give the picked gun
-		GivePlayerItem(client, gun_give_list[param2]);
+		EngineVersion game = GetEngineVersion();
 
+		if(game == Engine_CSS)
+		{
+			// finally give the player the item
+			GivePlayerItem(client, gun_give_list_css[param2]);
+		}
+
+		if(game == Engine_CSGO)
+		{
+			GivePlayerItem(client, gun_give_list_csgo[param2]);
+		}
 		
 		// give them plenty of primary ammo
 		weapon = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);
@@ -1142,7 +1187,8 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 			{
 				if (!is_valid_client(attacker)) { return Plugin_Continue; }
 				
-				if(GetClientTeam(victim) == CS_TEAM_T)
+				// knockback is way to overkill on csgo
+				if(GetClientTeam(victim) == CS_TEAM_T && GetEngineVersion() == Engine_CSS)
 				{
 					CreateKnockBack(victim, attacker, damage);
 				}
@@ -1739,7 +1785,8 @@ public Action OnWeaponEquip(int client, int weapon)
 		{
 			char weapon_string[32];
 			GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
-			if(!(StrEqual(weapon_string,"weapon_scout") || StrEqual(weapon_string,"weapon_knife")))
+			// need to check for ssg08 incase we are oncsgo
+			if(!(StrEqual(weapon_string,"weapon_scout") || StrEqual(weapon_string,"weapon_knife") || StrEqual(weapon_string,"weapon_ssg08")))
 			{
 				return Plugin_Handled;
 			}

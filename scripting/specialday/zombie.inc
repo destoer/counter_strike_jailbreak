@@ -92,6 +92,8 @@ void end_zombie()
 {
 	RestoreTeams();
 	patient_zero = -1;
+
+
 	AcceptEntityInput(fog_ent, "TurnOff");
 }
 
@@ -161,18 +163,24 @@ public void MakeZombie(int client)
 	SetEntityHealth(client, 250);
 	GivePlayerItem(client, "weapon_knife");
 	
+	// cant use custom builtin models on csgo
+	EngineVersion game = GetEngineVersion();
+
 	#if defined USE_CUSTOM_ZOMBIE_MODEL
 		if (zombie_model_success)
 		{
 			SetEntityModel(client, "models/player/slow/aliendrone/slow_alien.mdl");
 		}
 		
-		else
+		else if(game == Engine_CSS)
 		{
 			SetEntityModel(client, "models/zombie/classic.mdl");
 		}
 	#else
+	if(game == Engine_CSS)
+	{
 		SetEntityModel(client, "models/zombie/classic.mdl");
+	}
 	#endif
 	
 	// fix no block issues on respawn
@@ -207,8 +215,10 @@ public void StartZombie()
 
 	MakePatientZero(patient_zero);
 
+
 	AcceptEntityInput(fog_ent, "TurnOn");
 	
+
 #if defined CUSTOM_ZOMBIE_MUSIC
 	EmitSoundToAll("music/HLA.mp3");
 #else

@@ -34,9 +34,18 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 		int weapon = GetPlayerWeaponSlot(client, CS_SLOT_SECONDARY);
 		set_reserve_ammo(client, weapon, 999);
 		
-		
-		GivePlayerItem(client, gun_give_list[param2]);
+		// finally give them there item
+		EngineVersion game = GetEngineVersion();
 
+		if(game == Engine_CSS)
+		{
+			GivePlayerItem(client, gun_give_list_css[param2]);
+		}
+
+		else if(game == Engine_CSGO)
+		{
+			GivePlayerItem(client, gun_give_list_csgo[param2]);
+		}
 		
 		// give them plenty of primary ammo
 		weapon = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);

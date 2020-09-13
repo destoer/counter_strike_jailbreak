@@ -68,13 +68,24 @@ TODO make all names consistent
 #define PTS_PREFIX "\x07F8F8FF"
 */
 
+#define ANTISTUCK_PREFIX_CSGO "\x07[3E Antistuck]\x07"
+#define JB_PREFIX_CSGO "[3E Jailbreak]"
+#define WARDEN_PREFIX_CSGO "\x07[3E Warden]\x07"
+#define WARDEN_PLAYER_PREFIX_CSGO "\x07[3E Warden]\x07"
+#define PTS_PREFIX_CSGO "\x07"
 
-#define ANTISTUCK_PREFIX "\x07FF0000[3E Antistuck]\x07F8F8FF"
-#define JB_PREFIX "[3E Jailbreak]"
-#define WARDEN_PREFIX "\x07FF0000[3E Warden]\x07F8F8FF"
-#define WARDEN_PLAYER_PREFIX "\x07FF0000[3E Warden]\x07F8F8FF"
-#define PTS_PREFIX "\x07F8F8FF"
 
+#define ANTISTUCK_PREFIX_CSS "\x07FF0000[3E Antistuck]\x07F8F8FF"
+#define JB_PREFIX_CSS "[3E Jailbreak]"
+#define WARDEN_PREFIX_CSS "\x07FF0000[3E Warden]\x07F8F8FF"
+#define WARDEN_PLAYER_PREFIX_CSS "\x07FF0000[3E Warden]\x07F8F8FF"
+#define PTS_PREFIX_CSS "\x07F8F8FF"
+
+char ANTISTUCK_PREFIX[] = ANTISTUCK_PREFIX_CSS;
+char JB_PREFIX[] = JB_PREFIX_CSS;
+char WARDEN_PREFIX[] = WARDEN_PREFIX_CSS;
+char WARDEN_PLAYER_PREFIX[] = WARDEN_PLAYER_PREFIX_CSS;
+char PTS_PREFIX[] = PTS_PREFIX_CSS;
 
 const int WARDEN_INVALID = -1;
 // global vars
@@ -113,8 +124,6 @@ Handle client_laser_color_pref;
 #include "jailbreak/cookies.inc"
 #include "jailbreak/color.inc"
 
-
-EngineVersion g_Game;
 
 public Plugin:myinfo = 
 {
@@ -329,13 +338,22 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	
 	if (warden_id == client)
 	{
-	    if (is_valid_client(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
+		char color1[] = "\x07000000";
+		char color2[] = "\x07FFC0CB";
+
+		if(GetEngineVersion() == Engine_CSGO)
+		{
+			Format(color1,strlen(color1),"\x06");
+			Format(color2,strlen(color2),"\x06");
+		}
+
+		if (is_valid_client(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
 	    {
 	        if (!StrEqual(command, "say_team"))
 	        {    
 	                if (!CheckCommandAccess(client, "sm_say", ADMFLAG_CHAT))
 	                {
-	                    PrintToChatAll("%s %N \x07000000: \x07FFC0CB%s", WARDEN_PLAYER_PREFIX, client, sArgs);
+	                    PrintToChatAll("%s %N %s: %s%s", WARDEN_PLAYER_PREFIX, client,color1,color2, sArgs);
 	                    LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
 	                    return Plugin_Handled;                    
 	                }
@@ -343,7 +361,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	                {
 	                    if (sArgs[0] != '@')
 	                    {
-	                        PrintToChatAll("%s %N \x07000000: \x07FFC0CB%s", WARDEN_PLAYER_PREFIX, client, sArgs);
+	                        PrintToChatAll("%s %N %s: %s%s", WARDEN_PLAYER_PREFIX, client,color1,color2, sArgs);
 	                        LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
 	                        return Plugin_Handled;
 	                    }
@@ -357,7 +375,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	                {
 	                    if (sArgs[0] != '@')
 	                    {
-	                        PrintToChat(i, "\x01(Counter-Terrorist) %s %N \x07000000: \x07FFC0CB%s", WARDEN_PLAYER_PREFIX, client, sArgs);
+	                        PrintToChat(i, "%s %N %s: %s%s", WARDEN_PLAYER_PREFIX, client,color1,color2, sArgs);
 	                        LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
 	                    }
 	                }
@@ -365,9 +383,9 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	            return Plugin_Handled;
 	        }
 	    }
-	    else
+		else
 	    {
-	        PrintToChatAll("%s %N : %s", WARDEN_PLAYER_PREFIX, client, sArgs);
+	        PrintToChatAll("%s %N %s: %s%s", WARDEN_PLAYER_PREFIX, client,color1,color2, sArgs);
 	        LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
 	        return Plugin_Handled;
 	    }   
@@ -382,12 +400,24 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 // init the plugin
 public OnPluginStart()
 {
-	g_Game = GetEngineVersion();
-	if(g_Game != Engine_CSGO && g_Game != Engine_CSS)
+	EngineVersion game = GetEngineVersion();
+	if(game != Engine_CSGO && game != Engine_CSS)
 	{
 		SetFailState("This plugin is for CSGO/CSS only.");	
 	}
 	
+
+	// init text
+	if(game == Engine_CSGO)
+	{
+		Format(ANTISTUCK_PREFIX,strlen(ANTISTUCK_PREFIX),ANTISTUCK_PREFIX_CSGO);
+		Format(JB_PREFIX,strlen(JB_PREFIX),JB_PREFIX_CSGO);
+		Format(WARDEN_PLAYER_PREFIX,strlen(WARDEN_PLAYER_PREFIX),WARDEN_PLAYER_PREFIX_CSGO);
+		Format(WARDEN_PREFIX,strlen(WARDEN_PREFIX),WARDEN_PREFIX_CSGO);
+		Format(PTS_PREFIX,strlen(PTS_PREFIX),PTS_PREFIX_CSGO);		
+	}
+
+
 	
 	SetCollisionGroup = init_set_collision();
 	
@@ -406,7 +436,11 @@ public OnPluginStart()
 	// command_stuck is push out callback
 	// we currently use the noblock toggle callback
 	#if defined STUCK
-	RegConsoleCmd("stuck", command_stuck);
+	// workaround for csgo wont support this neatly
+	if(SetCollisionGroup == INVALID_HANDLE)
+	{
+		RegConsoleCmd("stuck", command_stuck);
+	}
 	#endif		
 	RegConsoleCmd("sm_samira", samira_EE);
 	
@@ -570,27 +604,29 @@ public Action become_warden(int client, int args)
 // \n doesent work apparently...
 public print_warden_commands(client)
 {
-/*
-	PrintToChat(client,"\x07FF0000!w           \x07800080- \x07F8F8FFbecome warden");
-	PrintToChat(client,"\x07FF0000!uw         \x07800080- \x07F8F8FFexit warden");
-	PrintToChat(client,"\x07FF0000!wb         \x07800080- \x07F8F8FFturn on block");
-	PrintToChat(client,"\x07FF0000!wub       \x07800080- \x07F8F8FFturn off block");
-	PrintToChat(client,"\x07FF0000!laser      \x07800080- \x07F8F8FFPoint/Draw Laser \x07FF0000(Member only)");
-	PrintToChat(client,"\x07FF0000!marker  \x07800080- \x07F8F8FFRMB - Bind 'key' '+marker'");
-*/
+	char color1[] = "\x07FF0000";
+	char color2[] = "\x07800080";
+	char color3[] = "\x07F8F8FF";
+
+	if(GetEngineVersion() == Engine_CSGO)
+	{
+		Format(color1,strlen(color1),"\x07");
+		Format(color2,strlen(color2),"\x01");
+		Format(color3,strlen(color3),"\x04");
+	}
 
 
-	PrintToChat(client,"\x07FF0000!w           \x07800080- \x07F8F8FFbecome warden");
-	PrintToChat(client,"\x07FF0000!uw         \x07800080- \x07F8F8FFexit warden");
-	PrintToChat(client,"\x07FF0000!wb         \x07800080- \x07F8F8FFturn on block");
-	PrintToChat(client,"\x07FF0000!wub       \x07800080- \x07F8F8FFturn off block");
-	PrintToChat(client,"\x07FF0000!laser       \x07800080- \x07F8F8FFswitch point/draw laser");
-	PrintToChat(client,"\x07FF0000!laser_color       \x07800080- \x07F8F8FFchange laser color");
-	PrintToChat(client,"\x07FF0000!marker  \x07800080- \x07F8F8FF+marker, use mouse to adjust size, then -marker");
-	PrintToChat(client,"\x07FF0000!wsd           \x07800080- \x07F8F8FFstart sd after enough rounds");
-	PrintToChat(client,"\x07FF0000!tlaser           \x07800080- \x07F8F8FFtoggle laser for t's'");	
-	PrintToChat(client,"\x07FF0000!color           \x07800080- \x07F8F8FFcolor players'");	
-	PrintToChat(client,"\x07FF0000!reset_color           \x07800080- \x07F8F8FFreset player colors'");	
+	PrintToChat(client,"%s!w           %s- %sbecome warden",color1,color2,color3);
+	PrintToChat(client,"%s!uw         %s- %sexit warden",color1,color2,color3);
+	PrintToChat(client,"%s!wb         %s- %sturn on block",color1,color2,color3);
+	PrintToChat(client,"%s!wub       %s- %sturn off block",color1,color2,color3);
+	PrintToChat(client,"%s!laser       %s- %sswitch point/draw laser",color1,color2,color3);
+	PrintToChat(client,"%s!laser_color       %s- %schange laser color",color1,color2,color3);
+	PrintToChat(client,"%s!marker  %s- %s+marker, use mouse to adjust size, then -marker",color1,color2,color3);
+	PrintToChat(client,"%s!wsd           %s- %sstart sd after enough rounds",color1,color2,color3);
+	PrintToChat(client,"%s!tlaser           %s- %stoggle laser for t's'",color1,color2,color3);	
+	PrintToChat(client,"%s!color           %s- %scolor players'",color1,color2,color3);	
+	PrintToChat(client,"%s!reset_color           %s- %sreset player colors'",color1,color2,color3);	
 
 }
 
@@ -730,11 +766,24 @@ public remove_warden()
 
 public Action samira_EE(int client, int args)
 {
- 
-    PrintToChat(client,"\x07EE82EE( ͡° ͜ʖ ͡°)\x07F8F8FF------------------\x076A5ACD( ͡° ͜ʖ ͡°)\x07F8F8FF--------------\x07FFFF00( ͡° ͜ʖ ͡°)");
-    PrintToChat(client,"\x074B0082( ͡° ͜ʖ ͡°)\x078B0000This plugin is sponsored by Samira\x073EFF3E( ͡° ͜ʖ ͡°)");
-    PrintToChat(client,"\x0799CCFF( ͡° ͜ʖ ͡°)\x07F8F8FF----------\x078B0000Thanks\x076A5ACD( ͡° ͜ʖ ͡°)\x078B0000Samira\x07F8F8FF------\x0799CCFF( ͡° ͜ʖ ͡°)");
-    PrintToChat(client,"\x073EFF3E( ͡° ͜ʖ ͡°)\x07F8F8FF------------------\x076A5ACD( ͡° ͜ʖ ͡°)\x07F8F8FF--------------\x074B0082( ͡° ͜ʖ ͡°)");
-    PrintToChat(client,"\x07FFFF00( ͡° ͜ʖ ͡°)\x07F8F8FF----------\x078B0000Organ\x07FF69B4♥\x076A5ACD( ͡° ͜ʖ ͡°)\x07FF69B4♥\x078B0000Jordi\x07F8F8FF-------\x07EE82EE( ͡° ͜ʖ ͡°)");
-    return Plugin_Handled;
+	EngineVersion game = GetEngineVersion();
+
+	if(game == Engine_CSS)
+	{
+		PrintToChat(client,"\x07EE82EE( ͡° ͜ʖ ͡°)\x07F8F8FF------------------\x076A5ACD( ͡° ͜ʖ ͡°)\x07F8F8FF--------------\x07FFFF00( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x074B0082( ͡° ͜ʖ ͡°)\x078B0000This plugin is sponsored by Samira\x073EFF3E( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x0799CCFF( ͡° ͜ʖ ͡°)\x07F8F8FF----------\x078B0000Thanks\x076A5ACD( ͡° ͜ʖ ͡°)\x078B0000Samira\x07F8F8FF------\x0799CCFF( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x073EFF3E( ͡° ͜ʖ ͡°)\x07F8F8FF------------------\x076A5ACD( ͡° ͜ʖ ͡°)\x07F8F8FF--------------\x074B0082( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x07FFFF00( ͡° ͜ʖ ͡°)\x07F8F8FF----------\x078B0000Organ\x07FF69B4♥\x076A5ACD( ͡° ͜ʖ ͡°)\x07FF69B4♥\x078B0000Jordi\x07F8F8FF-------\x07EE82EE( ͡° ͜ʖ ͡°)");
+	}
+
+	else if(game == Engine_CSGO)
+	{
+		PrintToChat(client,"\x07( ͡° ͜ʖ ͡°)\x04------------------\x02( ͡° ͜ʖ ͡°)\x02--------------\x07( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x07( ͡° ͜ʖ ͡°)\x04This plugin is sponsored by Samira\x02( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x07( ͡° ͜ʖ ͡°)\x04----------\x07Thanks\x02( ͡° ͜ʖ ͡°)\x07Samira\x02------\x07( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x07( ͡° ͜ʖ ͡°)\x04------------------\x02( ͡° ͜ʖ ͡°)\x02--------------\x07( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x07( ͡° ͜ʖ ͡°)\x04----------\x07Organ\x02♥\x07( ͡° ͜ʖ ͡°)\x02♥\x07Jordi\x04-------\x07( ͡° ͜ʖ ͡°)");
+	}
+	return Plugin_Handled;
 } 

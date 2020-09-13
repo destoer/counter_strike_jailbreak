@@ -10,7 +10,16 @@
 void scout_player_init(int client)
 {
 	strip_all_weapons(client);
-	GivePlayerItem(client, "weapon_scout");
+	if(GetEngineVersion() == Engine_CSS)
+	{
+		GivePlayerItem(client, "weapon_scout");
+	}
+
+	else if(GetEngineVersion() == Engine_CSGO)
+	{
+		GivePlayerItem(client,"weapon_ssg08");
+	}
+
 	GivePlayerItem(client, "weapon_knife");
 	GivePlayerItem(client, "item_assaultsuit");
 	SetEntityGravity(client, 0.1)

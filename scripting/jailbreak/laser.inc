@@ -102,7 +102,7 @@ enum laser_type
 };
 
 
-
+// todo make laser color players it strikes the same as the laser
 public void SetupLaser(int client,int color[4])
 {
 	setup_laser(client, color, g_lbeam, g_lpoint, laser_kill);
