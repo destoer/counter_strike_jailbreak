@@ -1,10 +1,3 @@
-
-#include <sourcemod>
-#include <sdktools>
-#include <cstrike>
-#include <sdkhooks>
-#include <entity>
-
 #include "lib.inc"
 #include "specialday/specialday.inc"
 // make this possible to be standalone later

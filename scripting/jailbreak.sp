@@ -96,9 +96,6 @@ Handle SetCollisionGroup;
 
 
 
-#include <sourcemod>
-#include <sdktools>
-#include <cstrike>
 #include "lib.inc"
 #include "specialday/specialday.inc"
 
