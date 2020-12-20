@@ -29,6 +29,10 @@ public Action is_blocked_cmd(int client, int args)
 		return Plugin_Handled;
 	}
 	
+	Handle hosties_cvar = FindConVar("sm_hosties_noblock_enable");
+	bool hosties_noblock = GetConVarInt(hosties_cvar) > 0;
+	
+	PrintToChat(client, "%s hosties block setting %s\n", WARDEN_PREFIX, hosties_noblock ? "no block" : "block");
 	PrintToChat(client, "%s blocked state: %s",WARDEN_PREFIX, noblock_enabled() ? "no block" : "block");
 	for (int i = 0; i < MaxClients; i++)
 	{

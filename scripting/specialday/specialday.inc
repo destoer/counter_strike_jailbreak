@@ -37,3 +37,5 @@ enum SdState
 
 native SdState sd_current_state();
 native SpecialDay sd_current_day();
+
+#define ROUND_WARDEN_SD 50

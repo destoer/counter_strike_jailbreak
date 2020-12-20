@@ -11,7 +11,7 @@
 #include "jailbreak/jailbreak.inc"
 
 
-#define VERSION "2.6  - Violent Intent Jailbreak"
+#define VERSION "2.6.1  - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -65,8 +65,9 @@ int store_kill_ammount_backup = 0;
 //#define SPECIALDAY_PREFIX "\x04[Vi Special Day]\x07F8F8FF"
 //#define SPECIALDAY_PREFIX "\x04[GK Special Day]\x07F8F8FF"
 //#define SPECIALDAY_PREFIX "\x04[GP Special Day]\x07F8F8FF"
-#define SPECIALDAY_PREFIX_CSS "\x04[3E Special Day]\x07F8F8FF"
-#define SPECIALDAY_PREFIX_CSGO "\x04[3E Special Day]\x02"
+//#define SPECIALDAY_PREFIX "\x04[3E Special Day]\x07F8F8FF"
+#define SPECIALDAY_PREFIX_CSS "\x04[GP Special Day]\x07F8F8FF"
+#define SPECIALDAY_PREFIX_CSGO "\x04[GP Special Day]\x02"
 
 char SPECIALDAY_PREFIX[] = SPECIALDAY_PREFIX_CSS
 
@@ -166,9 +167,6 @@ int rounds_since_warden_sd = 0;
 // csgo ff
 ConVar convar_mp_teammates_are_enemies;
 bool mp_teammates_are_enemies;
-
-#define ROUND_WARDEN_SD 20
-
 // split files for sd
 #include "specialday/ffd.inc"
 #include "specialday/tank.inc"
@@ -224,8 +222,22 @@ public Action round_delay_tick(Handle Timer)
 	
 	else
 	{
-		enable_round_end();
-		slay_all();
+		if(sd_state == sd_active)
+		{
+			enable_round_end();
+			slay_all();
+		}
+		
+		else
+		{
+			for (int i = 0; i < MaxClients; i++)
+			{
+				if(is_valid_client(i))
+				{
+					PrintToConsole(i,"[DEBUG] Warning attempted to slay for inactive sd. was there a cancel?");
+				}
+			}
+		}
 	}
 }
 
@@ -311,11 +323,12 @@ public OnPluginStart()
 	{
 		Format(SPECIALDAY_PREFIX,strlen(SPECIALDAY_PREFIX),SPECIALDAY_PREFIX_CSGO);
 	}
-
+	
 	SetCollisionGroup = init_set_collision();
 	
 		
-
+	
+	
 	HookEvent("player_death", OnPlayerDeath,EventHookMode_Post);
 	HookEvent("player_hurt", OnPlayerHurt); 
 
@@ -354,6 +367,7 @@ public OnPluginStart()
 	g_ignore_round_win = FindConVar("mp_ignore_round_win_conditions");
 	g_autokick = FindConVar("mp_autokick");
 	SetConVarBool(g_autokick, false);	
+
 	// should really save the defaults but ehhh
 	//b_autokick = GetConVarBool(g_autokick);
 	//b_hFriendlyFire = GetConVarBool(g_hFriendlyFire);
@@ -536,24 +550,34 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 
 	int client = GetClientOfUserId(GetEventInt(event,"userid"));
 
+
 	if(sd_state == sd_started)
 	{
 		switch(special_day)
 		{
 			case tank_day:
 			{
-				tank_discon_started(client);
+				if(client == tank)
+				{
+					tank_discon_started(client);
+				}
 			}
 			
 			case spectre_day:
 			{
-				spectre_discon_started(client);
+				if(client == spectre)
+				{
+					spectre_discon_started(client);
+				}
 			}
 			
 			
 			case zombie_day:
 			{
-				zombie_discon_started(client);
+				if(client == patient_zero)
+				{
+					zombie_discon_started(client);
+				}
 			}
 			
 			default: {}
@@ -565,19 +589,28 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 		switch(special_day)
 		{
 			case tank_day:
-			{
-				tank_discon_active(client);
+			{	
+				if(client == tank)
+				{
+					tank_discon_active(client);
+				}
 			}
 			
 			case spectre_day:
 			{
-				spectre_discon_active(client);
+				if(client == spectre)
+				{
+					spectre_discon_active(client);
+				}
 			}
 			
 			
 			case zombie_day:
 			{
-				zombie_discon_active(client);
+				if(client == patient_zero)
+				{
+					zombie_discon_active(client);
+				}
 			}
 			
 			default: {}
@@ -795,10 +828,10 @@ void EndSd(bool forced=false)
 			ThrowNativeError(SP_ERROR_NATIVE, "special day %d not handled in round_end",special_day);
 		}
 	}
-	
-	// just in case
-	enable_round_end();
 
+	// just in case
+	enable_round_end();	
+	
 	if(ff == true)
 	{
 		disable_friendly_fire();
@@ -982,8 +1015,8 @@ public Action command_warden_special_day(int client,int args)
 	if(rounds_since_warden_sd >= ROUND_WARDEN_SD && client == get_warden_id()
 		&& sd_state == sd_inactive)
 	{
-		rounds_since_warden_sd = 0;
-		sd_select(client, GetRandomInt(0, view_as<int>(normal_day) - 1));
+		//ect(client, GetRandomInt(0, view_as<int>(normal_day) - 1));
+		command_special_day(client, args);
 	}
 }
 
@@ -1072,6 +1105,7 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 		{
 			GivePlayerItem(client, gun_give_list_csgo[param2]);
 		}
+
 		
 		// give them plenty of primary ammo
 		weapon = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);
@@ -1373,7 +1407,11 @@ public int sd_select(int client, int sd)
 		return -1;
 	}
 
-
+	// invoked by a warden reset the round limit
+	if(client == get_warden_id())
+	{
+		rounds_since_warden_sd = 0;
+	}
 
 	sdtimer = 20;
 
@@ -1956,7 +1994,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	bool in_use = (buttons & IN_USE) == IN_USE;
 	
 	// kill laser
-	if(in_use && special_day == laser_day)
+	if(in_use && special_day == laser_day && sd_state == sd_active)
 	{
 		setup_laser(client,{ 1, 153, 255, 255 },g_lbeam,g_lpoint,true);
 	}	

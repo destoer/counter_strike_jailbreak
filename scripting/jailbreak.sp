@@ -14,8 +14,8 @@ TODO make all names consistent
 
 
 // if defined these two features are locked behind custom admin flags
-//#define DRAW_CUSTOM_FLAGS
-//#define LASER_COLOR_CUSTOM_FLAGS
+#define DRAW_CUSTOM_FLAGS
+#define LASER_COLOR_CUSTOM_FLAGS
 
 /*
 	admin flags
@@ -27,14 +27,15 @@ TODO make all names consistent
 */
 
 //uncomment to make noblock default 
-#define NOBLOCK_DEFAULT
+//#define NOBLOCK_DEFAULT
 
 
 #define CT_ARMOUR  // 50 armour for ct on spawn
 //#define CT_KEVLAR_HELMET // kevlar + helment for cts 
-#define STUCK
-#define LASER_DEATH
-#define GUN_COMMANDS
+//#define STUCK
+//#define LASER_DEATH
+//#define GUN_COMMANDS
+//#define T_LASER
 
 #define DONATOR 	ADMFLAG_CUSTOM1
 #define MEMBER 		ADMFLAG_CUSTOM2
@@ -42,7 +43,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V3.3 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.3.3 - Violent Intent Jailbreak"
 
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
@@ -60,32 +61,27 @@ TODO make all names consistent
 #define WARDEN_PLAYER_PREFIX "\x0700008B[Warden]\x07F8F8FF"
 #define PTS_PREFIX "\x07F8F8FF"
 */
-/*
-#define ANTISTUCK_PREFIX "\x07FF0000[Antistuck]\x07F8F8FF"
-#define JB_PREFIX "\x04[GP Jailbreak]\x07F8F8FF"
-#define WARDEN_PREFIX "\x04[GP Warden]\x07F8F8FF"
-#define WARDEN_PLAYER_PREFIX "\x04[GP Warden]\x0700BFFF"
-#define PTS_PREFIX "\x07F8F8FF"
-*/
-
-#define ANTISTUCK_PREFIX_CSGO "\x07[3E Antistuck]\x07"
-#define JB_PREFIX_CSGO "[3E Jailbreak]"
-#define WARDEN_PREFIX_CSGO "\x07[3E Warden]\x07"
-#define WARDEN_PLAYER_PREFIX_CSGO "\x07[3E Warden]\x07"
-#define PTS_PREFIX_CSGO "\x07"
 
 
-#define ANTISTUCK_PREFIX_CSS "\x07FF0000[3E Antistuck]\x07F8F8FF"
-#define JB_PREFIX_CSS "[3E Jailbreak]"
-#define WARDEN_PREFIX_CSS "\x07FF0000[3E Warden]\x07F8F8FF"
-#define WARDEN_PLAYER_PREFIX_CSS "\x07FF0000[3E Warden]\x07F8F8FF"
+#define ANTISTUCK_PREFIX_CSS "\x07FF0000[Antistuck]\x07F8F8FF"
+#define JB_PREFIX_CSS "\x04[GP Jailbreak]\x07F8F8FF"
+#define WARDEN_PREFIX_CSS "\x04[GP Warden]\x07F8F8FF"
+#define WARDEN_PLAYER_PREFIX_CSS "\x04[GP Warden]\x0700BFFF"
 #define PTS_PREFIX_CSS "\x07F8F8FF"
 
-char ANTISTUCK_PREFIX[] = ANTISTUCK_PREFIX_CSS;
-char JB_PREFIX[] = JB_PREFIX_CSS;
-char WARDEN_PREFIX[] = WARDEN_PREFIX_CSS;
-char WARDEN_PLAYER_PREFIX[] = WARDEN_PLAYER_PREFIX_CSS;
-char PTS_PREFIX[] = PTS_PREFIX_CSS;
+#define ANTISTUCK_PREFIX_CSGO "\x07[Antistuck]\x07"
+#define JB_PREFIX_CSGO "\x07[GP Jailbreak]\x07"
+#define WARDEN_PREFIX_CSGO "\x07[GP Warden]\x07"
+#define WARDEN_PLAYER_PREFIX_CSGO "\x07[GP Warden]\x07"
+#define PTS_PREFIX_CSGO "\x07"
+
+/*
+#define ANTISTUCK_PREFIX "\x07FF0000[3E Antistuck]\x07F8F8FF"
+#define JB_PREFIX "[3E Jailbreak]"
+#define WARDEN_PREFIX "\x07FF0000[3E Warden]\x07F8F8FF"
+#define WARDEN_PLAYER_PREFIX "\x07FF0000[3E Warden]\x07F8F8FF"
+#define PTS_PREFIX "\x07F8F8FF"
+*/
 
 const int WARDEN_INVALID = -1;
 // global vars
@@ -124,6 +120,8 @@ Handle client_laser_color_pref;
 #include "jailbreak/cookies.inc"
 #include "jailbreak/color.inc"
 
+
+EngineVersion g_Game;
 
 public Plugin:myinfo = 
 {
@@ -267,7 +265,6 @@ public void OnClientSpeakingEx(client)
 }
 */
 
-
 public OnMapStart()
 {
 	// prechache circle sprites
@@ -294,6 +291,12 @@ public OnMapStart()
 	
 	
 	gun_menu = build_gun_menu(WeaponHandler);
+
+#if defined NOBLOCK_DEFAULT
+		disable_block_all();
+#else
+		enable_block_all();
+#endif
 }
 
 public OnMapEnd()
@@ -397,16 +400,16 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 }
 
 
+
 // init the plugin
 public OnPluginStart()
 {
-	EngineVersion game = GetEngineVersion();
-	if(game != Engine_CSGO && game != Engine_CSS)
+	g_Game = GetEngineVersion();
+	if(g_Game != Engine_CSGO && g_Game != Engine_CSS)
 	{
 		SetFailState("This plugin is for CSGO/CSS only.");	
 	}
 	
-
 	// init text
 	if(game == Engine_CSGO)
 	{
@@ -416,8 +419,6 @@ public OnPluginStart()
 		Format(WARDEN_PREFIX,strlen(WARDEN_PREFIX),WARDEN_PREFIX_CSGO);
 		Format(PTS_PREFIX,strlen(PTS_PREFIX),PTS_PREFIX_CSGO);		
 	}
-
-
 	
 	SetCollisionGroup = init_set_collision();
 	
@@ -440,16 +441,14 @@ public OnPluginStart()
 	if(SetCollisionGroup == INVALID_HANDLE)
 	{
 		RegConsoleCmd("stuck", command_stuck);
-	}
-	#endif		
+	}		
 	RegConsoleCmd("sm_samira", samira_EE);
-	
 	
 	// admin commands
 	RegAdminCmd("sm_rw", fire_warden, ADMFLAG_KICK);
 	RegAdminCmd("block", enable_block_admin, ADMFLAG_BAN);
 	RegAdminCmd("ublock",disable_block_admin, ADMFLAG_BAN);	
-	RegAdminCmd("force_open", force_open_callback, ADMFLAG_BAN);
+	RegAdminCmd("force_open", force_open_callback, ADMFLAG_UNBAN);
 
 #if defined LASER_DEATH
 	// toggle kill and safe laser
@@ -463,9 +462,11 @@ public OnPluginStart()
 #else
 	RegConsoleCmd("laser", laser_menu);
 #endif
-	
+
+#if defined T_LASER	
 	RegConsoleCmd("tlaser", t_laser_menu);
-	
+#endif
+
 #if defined LASER_COLOR_CUSTOM_FLAGS
 	RegAdminCmd("laser_color", command_laser_color, ADMFLAG_CUSTOM4);
 #else
@@ -482,7 +483,7 @@ public OnPluginStart()
 	HookEvent("round_start", round_start); // For the round start
 	HookEvent("player_spawn", player_spawn); 
 	HookEvent("player_death", player_death); // To check when our warden dies :)
-	
+	HookEvent("player_team", player_team);
 	
 	// create a timer for a the warden text
 	CreateTimer(1.0, print_warden_text_all, _, TIMER_REPEAT);
@@ -501,6 +502,18 @@ public OnPluginStart()
 	PrecacheSound("bot\\what_have_you_done.wav");
 	
 	register_cookies();
+}
+
+
+// if warden drops into spec remove them
+public Action player_team(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(GetEventInt(event, "userid")); 
+
+	if(client == warden_id)
+	{
+		remove_warden();
+	}
 }
 
 public Action force_open_callback (int client, int args)
@@ -537,8 +550,16 @@ public Action print_warden_text_all(Handle timer)
 	
 	
 	Handle h_hud_text = CreateHudSynchronizer();
-	SetHudTextParams(-1.5, -1.7, 1.0, 255, 255, 255, 255);
-
+	if(GetEngineVersion() == Engine_CSGO)
+	{
+		// TODO drawing is scuffed on csgo for some monitor sizes
+        //SetHudTextParams(1.5, -1.7, 1.0, 255, 255, 255, 255);
+	}
+	
+	else
+	{
+        SetHudTextParams(1.5, -1.7, 1.0, 255, 255, 255, 255);
+    }
 	// for each client
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -602,6 +623,7 @@ public Action become_warden(int client, int args)
 }
 
 // \n doesent work apparently...
+// \n doesent work apparently...
 public print_warden_commands(client)
 {
 	char color1[] = "\x07FF0000";
@@ -623,8 +645,10 @@ public print_warden_commands(client)
 	PrintToChat(client,"%s!laser       %s- %sswitch point/draw laser",color1,color2,color3);
 	PrintToChat(client,"%s!laser_color       %s- %schange laser color",color1,color2,color3);
 	PrintToChat(client,"%s!marker  %s- %s+marker, use mouse to adjust size, then -marker",color1,color2,color3);
-	PrintToChat(client,"%s!wsd           %s- %sstart sd after enough rounds",color1,color2,color3);
-	PrintToChat(client,"%s!tlaser           %s- %stoggle laser for t's'",color1,color2,color3);	
+	PrintToChat(client,"%s!wsd           %s- %sstart sd after %d rounds",color1,color2,color3,ROUND_WARDEN_SD);
+#if defined T_LASER
+	PrintToChat(client,"%s!tlaser           %s- %stoggle laser for t's'",color1,color2,color3);
+#endif	
 	PrintToChat(client,"%s!color           %s- %scolor players'",color1,color2,color3);	
 	PrintToChat(client,"%s!reset_color           %s- %sreset player colors'",color1,color2,color3);	
 
@@ -684,18 +708,51 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 	}
 }
 
-// give ct equitment on spawn
+// give ct equitment on spawn & set block
 public Action player_spawn(Handle event, const String:name[], bool dontBroadcast)
 {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
-	if(IsClientInGame(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
+	
+	if(is_valid_client(client))
 	{
-		#if defined CT_KEVLAR_HELMET
-			GivePlayerItem(client, "item_assaultsuit");
-		#elseif defined CT_ARMOUR
-			GivePlayerItem(client, "item_kevlar");
-			SetEntProp(client , Prop_Send, "m_ArmorValue", 50, 1);
-		#endif
+		if(sd_current_state() == sd_inactive)
+		{
+		
+			//taking this information off clients is not functioning reliably
+		
+			// ignore clients setting as its unreliable
+			// the first round we cant rely on it to be set as there are no players
+			// apparently hoping a empty team join will force a round reset aint good enough
+			
+			int dummy = 0;
+			bool first_round = CS_GetTeamScore(CS_TEAM_CT) + CS_GetTeamScore(CS_TEAM_T) <= 0;
+			bool force_setting = first_round || get_alive_team_count(GetClientTeam(client), dummy) <= 1;
+#if defined NOBLOCK_DEFAULT
+			if(block_enabled(client) || force_setting)
+			{
+				unblock_client(client, SetCollisionGroup);
+			}			
+#else
+			if(!noblock_enabled(client) || force_setting)
+			{
+				block_client(client, SetCollisionGroup);
+			}
+#endif
+			else
+			{
+				unblock_client(client, SetCollisionGroup);
+			}		
+		}
+				
+		if(GetClientTeam(client) == CS_TEAM_CT)
+		{
+			#if defined CT_KEVLAR_HELMET
+				GivePlayerItem(client, "item_assaultsuit");
+			#elseif defined CT_ARMOUR
+				GivePlayerItem(client, "item_kevlar");
+				SetEntProp(client , Prop_Send, "m_ArmorValue", 50, 1);
+			#endif
+		}
 	}
 }
 
