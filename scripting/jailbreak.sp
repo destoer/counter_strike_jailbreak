@@ -43,7 +43,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V3.3.3 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.4 - Violent Intent Jailbreak"
 
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
@@ -62,6 +62,14 @@ TODO make all names consistent
 #define PTS_PREFIX "\x07F8F8FF"
 */
 
+/*
+#define ANTISTUCK_PREFIX "\x07FF0000[3E Antistuck]\x07F8F8FF"
+#define JB_PREFIX "[3E Jailbreak]"
+#define WARDEN_PREFIX "\x07FF0000[3E Warden]\x07F8F8FF"
+#define WARDEN_PLAYER_PREFIX "\x07FF0000[3E Warden]\x07F8F8FF"
+#define PTS_PREFIX "\x07F8F8FF"
+*/
+
 
 #define ANTISTUCK_PREFIX_CSS "\x07FF0000[Antistuck]\x07F8F8FF"
 #define JB_PREFIX_CSS "\x04[GP Jailbreak]\x07F8F8FF"
@@ -74,14 +82,11 @@ TODO make all names consistent
 #define WARDEN_PREFIX_CSGO "\x07[GP Warden]\x07"
 #define WARDEN_PLAYER_PREFIX_CSGO "\x07[GP Warden]\x07"
 #define PTS_PREFIX_CSGO "\x07"
-
-/*
-#define ANTISTUCK_PREFIX "\x07FF0000[3E Antistuck]\x07F8F8FF"
-#define JB_PREFIX "[3E Jailbreak]"
-#define WARDEN_PREFIX "\x07FF0000[3E Warden]\x07F8F8FF"
-#define WARDEN_PLAYER_PREFIX "\x07FF0000[3E Warden]\x07F8F8FF"
-#define PTS_PREFIX "\x07F8F8FF"
-*/
+char ANTISTUCK_PREFIX[] = ANTISTUCK_PREFIX_CSS;
+char JB_PREFIX[] = JB_PREFIX_CSS;
+char WARDEN_PREFIX[] = WARDEN_PREFIX_CSS;
+char WARDEN_PLAYER_PREFIX[] = WARDEN_PLAYER_PREFIX_CSS;
+char PTS_PREFIX[] = PTS_PREFIX_CSS;
 
 const int WARDEN_INVALID = -1;
 // global vars
@@ -96,6 +101,9 @@ Handle SetCollisionGroup;
 
 
 
+#include <sourcemod>
+#include <sdktools>
+#include <cstrike>
 #include "lib.inc"
 #include "specialday/specialday.inc"
 
@@ -117,8 +125,6 @@ Handle client_laser_color_pref;
 #include "jailbreak/cookies.inc"
 #include "jailbreak/color.inc"
 
-
-EngineVersion g_Game;
 
 public Plugin:myinfo = 
 {
@@ -262,6 +268,7 @@ public void OnClientSpeakingEx(client)
 }
 */
 
+
 public OnMapStart()
 {
 	// prechache circle sprites
@@ -397,16 +404,16 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 }
 
 
-
 // init the plugin
 public OnPluginStart()
 {
-	g_Game = GetEngineVersion();
-	if(g_Game != Engine_CSGO && g_Game != Engine_CSS)
+	EngineVersion game = GetEngineVersion();
+	if(game != Engine_CSGO && game != Engine_CSS)
 	{
 		SetFailState("This plugin is for CSGO/CSS only.");	
 	}
 	
+
 	// init text
 	if(game == Engine_CSGO)
 	{
@@ -416,6 +423,8 @@ public OnPluginStart()
 		Format(WARDEN_PREFIX,strlen(WARDEN_PREFIX),WARDEN_PREFIX_CSGO);
 		Format(PTS_PREFIX,strlen(PTS_PREFIX),PTS_PREFIX_CSGO);		
 	}
+
+
 	
 	SetCollisionGroup = init_set_collision();
 	
@@ -438,7 +447,8 @@ public OnPluginStart()
 	if(SetCollisionGroup == INVALID_HANDLE)
 	{
 		RegConsoleCmd("stuck", command_stuck);
-	}		
+	}
+	#endif		
 	RegConsoleCmd("sm_samira", samira_EE);
 	
 	// admin commands
@@ -725,7 +735,7 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 			bool first_round = CS_GetTeamScore(CS_TEAM_CT) + CS_GetTeamScore(CS_TEAM_T) <= 0;
 			bool force_setting = first_round || get_alive_team_count(GetClientTeam(client), dummy) <= 1;
 #if defined NOBLOCK_DEFAULT
-			if(block_enabled(client) || force_setting)
+			if(noblock_enabled(client) || force_setting)
 			{
 				unblock_client(client, SetCollisionGroup);
 			}			

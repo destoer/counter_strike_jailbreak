@@ -12,8 +12,6 @@
 
 bool timer_active = false;
 
-#include "lib.inc"
-
 int old_group;
 
 public Action command_stuck(int client, int args)

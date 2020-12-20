@@ -77,17 +77,8 @@ public void OnPluginStart()
 
 public void OnMapStart()
 {
-	if(GetEngineVersion() == Engine_CSGO)
-	{
-		gI_BeamSprite = PrecacheModel("materials/sprites/hostage_following_offscreen.vmt", true);
-		gI_HaloSprite = PrecacheModel("materials/sprites/hostage_following_offscreen.vmt", true);
-	}
-
-	else
-	{
-		gI_BeamSprite = PrecacheModel("materials/sprites/hostage_following_offscreen.vmt", true);
-		gI_HaloSprite = PrecacheModel("materials/sprites/hostage_following_offscreen.vmt", true);
-	}
+	gI_BeamSprite = PrecacheModel("materials/sprites/hostage_following_offscreen.vmt", true);
+	gI_HaloSprite = PrecacheModel("materials/sprites/hostage_following_offscreen.vmt", true);
 }
 
 public void OnClientPutInServer(int client)

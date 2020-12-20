@@ -12,11 +12,6 @@
 
 
 
-#include <sourcemod>
-#include <sdktools>
-#include <cstrike>
-#include <sdkhooks>
-#include <entity>
 
 
 stock bool steam_id_equal(int client, char[] id)
@@ -266,7 +261,7 @@ stock bool is_client_blocked(int client)
 }
 
 // not even gonna bother assuming things will go thru the above functions
-stock bool noblock_enabled()
+stock bool noblock_enabled(int client = -1)
 {
 	// ignore cases where there are no clients
 	if(GetClientCount(true) == 0)
@@ -277,7 +272,7 @@ stock bool noblock_enabled()
 	// if a single valid player  does not have no block then its not on
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if(is_valid_client(i) && is_client_blocked(i) && is_on_team(i))
+		if(is_valid_client(i) && is_client_blocked(i) && is_on_team(i) && i != client)
 		{
 			return false;
 		}
