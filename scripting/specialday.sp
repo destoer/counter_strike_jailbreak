@@ -1,3 +1,7 @@
+#include <sourcemod>
+#include <sdktools>
+#include <sdkhooks>
+#include <cstrike>
 #include "lib.inc"
 #include "specialday/specialday.inc"
 // make this possible to be standalone later
@@ -25,7 +29,7 @@ public Plugin myinfo = {
 // if running gangs or ct bans with this define to prevent issues :)
 //#define GANGS
 #define CT_BAN
-#define STORE
+//#define STORE
 
 #define USE_CUSTOM_ZOMBIE_MODEL
 #define CUSTOM_ZOMBIE_MUSIC
@@ -59,8 +63,14 @@ int store_kill_ammount_backup = 0;
 //#define SPECIALDAY_PREFIX "\x04[GK Special Day]\x07F8F8FF"
 //#define SPECIALDAY_PREFIX "\x04[GP Special Day]\x07F8F8FF"
 //#define SPECIALDAY_PREFIX "\x04[3E Special Day]\x07F8F8FF"
+
+/*
 #define SPECIALDAY_PREFIX_CSS "\x04[GP Special Day]\x07F8F8FF"
 #define SPECIALDAY_PREFIX_CSGO "\x04[GP Special Day]\x02"
+*/
+
+#define SPECIALDAY_PREFIX_CSS "\x04[3E Special Day]\x07F8F8FF"
+#define SPECIALDAY_PREFIX_CSGO "\x04[3E Special Day]\x02"
 
 char SPECIALDAY_PREFIX[] = SPECIALDAY_PREFIX_CSS
 
