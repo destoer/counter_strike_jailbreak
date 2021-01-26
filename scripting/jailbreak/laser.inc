@@ -30,7 +30,7 @@ int laser_colors[LASER_COLOR_SIZE][4] =
 	{255,0,0,255}, // red
 	{118, 9, 186, 255}, // purple
 	{66, 66, 66, 255}, // grey
-	{0,255,0,255}, // green
+	{0, 191, 0, 255}, // green
 	{ 255, 255, 0, 255 } // yellow
 };
 
@@ -221,7 +221,7 @@ public Action laser_draw(Handle timer)
 {
 	if(warden_id != WARDEN_INVALID && use_draw_laser_settings[warden_id] && laser_use[warden_id])
 	{
-		do_draw(warden_id, { 1, 153, 255, 255 } );
+		do_draw(warden_id, {0,191,0,255} );
 	}
 	
 	// now check if any of our t's happen to be drawing
@@ -234,7 +234,7 @@ public Action laser_draw(Handle timer)
 		
 		if(t_use_draw_laser[i])
 		{
-			do_draw(i, { 255, 0, 0, 255 } );
+			do_draw(i, {255,0,0,255} );
 		}
 	}
 }

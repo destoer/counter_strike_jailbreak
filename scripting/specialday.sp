@@ -8,7 +8,7 @@
 #include "jailbreak/jailbreak.inc"
 
 
-#define VERSION "2.6.1  - Violent Intent Jailbreak"
+#define VERSION "2.6.2- Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -69,8 +69,14 @@ int store_kill_ammount_backup = 0;
 #define SPECIALDAY_PREFIX_CSGO "\x04[GP Special Day]\x02"
 */
 
+/*
 #define SPECIALDAY_PREFIX_CSS "\x04[3E Special Day]\x07F8F8FF"
 #define SPECIALDAY_PREFIX_CSGO "\x04[3E Special Day]\x02"
+*/
+
+
+#define SPECIALDAY_PREFIX_CSS "\x04[EgN | Special Day]\x07F8F8FF"
+#define SPECIALDAY_PREFIX_CSGO "\x04[EgN | Special Day]\x02"
 
 char SPECIALDAY_PREFIX[] = SPECIALDAY_PREFIX_CSS
 

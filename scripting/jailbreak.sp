@@ -27,7 +27,7 @@ TODO make all names consistent
 */
 
 //uncomment to make noblock default 
-#define NOBLOCK_DEFAULT
+//#define NOBLOCK_DEFAULT
 
 
 #define CT_ARMOUR  // 50 armour for ct on spawn
@@ -43,7 +43,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V3.4 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.4.1 - Violent Intent Jailbreak"
 
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
@@ -84,7 +84,7 @@ TODO make all names consistent
 #define PTS_PREFIX_CSGO "\x07"
 */
 
-
+/*
 #define ANTISTUCK_PREFIX_CSS "\x07FF0000[Antistuck]\x07F8F8FF"
 #define JB_PREFIX_CSS "\x04[3E Jailbreak]\x07F8F8FF"
 #define WARDEN_PREFIX_CSS "\x04[3E Warden]\x07F8F8FF"
@@ -95,6 +95,20 @@ TODO make all names consistent
 #define JB_PREFIX_CSGO "\x07[3E Jailbreak]\x07"
 #define WARDEN_PREFIX_CSGO "\x07[3E Warden]\x07"
 #define WARDEN_PLAYER_PREFIX_CSGO "\x07[3E Warden]\x07"
+#define PTS_PREFIX_CSGO "\x07"
+*/
+
+
+#define ANTISTUCK_PREFIX_CSS "\x07FF0000[Antistuck]\x07F8F8FF"
+#define JB_PREFIX_CSS "\x04[EgN | Jailbreak]\x07F8F8FF"
+#define WARDEN_PREFIX_CSS "\x04[EgN | Warden]\x07F8F8FF"
+#define WARDEN_PLAYER_PREFIX_CSS "\x04[EgN | Warden]\x0700BFFF"
+#define PTS_PREFIX_CSS "\x07F8F8FF"
+
+#define ANTISTUCK_PREFIX_CSGO "\x07[Antistuck]\x07"
+#define JB_PREFIX_CSGO "\x07[EgN | Jailbreak]\x07"
+#define WARDEN_PREFIX_CSGO "\x07[EgN | Warden]\x07"
+#define WARDEN_PLAYER_PREFIX_CSGO "\x07[EgN | Warden]\x07"
 #define PTS_PREFIX_CSGO "\x07"
 
 
@@ -243,7 +257,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 			{
 				case warden:
 				{
-					SetupLaser(client,laser_colors[0]);
+					SetupLaser(client,laser_colors[5]);
 				}
 			
 			
@@ -705,7 +719,7 @@ public set_warden(int client)
 	print_warden_commands(warden_id);
 	
 	// set the warden with special color
-	SetEntityRenderColor(warden_id, 0, 0, 255, 255);
+	SetEntityRenderColor(warden_id, 0, 191, 0, 255);
 
 }
 
