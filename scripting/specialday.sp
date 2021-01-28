@@ -8,7 +8,7 @@
 #include "jailbreak/jailbreak.inc"
 
 
-#define VERSION "2.6.2- Violent Intent Jailbreak"
+#define VERSION "2.6.3 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -31,8 +31,9 @@ public Plugin myinfo = {
 #define CT_BAN
 //#define STORE
 
-#define USE_CUSTOM_ZOMBIE_MODEL
-#define CUSTOM_ZOMBIE_MUSIC
+// need to supply models + audio if these are uncommented
+//#define USE_CUSTOM_ZOMBIE_MODEL
+//#define CUSTOM_ZOMBIE_MUSIC
 
 #define SD_ADMIN_FLAG ADMFLAG_UNBAN
 
@@ -170,7 +171,7 @@ int sd_winner = -1;
 // gun removal
 int g_WeaponParent;
 
-
+int warden_sd_available = 0;
 int rounds_since_warden_sd = 0;
 
 // csgo ff
@@ -901,15 +902,22 @@ void EndSd(bool forced=false)
 
 public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 {
-	if(GetClientCount(true) >= 8)
+	// if we have the required players and can still add rounds to the stockpile
+	if(GetClientCount(true) >= ROUND_PLAYER_REQ && warden_sd_available < ROUND_STACK_LIM)
 	{
 		rounds_since_warden_sd += 1;
+		// inc availiable reset round counter
+		if(rounds_since_warden_sd >= ROUND_WARDEN_SD)
+		{
+			rounds_since_warden_sd = 0;
+			warden_sd_available += 1;
+		}
 	}	
 
 
-	if(rounds_since_warden_sd >= ROUND_WARDEN_SD)
+	if(warden_sd_available > 0)
 	{
-		PrintToChatAll("%s Warden sd available !wsd",SPECIALDAY_PREFIX);
+		PrintToChatAll("%s Warden sd available !wsd(%d)",SPECIALDAY_PREFIX,warden_sd_available);
 	}
 	
 #if defined GANGS	
@@ -1021,7 +1029,7 @@ public Action print_specialday_text_all(Handle timer)
 public Action command_warden_special_day(int client,int args)
 {
 	
-	if(rounds_since_warden_sd >= ROUND_WARDEN_SD && client == get_warden_id()
+	if(warden_sd_available > 0 && client == get_warden_id()
 		&& sd_state == sd_inactive)
 	{
 		//ect(client, GetRandomInt(0, view_as<int>(normal_day) - 1));
@@ -1419,7 +1427,7 @@ public int sd_select(int client, int sd)
 	// invoked by a warden reset the round limit
 	if(client == get_warden_id())
 	{
-		rounds_since_warden_sd = 0;
+		warden_sd_available -= 1;
 	}
 
 	sdtimer = 20;
