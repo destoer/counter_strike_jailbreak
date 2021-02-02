@@ -92,7 +92,8 @@ Menu gun_menu;
 Handle SetCollisionGroup;
 
 
-const int SD_SIZE = 15;
+//const int SD_SIZE = 15;
+const int SD_SIZE = 14;
 new const String:sd_list[SD_SIZE][] =
 {	
 	"Friendly Fire Day", 
@@ -107,7 +108,7 @@ new const String:sd_list[SD_SIZE][] =
 	"Knife",
 	"Scout Knives",
 	"Death Match",
-	"Laser Wars",
+	//"Laser Wars",
 	"Spectre",
 	"Headshot"
 };
@@ -177,6 +178,11 @@ int rounds_since_warden_sd = 0;
 // csgo ff
 ConVar convar_mp_teammates_are_enemies;
 bool mp_teammates_are_enemies;
+
+// laser sprites
+int g_lbeam;
+int g_lpoint;
+
 // split files for sd
 #include "specialday/ffd.inc"
 #include "specialday/tank.inc"
@@ -190,10 +196,11 @@ bool mp_teammates_are_enemies;
 #include "specialday/knife.inc"
 #include "specialday/scoutknifes.inc"
 #include "specialday/deathmatch.inc"
-#include "specialday/laserwars.inc"
+//#include "specialday/laserwars.inc"
 #include "specialday/spectre.inc"
 #include "specialday/headshot.inc"
 #include "specialday/debug.inc"
+#include "specialday/spawn.inc"
 
 
 // we can then just call this rather than having to switch on the sds in many places
@@ -409,6 +416,9 @@ public OnPluginStart()
 	{
 		gungame_gun_idx[i] = i;
 	}
+	
+	// dummy to check errors
+	sample_cords();
 }
 
 
@@ -464,12 +474,12 @@ public Action sd_spawn(int client, int args)
 			{
 				CreateTimer(3.0, ReviveScout, client);
 			}
-			
+		/*	
 			case laser_day:
 			{
 				CreateTimer(3.0, ReviveLaser, client);
 			}
-			
+		*/	
 			default: {}
 			
 		}
@@ -803,7 +813,7 @@ void EndSd(bool forced=false)
 		case fly_day: {}
 		case grenade_day: {}
 		case knife_day: {}
-		case laser_day: {}
+		//case laser_day: {}
 		case headshot_day: {}
 
 		case spectre_day: 
@@ -982,12 +992,12 @@ public Action print_specialday_text_all(Handle timer)
 			{
 				Format(buf, sizeof(buf), "death match: %d", round_delay_timer);	
 			}			
-			
+		/*	
 			case laser_day:
 			{
 				Format(buf, sizeof(buf), "laser: %d", round_delay_timer);	
 			}
-
+		*/
 			case spectre_day:
 			{
 				Format(buf, sizeof(buf), "spectre: %N", spectre);
@@ -1385,12 +1395,12 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 		{
 			gungame_death(attacker, victim);
 		}
-		
+	/*
 		case laser_day:
 		{
 			laser_death(victim);
 		}
-		
+	*/
 		default: {}
 	
 	}
@@ -1535,12 +1545,12 @@ public int sd_select(int client, int sd)
 		{
 			deathmatch_init();
 		}
-		
+	/*	
 		case laser_day: // laser day
 		{
 			laser_init();
 		}
-		
+	*/	
 
 		// spectre
 		case spectre_day:
@@ -1708,12 +1718,12 @@ public StartSD()
 		{
 			StartDeathMatch();
 		}
-		
+	/*	
 		case laser_day:
 		{
 			StartLaser();
 		}
-
+	*/
 		case spectre_day:
 		{
 			StartSpectre();
@@ -2009,7 +2019,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	}
 	
 	bool in_use = (buttons & IN_USE) == IN_USE;
-	
+/*	
 	// kill laser
 	if(in_use && special_day == laser_day && sd_state == sd_active)
 	{
@@ -2017,7 +2027,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	}	
 
 	// use key press toggle fly day move type
-	else if(in_use && !use_key[client] && special_day == fly_day)
+	else */if(in_use && !use_key[client] && special_day == fly_day)
 	{
 		if(GetEntityMoveType(client) == MOVETYPE_FLY)
 		{

@@ -6,8 +6,6 @@
 #endif
 #define _LASERWARS_INCLUDE_included
 
-int g_lbeam;
-int g_lpoint;
 
 void laser_player_init(int client)
 {

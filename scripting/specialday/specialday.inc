@@ -21,7 +21,7 @@ enum SpecialDay
 	knife_day,
 	scoutknife_day,
 	deathmatch_day,
-	laser_day,
+	//laser_day,
 	spectre_day,
 	headshot_day,
 	normal_day,
@@ -42,6 +42,6 @@ native SpecialDay sd_current_day();
 //#define ROUND_STACK_LIM 1
 //#define ROUND_PLAYER_REQ 8
 
-#define ROUND_WARDEN_SD 5
+#define ROUND_WARDEN_SD 8
 #define ROUND_STACK_LIM 2
 #define ROUND_PLAYER_REQ 3
