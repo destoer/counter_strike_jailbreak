@@ -193,13 +193,13 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon)
 {
-
+/*
 	// if on a laser day dont allow lasers
 	if(sd_current_day() == laser_day && sd_current_state() != sd_inactive)
 	{
 		return Plugin_Continue;
 	}
-	
+*/	
 	
 	// reset laser cords we are no longer drawing
 	if(!(buttons & IN_USE))

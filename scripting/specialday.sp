@@ -8,7 +8,7 @@
 #include "jailbreak/jailbreak.inc"
 
 
-#define VERSION "2.6.3 - Violent Intent Jailbreak"
+#define VERSION "2.6.4 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -20,11 +20,9 @@ public Plugin myinfo = {
 
 // todo
 // ff toggles on individual rounds
-// headshot only (done)
 // shotgun wars
-// sd can start after x number of rounds on warden trigger (done)
 // human only fog on zombies
-
+// code cleanup, start and end pointers for sds
 
 // if running gangs or ct bans with this define to prevent issues :)
 //#define GANGS
@@ -200,7 +198,7 @@ int g_lpoint;
 #include "specialday/spectre.inc"
 #include "specialday/headshot.inc"
 #include "specialday/debug.inc"
-#include "specialday/spawn.inc"
+//#include "specialday/spawn.inc"
 
 
 // we can then just call this rather than having to switch on the sds in many places
@@ -417,8 +415,6 @@ public OnPluginStart()
 		gungame_gun_idx[i] = i;
 	}
 	
-	// dummy to check errors
-	sample_cords();
 }
 
 
@@ -829,6 +825,7 @@ void EndSd(bool forced=false)
 		case deathmatch_day:
 		{
 			end_deathmatch();
+			RestoreTeams();
 		}
 		
 		
@@ -836,6 +833,7 @@ void EndSd(bool forced=false)
 		case gungame_day:
 		{
 			enable_round_end();
+			RestoreTeams();
 		}
 		
 		case zombie_day:
@@ -1281,6 +1279,36 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 }
 
 
+public BalTeams()
+{
+	int unused = 0;
+	int ct = get_alive_team_count(CS_TEAM_CT, unused);
+	int t = get_alive_team_count(CS_TEAM_T, unused);
+	
+	
+	SaveTeams(false);
+	
+	// switch from t to ct until we have a roughly even split
+	for (int i = 0; i < MaxClients; i++)
+	{
+		if(ct >= t)
+		{
+			break;
+		}
+		
+		if(!is_valid_client(i))
+		{
+			continue;
+		}
+		
+		if(GetClientTeam(i) == CS_TEAM_T && !(check_command_exists("sm_ctban") &&  CTBan_IsClientBanned(i)))
+		{
+            ct += 1;
+            t -= 1;
+			CS_SwitchTeam(i,CS_TEAM_CT);
+		}
+	}
+}
 
 public SaveTeams(bool onlyct)
 {
@@ -1445,6 +1473,8 @@ public int sd_select(int client, int sd)
 	// special done begun but not active
 	sd_state = sd_started; 
 	
+    // sd is started so dont have a warden
+	remove_warden();
 	
 	force_open();
 	// re-spawn all players
@@ -1651,9 +1681,6 @@ public StartSD()
 		ServerCommand("sm plugins unload hl_gangs.smx");
 	}
 #endif
-
-	// sd is active so dont have a warden
-	remove_warden();
 
 
 	switch(special_day)

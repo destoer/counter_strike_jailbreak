@@ -17,11 +17,23 @@ int gungame_level[64] =  { 0 };
 // gun game
 void gun_game_player_init(int client)
 {
+    // color them incase the skin aint set
+    SetEntityRenderMode(client, RENDER_TRANSCOLOR);
+    if(GetClientTeam(client) == CS_TEAM_CT)
+    {
+        SetEntityRenderColor(client, 0, 0, 255, 255);
+    }
+    
+    else 
+    {
+        SetEntityRenderColor(client, 255, 0, 0, 255);
+    }
 	GiveGunGameGun(client);
 }
 
 void init_gungame()
 {
+	
 	PrintToChatAll("%s gun game day started", SPECIALDAY_PREFIX);
 	
 	special_day = gungame_day;
@@ -44,6 +56,7 @@ void init_gungame()
 	}
 		
 	sd_player_init_fptr = gun_game_player_init;
+	BalTeams();
 }
 
 
@@ -78,16 +91,15 @@ public Action ReviveGunGame(Handle timer, int client)
 		return;
 	}
 	
-	if(IsClientInGame(client))
+	if(is_valid_client(client) && is_on_team(client))
 	{
-		CS_RespawnPlayer(client);
-		GiveGunGameGun(client);
+        CS_RespawnPlayer(client);
+		sd_player_init(client);
 	}		
 }
 
 public void StartGunGame()
 {
-	enable_friendly_fire();
 	PrintCenterTextAll("Gun game active");
 	disable_round_end();
 	CreateTimer(1.0, RemoveGuns);

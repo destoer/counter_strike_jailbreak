@@ -9,13 +9,26 @@
 
 void deathmatch_player_init(int client)
 {
+    SetEntityRenderMode(client, RENDER_TRANSCOLOR);
+    if(GetClientTeam(client) == CS_TEAM_CT)
+    {
+        SetEntityRenderColor(client, 0, 0, 255, 255);
+    }
+    
+    else 
+    {
+        SetEntityRenderColor(client, 255, 0, 0, 255);
+    }
 	WeaponMenu(client);
 }
 
 public Action ReviveDeathMatch(Handle Timer, int client)
 {
-	CS_RespawnPlayer(client);
-	sd_player_init(client);
+	if(is_valid_client(client) && is_on_team(client))
+	{
+		CS_RespawnPlayer(client);
+		sd_player_init(client);
+	}
 }
 
 void deathmatch_init()
@@ -29,6 +42,7 @@ void deathmatch_init()
 	{
 		player_kills[i] = 0;
 	}
+	BalTeams();
 }	
 
 
@@ -36,7 +50,6 @@ public void StartDeathMatch()
 {
 	start_round_delay(90);
 	CreateTimer(1.0, RemoveGuns);
-	enable_friendly_fire();
 }
 
 void end_deathmatch()

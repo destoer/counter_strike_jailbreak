@@ -16,7 +16,7 @@ void sample_cords()
 {
 	for (int i = 0; i < 64; i++)
 	{
-		if(is_on_team(i) && is_valid_client(i))
+		if(is_valid_client(i) && is_on_team(i))
 		{
 			sample_cord(i);
 		}

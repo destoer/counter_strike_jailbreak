@@ -27,8 +27,11 @@ void scout_player_init(int client)
 
 public Action ReviveScout(Handle Timer, int client)
 {
-	CS_RespawnPlayer(client);
-	sd_player_init(client);
+	if(is_valid_client(client) && is_on_team(client))
+	{
+		CS_RespawnPlayer(client);
+		sd_player_init(client);
+	}
 }
 
 
