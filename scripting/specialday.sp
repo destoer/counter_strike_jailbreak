@@ -5,7 +5,13 @@
 #include "lib.inc"
 #include "specialday/specialday.inc"
 // make this possible to be standalone later
+#if defined SD_STANDALONE
+
+#else 
+
 #include "jailbreak/jailbreak.inc"
+
+#endif
 
 
 #define VERSION "2.6.4 - Violent Intent Jailbreak"
@@ -32,6 +38,9 @@ public Plugin myinfo = {
 // need to supply models + audio if these are uncommented
 //#define USE_CUSTOM_ZOMBIE_MODEL
 //#define CUSTOM_ZOMBIE_MUSIC
+
+// make t his not require warden plugin
+//#define SD_STANDALONE
 
 #define SD_ADMIN_FLAG ADMFLAG_UNBAN
 
@@ -113,10 +122,23 @@ new const String:sd_list[SD_SIZE][] =
 
 
 
+void callback_dummy()
+{
+
+}
+
 SpecialDay special_day = normal_day;
 SdState sd_state = sd_inactive;
 
 typedef SD_INIT_FUNC = function void (int client);
+
+typedef SD_STATE_FUNC = function void();
+
+//typedef SD_
+
+SD_STATE_FUNC end_fptr[SD_SIZE];
+SD_STATE_FUNC start_fptr[SD_SIZE];
+SD_STATE_FUNC init_fptr[SD_SIZE];
 
 // function pointer set to tell us how to handle initilaze players on sds
 // set back to invalid on endsd to make sure we set it properly for each sd
@@ -180,6 +202,8 @@ bool mp_teammates_are_enemies;
 // laser sprites
 int g_lbeam;
 int g_lpoint;
+
+bool sd_init_failure = false;
 
 // split files for sd
 #include "specialday/ffd.inc"
@@ -348,7 +372,11 @@ public OnPluginStart()
 	HookEvent("player_hurt", OnPlayerHurt); 
 
 	// warden trigger random sd
+#if defined SD_STANDALONE	
+
+#else
 	RegConsoleCmd("wsd", command_warden_special_day);
+#endif
 	// register our special day console command	
 	RegAdminCmd("sd", command_special_day, SD_ADMIN_FLAG);
 	RegAdminCmd("sd_cancel", command_cancel_special_day, SD_ADMIN_FLAG);
@@ -414,7 +442,146 @@ public OnPluginStart()
 	{
 		gungame_gun_idx[i] = i;
 	}
+
+	init_function_pointers();
 	
+}
+
+public void panic_unimplemented()
+{
+	ThrowNativeError(SP_ERROR_NATIVE, "did not initalize sd %d\n",view_as<int>(special_day));
+}
+
+// just sourcemod things
+public void init_function_pointers()
+{
+
+	// incase we forget to init a ptr
+	for(int i = 0; i < SD_SIZE; i++)
+	{
+		end_fptr[i] = panic_unimplemented;
+		start_fptr[i] = panic_unimplemented;
+		init_fptr[i] = panic_unimplemented;
+	}
+
+	for(int i = 0; i < SD_SIZE; i++)
+	{
+		SpecialDay day = view_as<SpecialDay>(i);
+
+		switch(day)
+		{
+			case friendly_fire_day:
+			{
+				end_fptr[i] = end_ffd;
+				start_fptr[i] = StartFFD;
+				init_fptr[i] = init_ffd;
+			}
+
+			case tank_day:
+			{
+				end_fptr[i] = end_tank;
+				start_fptr[i] = StartTank;
+				init_fptr[i] = init_tank;
+			}
+
+			case juggernaut_day:
+			{
+				end_fptr[i] = end_juggernaut;
+				start_fptr[i] = StartJuggernaut;
+				init_fptr[i] = init_ffdg;
+			}
+
+			case fly_day:
+			{
+				end_fptr[i] = callback_dummy;
+				start_fptr[i] = StartFly;
+				init_fptr[i] = init_skywars;
+			}
+
+			case hide_day:
+			{
+				end_fptr[i] = callback_dummy;
+				start_fptr[i] = StartHide;
+				init_fptr[i] = init_hide;
+			}
+
+			case dodgeball_day:
+			{
+				end_fptr[i] = callback_dummy;
+				start_fptr[i] = StartDodgeball;
+				init_fptr[i] = dodgeball_init;
+			}
+
+			case grenade_day:
+			{
+				end_fptr[i] = callback_dummy;
+				start_fptr[i] = StartGrenade;
+				init_fptr[i] = grenade_init;
+			}
+
+			case zombie_day:
+			{
+				end_fptr[i] = end_zombie;
+				start_fptr[i] = StartZombie;
+				init_fptr[i] = init_zombie;
+			}
+
+			case gungame_day:
+			{
+				end_fptr[i] = end_gungame;
+				start_fptr[i] = StartGunGame;
+				init_fptr[i] = init_gungame;
+			}
+
+			case knife_day:
+			{
+				end_fptr[i] = callback_dummy;
+				start_fptr[i] = StartKnife;
+				init_fptr[i] = knife_init;
+			}
+
+			case scoutknife_day:
+			{
+				end_fptr[i] = end_scout;
+				start_fptr[i] = StartScout;
+				init_fptr[i] = scoutknife_init;
+			}
+
+			case deathmatch_day:
+			{
+				end_fptr[i] = end_deathmatch;
+				start_fptr[i] = StartDeathMatch;
+				init_fptr[i] = deathmatch_init;
+			}
+		/*
+			case laser_day:
+			{
+				end_fptr[i] = callback_dummy;
+				start_fptr[i] = StartLaser;
+				init_fptr = laser_init;
+			}
+		*/
+
+			case spectre_day:
+			{
+				end_fptr[i] = end_spectre;
+				start_fptr[i] = StartSpectre;
+				init_fptr[i] = spectre_init;
+			}
+
+			case headshot_day:
+			{
+				end_fptr[i] = callback_dummy;
+				start_fptr[i] = StartHeadshot;
+				init_fptr[i] = headshot_init;
+			}
+
+			default:
+			{
+				ThrowNativeError(SP_ERROR_NATIVE, "did not initalize sd %d", i);				
+			}
+		}
+	}
 }
 
 
@@ -782,70 +949,13 @@ void EndSd(bool forced=false)
 		PrintToChatAll("%s Specialday cancelled!", SPECIALDAY_PREFIX);
 	}
 	
-	switch(special_day)
-	{
-		case tank_day:
-		{
-			end_tank();
-		}
-		
-		
-		case friendly_fire_day:
-		{
-			disable_friendly_fire();
-		}
-		
-		case juggernaut_day:
-		{
-			disable_friendly_fire();
-		}
-		
-		case hide_day: {} // we render players further down to handle maps that do messy things
-		
+	// call sd cleanup
+	int idx = view_as<int>(special_day);
 
-		
-		case dodgeball_day: {}
-		case normal_day: {}
-		case fly_day: {}
-		case grenade_day: {}
-		case knife_day: {}
-		//case laser_day: {}
-		case headshot_day: {}
+	SD_STATE_FUNC end_func = end_fptr[idx];
 
-		case spectre_day: 
-		{
-			end_spectre();
-		}
-
-		case scoutknife_day:
-		{
-			end_scout();
-		}
-		
-		case deathmatch_day:
-		{
-			end_deathmatch();
-			RestoreTeams();
-		}
-		
-		
-		// need to turn off ignore round win here :)
-		case gungame_day:
-		{
-			enable_round_end();
-			RestoreTeams();
-		}
-		
-		case zombie_day:
-		{
-			end_zombie();
-		}
-		
-		default:
-		{
-			ThrowNativeError(SP_ERROR_NATIVE, "special day %d not handled in round_end",special_day);
-		}
-	}
+	Call_StartFunction(null, end_func);
+	Call_Finish();
 
 	// just in case
 	enable_round_end();	
@@ -910,6 +1020,9 @@ void EndSd(bool forced=false)
 
 public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 {
+#if defined SD_STANDALONE	
+
+#else
 	// if we have the required players and can still add rounds to the stockpile
 	if(GetClientCount(true) >= ROUND_PLAYER_REQ && warden_sd_available < ROUND_STACK_LIM)
 	{
@@ -927,6 +1040,7 @@ public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 	{
 		PrintToChatAll("%s Warden sd available !wsd(%d)",SPECIALDAY_PREFIX,warden_sd_available);
 	}
+#endif
 	
 #if defined GANGS	
 	if(sd_state == sd_active && check_command_exists("sm_gang"))
@@ -1229,6 +1343,7 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 		}	
 	}
 
+	// hook any sd damage modifications here
 	if(sd_state != sd_inactive)
 	{
 		switch(special_day)
@@ -1462,20 +1577,26 @@ public int sd_select(int client, int sd)
 		return -1;
 	}
 
+
+
+	sdtimer = 20;
+
+	// special done begun but not active
+	sd_state = sd_started; 
+
+#if defined SD_STANDALONE	
+
+#else
 	// invoked by a warden reset the round limit
 	if(client == get_warden_id())
 	{
 		warden_sd_available -= 1;
 	}
 
-	sdtimer = 20;
-
-	// special done begun but not active
-	sd_state = sd_started; 
-	
-    // sd is started so dont have a warden
+	 // sd is started so dont have a warden 
 	remove_warden();
-	
+#endif
+
 	force_open();
 	// re-spawn all players
 	for(int i = 1; i < MaxClients; i++)
@@ -1505,98 +1626,18 @@ public int sd_select(int client, int sd)
 	// will just ignore the request
 	unblock_all_clients(SetCollisionGroup);
 	
-	
+	sd_init_failure = false;
 
-	switch(sd)
+	// init_func
+
+	SD_STATE_FUNC init_func = init_fptr[sd];
+
+	Call_StartFunction(null, init_func);
+	Call_Finish();
+
+	if(sd_init_failure)
 	{
-
-		case friendly_fire_day: //ffd
-		{ 
-			init_ffd();
-		}
-		
-		case tank_day: // tank day
-		{
-			if(!init_tank())
-			{
-				return -1;
-			}
-		}
-		
-		case juggernaut_day: //ffdg
-		{
-			init_ffdg();
-		}
-		
-		case fly_day: // flying day
-		{
-			init_skywars();
-		}
-		
-		case hide_day: // hide and seek day
-		{
-			init_hide();
-		}
-		
-		
-		case dodgeball_day: // dodgeball day
-		{
-			dodgeball_init();
-		}
-		
-		
-		
-		case grenade_day: // grenade day
-		{
-			grenade_init();
-		}
-			
-		case zombie_day: // zombie day
-		{
-			init_zombie();
-		}
-		
-		case gungame_day: // gun game
-		{
-			init_gungame();
-		}
-		
-		case knife_day: // knife day
-		{
-			knife_init();
-		}
-		
-		case scoutknife_day: // scout knife day
-		{
-			scoutknife_init();
-		}
-		
-		case deathmatch_day: // deathmatch
-		{
-			deathmatch_init();
-		}
-	/*	
-		case laser_day: // laser day
-		{
-			laser_init();
-		}
-	*/	
-
-		// spectre
-		case spectre_day:
-		{
-			if(!spectre_init())
-			{
-				return -1;
-			}
-		}
-		
-		// headshot only
-		case headshot_day:
-		{
-			headshot_init();
-		}
-		
+		return -1;
 	}
 
 	// call the initial init for all players on the function pointers we just set
@@ -1682,91 +1723,11 @@ public StartSD()
 	}
 #endif
 
+	int idx = view_as<int>(special_day);
+	SD_STATE_FUNC start_func = start_fptr[idx];
 
-	switch(special_day)
-	{
-		case friendly_fire_day:
-		{
-			StartFFD();
-		}
-		
-		case juggernaut_day:
-		{
-			StartJuggernaut();
-		}
-		
-		case tank_day:
-		{
-			StartTank();
-		}
-		
-		case fly_day:
-		{
-			StartFly();
-		}
-		
-		case dodgeball_day:
-		{
-			StartDodgeball();
-		}
-		
-		case hide_day:
-		{
-			StartHide();
-		}
-		
-		
-		case grenade_day:
-		{
-			StartGrenade();
-		}
-		
-		case zombie_day:
-		{
-			StartZombie();
-		}
-		
-		case gungame_day:
-		{
-			StartGunGame();
-		}
-		
-		case knife_day:
-		{
-			StartKnife();
-		}
-		
-		case scoutknife_day:
-		{
-			StartScout();
-		}
-		
-		case deathmatch_day:
-		{
-			StartDeathMatch();
-		}
-	/*	
-		case laser_day:
-		{
-			StartLaser();
-		}
-	*/
-		case spectre_day:
-		{
-			StartSpectre();
-		}
-		
-		case headshot_day:
-		{
-			StartHeadshot();
-		}
-
-
-		default:
-		{
-			ThrowNativeError(SP_ERROR_NATIVE, "attempted to start invalid sd %d", special_day);
-		}
-	}
+	Call_StartFunction(null, start_func);
+	Call_Finish();
 }
 
 

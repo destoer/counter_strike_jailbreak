@@ -34,3 +34,8 @@ StartJuggernaut()
 	
 	enable_friendly_fire();
 }
+
+public void end_juggernaut()
+{
+	disable_friendly_fire();
+}

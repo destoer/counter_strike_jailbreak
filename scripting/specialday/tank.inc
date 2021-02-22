@@ -16,14 +16,15 @@ void tank_player_init(int client)
 	WeaponMenu(client);
 }
 
-bool init_tank()
+void init_tank()
 {
 	SaveTeams(true);
 	
 	if(validclients == 0)
 	{
 		PrintToChatAll("%s You are all freekillers!", SPECIALDAY_PREFIX);
-		return false;
+		sd_init_failure = true;
+		return;
 	}
 	
 	special_day = tank_day;
@@ -33,8 +34,6 @@ bool init_tank()
 	
 	int rand = GetRandomInt( 0, (validclients-1) );
 	tank = game_clients[rand]; // select the lucky client
-	
-	return true;
 }
 
 void end_tank()

@@ -61,6 +61,7 @@ void end_deathmatch()
 		PrintToChatAll("%s %N won deathmatch", SPECIALDAY_PREFIX, cli);
 	}
 	sd_winner = cli;
+	RestoreTeams();
 }
 
 void deathmatch_death(int attacker, int victim)

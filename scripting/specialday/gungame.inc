@@ -45,14 +45,13 @@ void init_gungame()
 	}
 	
 	// shuffle the game game indexes to randomize weapons
-	for (int i = 0; i < GUNS_SIZE; i++)
+	for (int i = GUNS_SIZE-1; i >= 0; i--)
 	{
-		int p1 = GetRandomInt(0, GUNS_SIZE - 1);
-		int p2 = GetRandomInt(0, GUNS_SIZE - 1);
+		int idx = GetRandomInt(0, GUNS_SIZE - 1);
 		
-		int tmp = gungame_gun_idx[p1];
-		gungame_gun_idx[p1] = gungame_gun_idx[p2];
-		gungame_gun_idx[p2] = tmp;
+		int tmp = gungame_gun_idx[i];
+		gungame_gun_idx[i] = gungame_gun_idx[idx];
+		gungame_gun_idx[idx] = tmp;
 	}
 		
 	sd_player_init_fptr = gun_game_player_init;
@@ -161,10 +160,9 @@ void gungame_death(int attacker, int victim)
 	// killed with knife dec the enemies weapon
 	else if(StrEqual(weapon_name,"weapon_knife"))
 	{
-		gungame_level[victim]--;
-		if(gungame_level[victim] < 0)
+		if(gungame_level[victim] > 0)
 		{
-			gungame_level[victim] = 0;
+			gungame_level[victim]--;
 		}
 	}
 	
@@ -174,3 +172,9 @@ void gungame_death(int attacker, int victim)
 	// start a respawn for the dead player :)
 	CreateTimer(3.0, ReviveGunGame, victim);
 }		 
+
+public void end_gungame()
+{
+	enable_round_end();
+	RestoreTeams();	
+}
