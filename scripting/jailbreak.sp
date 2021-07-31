@@ -98,7 +98,7 @@ TODO make all names consistent
 #define PTS_PREFIX_CSGO "\x07"
 */
 
-
+/*
 #define ANTISTUCK_PREFIX_CSS "\x07FF0000[Antistuck]\x07F8F8FF"
 #define JB_PREFIX_CSS "\x04[EgN | Jailbreak]\x07F8F8FF"
 #define WARDEN_PREFIX_CSS "\x04[EgN | Warden]\x07F8F8FF"
@@ -110,7 +110,19 @@ TODO make all names consistent
 #define WARDEN_PREFIX_CSGO "\x07[EgN | Warden]\x07"
 #define WARDEN_PLAYER_PREFIX_CSGO "\x07[EgN | Warden]\x07"
 #define PTS_PREFIX_CSGO "\x07"
+*/
 
+#define ANTISTUCK_PREFIX_CSS "\x07FF0000[Antistuck]\x07F8F8FF"
+#define JB_PREFIX_CSS "\x04[NLG | Jailbreak]\x07F8F8FF"
+#define WARDEN_PREFIX_CSS "\x04[NLG | Warden]\x07F8F8FF"
+#define WARDEN_PLAYER_PREFIX_CSS "\x04[NLG | Warden]\x0700BFFF"
+#define PTS_PREFIX_CSS "\x07F8F8FF"
+
+#define ANTISTUCK_PREFIX_CSGO "\x07[Antistuck]\x07"
+#define JB_PREFIX_CSGO "\x07[NLG | Jailbreak]\x07"
+#define WARDEN_PREFIX_CSGO "\x07[NLG | Warden]\x07"
+#define WARDEN_PLAYER_PREFIX_CSGO "\x07[NLG | Warden]\x07"
+#define PTS_PREFIX_CSGO "\x07"
 
 char ANTISTUCK_PREFIX[] = ANTISTUCK_PREFIX_CSS;
 char JB_PREFIX[] = JB_PREFIX_CSS;

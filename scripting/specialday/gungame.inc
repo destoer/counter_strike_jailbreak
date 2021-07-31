@@ -17,17 +17,17 @@ int gungame_level[64] =  { 0 };
 // gun game
 void gun_game_player_init(int client)
 {
-    // color them incase the skin aint set
-    SetEntityRenderMode(client, RENDER_TRANSCOLOR);
-    if(GetClientTeam(client) == CS_TEAM_CT)
-    {
-        SetEntityRenderColor(client, 0, 0, 255, 255);
-    }
-    
-    else 
-    {
-        SetEntityRenderColor(client, 255, 0, 0, 255);
-    }
+	// color them incase the skin aint set
+	SetEntityRenderMode(client, RENDER_TRANSCOLOR);
+	if(GetClientTeam(client) == CS_TEAM_CT)
+	{
+	    SetEntityRenderColor(client, 0, 0, 255, 255);
+	}
+	
+	else 
+	{
+	    SetEntityRenderColor(client, 255, 0, 0, 255);
+	}
 	GiveGunGameGun(client);
 }
 
@@ -64,19 +64,19 @@ public void GiveGunGameGun(int client)
 	strip_all_weapons(client);
 	GivePlayerItem(client, "weapon_knife");
 	GivePlayerItem(client, "item_assaultsuit");
-
+	
 	EngineVersion game = GetEngineVersion();
-
+	
 	if(game == Engine_CSS)
 	{
 		GivePlayerItem(client, gun_give_list_css[gungame_gun_idx[gungame_level[client]]]);
 	}
-
+	
 	if(game == Engine_CSGO)
 	{
 		GivePlayerItem(client, gun_give_list_csgo[gungame_gun_idx[gungame_level[client]]]);
 	}
-
+	
 	PrintToChat(client, "%s Current level: %s (%d of %d)", 
 		SPECIALDAY_PREFIX, gun_list[gungame_gun_idx[gungame_level[client]]],gungame_level[client]+1,GUNS_SIZE);
 }
@@ -92,7 +92,7 @@ public Action ReviveGunGame(Handle timer, int client)
 	
 	if(is_valid_client(client) && is_on_team(client))
 	{
-        CS_RespawnPlayer(client);
+		CS_RespawnPlayer(client);
 		sd_player_init(client);
 	}		
 }

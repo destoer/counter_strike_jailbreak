@@ -21,7 +21,7 @@ enum SpecialDay
 	knife_day,
 	scoutknife_day,
 	deathmatch_day,
-	//laser_day,
+	laser_day,
 	spectre_day,
 	headshot_day,
 	normal_day,

@@ -31,7 +31,7 @@ public Plugin myinfo = {
 // code cleanup, start and end pointers for sds
 
 // if running gangs or ct bans with this define to prevent issues :)
-//#define GANGS
+#define GANGS
 #define CT_BAN
 //#define STORE
 
@@ -82,9 +82,13 @@ int store_kill_ammount_backup = 0;
 #define SPECIALDAY_PREFIX_CSGO "\x04[3E Special Day]\x02"
 */
 
-
+/*
 #define SPECIALDAY_PREFIX_CSS "\x04[EgN | Special Day]\x07F8F8FF"
 #define SPECIALDAY_PREFIX_CSGO "\x04[EgN | Special Day]\x02"
+*/
+
+#define SPECIALDAY_PREFIX_CSS "\x04[NLG | Special Day]\x07F8F8FF"
+#define SPECIALDAY_PREFIX_CSGO "\x04[NLG | Special Day]\x02"
 
 char SPECIALDAY_PREFIX[] = SPECIALDAY_PREFIX_CSS
 
@@ -99,8 +103,7 @@ Menu gun_menu;
 Handle SetCollisionGroup;
 
 
-//const int SD_SIZE = 15;
-const int SD_SIZE = 14;
+const int SD_SIZE = 15;
 new const String:sd_list[SD_SIZE][] =
 {	
 	"Friendly Fire Day", 
@@ -115,7 +118,7 @@ new const String:sd_list[SD_SIZE][] =
 	"Knife",
 	"Scout Knives",
 	"Death Match",
-	//"Laser Wars",
+	"Laser Wars",
 	"Spectre",
 	"Headshot"
 };
@@ -218,7 +221,7 @@ bool sd_init_failure = false;
 #include "specialday/knife.inc"
 #include "specialday/scoutknifes.inc"
 #include "specialday/deathmatch.inc"
-//#include "specialday/laserwars.inc"
+#include "specialday/laserwars.inc"
 #include "specialday/spectre.inc"
 #include "specialday/headshot.inc"
 #include "specialday/debug.inc"
@@ -553,14 +556,14 @@ public void init_function_pointers()
 				start_fptr[i] = StartDeathMatch;
 				init_fptr[i] = deathmatch_init;
 			}
-		/*
+		
 			case laser_day:
 			{
 				end_fptr[i] = callback_dummy;
 				start_fptr[i] = StartLaser;
-				init_fptr = laser_init;
+				init_fptr[i] = laser_init;
 			}
-		*/
+		
 
 			case spectre_day:
 			{
@@ -637,12 +640,12 @@ public Action sd_spawn(int client, int args)
 			{
 				CreateTimer(3.0, ReviveScout, client);
 			}
-		/*	
+			
 			case laser_day:
 			{
 				CreateTimer(3.0, ReviveLaser, client);
 			}
-		*/	
+			
 			default: {}
 			
 		}
@@ -1104,12 +1107,12 @@ public Action print_specialday_text_all(Handle timer)
 			{
 				Format(buf, sizeof(buf), "death match: %d", round_delay_timer);	
 			}			
-		/*	
+			
 			case laser_day:
 			{
 				Format(buf, sizeof(buf), "laser: %d", round_delay_timer);	
 			}
-		*/
+		
 			case spectre_day:
 			{
 				Format(buf, sizeof(buf), "spectre: %N", spectre);
@@ -1396,33 +1399,56 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 
 public BalTeams()
 {
-	int unused = 0;
-	int ct = get_alive_team_count(CS_TEAM_CT, unused);
-	int t = get_alive_team_count(CS_TEAM_T, unused);
-	
-	
-	SaveTeams(false);
-	
-	// switch from t to ct until we have a roughly even split
-	for (int i = 0; i < MaxClients; i++)
-	{
-		if(ct >= t)
-		{
-			break;
-		}
-		
-		if(!is_valid_client(i))
-		{
-			continue;
-		}
-		
-		if(GetClientTeam(i) == CS_TEAM_T && !(check_command_exists("sm_ctban") &&  CTBan_IsClientBanned(i)))
-		{
-            ct += 1;
-            t -= 1;
-			CS_SwitchTeam(i,CS_TEAM_CT);
-		}
-	}
+    int unused = 0;
+    int ct = get_alive_team_count(CS_TEAM_CT, unused);
+    int t = get_alive_team_count(CS_TEAM_T, unused);
+
+    bool switch_ct = ct < t;
+    
+    
+    SaveTeams(false);
+    
+    // switch for one team until we have a roughly even split
+    for (int i = 0; i < MaxClients; i++)
+    {
+        if(ct == t || ct == (t - 1))
+        {
+            break;
+        }
+        
+        if(!is_valid_client(i))
+        {
+            continue;
+        }
+        
+        if(switch_ct)
+        {
+            #if defined CT_BAN 
+                if(GetClientTeam(i) == CS_TEAM_T && !(check_command_exists("sm_ctban") &&  CTBan_IsClientBanned(i)))
+                {
+                    ct += 1;
+                    t -= 1;
+                    CS_SwitchTeam(i,CS_TEAM_CT);
+                }
+            #else
+                if(GetClientTeam(i) == CS_TEAM_T)
+                {
+                    ct += 1;
+                    t -= 1;
+                    CS_SwitchTeam(i,CS_TEAM_CT);
+                }            
+            #endif
+        }
+        
+        // switch to t
+        else if(GetClientTeam(i) == CS_TEAM_CT)
+        {
+            ct -= 1;
+            t += 1;
+            CS_SwitchTeam(i,CS_TEAM_T);
+        }           
+    }
+    
 }
 
 public SaveTeams(bool onlyct)
@@ -1538,12 +1564,12 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 		{
 			gungame_death(attacker, victim);
 		}
-	/*
+	
 		case laser_day:
 		{
 			laser_death(victim);
 		}
-	*/
+	
 		default: {}
 	
 	}
@@ -2007,7 +2033,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	}
 	
 	bool in_use = (buttons & IN_USE) == IN_USE;
-/*	
+	
 	// kill laser
 	if(in_use && special_day == laser_day && sd_state == sd_active)
 	{
@@ -2015,7 +2041,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	}	
 
 	// use key press toggle fly day move type
-	else */if(in_use && !use_key[client] && special_day == fly_day)
+	else if(in_use && !use_key[client] && special_day == fly_day)
 	{
 		if(GetEntityMoveType(client) == MOVETYPE_FLY)
 		{

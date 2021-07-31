@@ -9,16 +9,16 @@
 
 void deathmatch_player_init(int client)
 {
-    SetEntityRenderMode(client, RENDER_TRANSCOLOR);
-    if(GetClientTeam(client) == CS_TEAM_CT)
-    {
-        SetEntityRenderColor(client, 0, 0, 255, 255);
-    }
-    
-    else 
-    {
-        SetEntityRenderColor(client, 255, 0, 0, 255);
-    }
+	SetEntityRenderMode(client, RENDER_TRANSCOLOR);
+	if(GetClientTeam(client) == CS_TEAM_CT)
+	{
+	    SetEntityRenderColor(client, 0, 0, 255, 255);
+	}
+	
+	else 
+	{
+	    SetEntityRenderColor(client, 255, 0, 0, 255);
+	}
 	WeaponMenu(client);
 }
 
