@@ -4,6 +4,10 @@
 #include <cstrike>
 #include "lib.inc"
 #include "specialday/specialday.inc"
+
+// make t his not require warden plugin
+#define SD_STANDALONE
+
 // make this possible to be standalone later
 #if defined SD_STANDALONE
 
@@ -31,16 +35,14 @@ public Plugin myinfo = {
 // code cleanup, start and end pointers for sds
 
 // if running gangs or ct bans with this define to prevent issues :)
-#define GANGS
-#define CT_BAN
+//#define GANGS
+//#define CT_BAN
 //#define STORE
 
 // need to supply models + audio if these are uncommented
 //#define USE_CUSTOM_ZOMBIE_MODEL
 //#define CUSTOM_ZOMBIE_MUSIC
 
-// make t his not require warden plugin
-//#define SD_STANDALONE
 
 #define SD_ADMIN_FLAG ADMFLAG_UNBAN
 
@@ -195,8 +197,14 @@ int sd_winner = -1;
 // gun removal
 int g_WeaponParent;
 
+#if defined SD_STANDALONE
+
+#else
+
 int warden_sd_available = 0;
 int rounds_since_warden_sd = 0;
+
+#endif
 
 // csgo ff
 ConVar convar_mp_teammates_are_enemies;
@@ -1151,6 +1159,9 @@ public Action print_specialday_text_all(Handle timer)
 	return Plugin_Continue;
 } 
 
+#if defined SD_STANDALONE
+
+#else
 public Action command_warden_special_day(int client,int args)
 {
 	
@@ -1161,7 +1172,7 @@ public Action command_warden_special_day(int client,int args)
 		command_special_day(client, args);
 	}
 }
-
+#endif
 
 public Action command_special_day(int client,int args)  
 {
