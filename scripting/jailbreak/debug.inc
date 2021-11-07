@@ -44,3 +44,30 @@ public Action is_blocked_cmd(int client, int args)
 	
 	return Plugin_Continue;
 }
+
+
+public Action wd_rounds(int client, int args)
+{
+	// undocumented command
+	if(!is_sudoer(client))
+	{
+		return Plugin_Handled;
+	}
+
+	PrintToChat(client,"%s warday round counter %d:%d",WARDEN_PREFIX,warday_round_counter,WARDAY_ROUND_COUNT);
+
+	return Plugin_Continue;
+}
+
+public Action enable_wd(int client, int args)
+{
+	// undocumented command
+	if(!is_sudoer(client))
+	{
+		return Plugin_Handled;
+	}
+
+	warday_round_counter = WARDAY_ROUND_COUNT;	
+
+	return Plugin_Continue;
+}

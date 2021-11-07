@@ -5,8 +5,11 @@
 #include "lib.inc"
 #include "specialday/specialday.inc"
 
+
+// TODO: move hooks into there own hook.sp file to make plugin cleaner
+
 // make t his not require warden plugin
-#define SD_STANDALONE
+//#define SD_STANDALONE
 
 // make this possible to be standalone later
 #if defined SD_STANDALONE

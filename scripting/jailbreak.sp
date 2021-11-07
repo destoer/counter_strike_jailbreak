@@ -43,7 +43,14 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V3.4.2 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.4.3 - Violent Intent Jailbreak"
+
+
+#define WARDAY_ROUND_COUNT 5
+int warday_round_counter = 0;
+bool warday_active = false;
+
+char warday_loc[20];
 
 /*
 #define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
@@ -166,7 +173,7 @@ Handle client_laser_color_pref;
 #include "jailbreak/debug.inc"
 #include "jailbreak/cookies.inc"
 #include "jailbreak/color.inc"
-
+#include "jailbreak/warday.inc"
 
 public Plugin:myinfo = 
 {
@@ -472,6 +479,11 @@ public OnPluginStart()
 	
 	// user commands
 	RegConsoleCmd("wb", enable_block_warden_callback);
+
+	RegConsoleCmd("wd", warday_callback);
+
+
+
 	RegConsoleCmd("wub", disable_block_warden_callback);	
 	RegConsoleCmd("w", become_warden);
 	RegConsoleCmd("uw", leave_warden);
@@ -527,6 +539,8 @@ public OnPluginStart()
 	
 	RegConsoleCmd("wv", jailbreak_version);
 	RegConsoleCmd("is_blocked", is_blocked_cmd);
+	RegConsoleCmd("wd_rounds",wd_rounds);
+	RegConsoleCmd("enable_wd",enable_wd);
 	
 	// hooks
 	HookEvent("round_start", round_start); // For the round start
@@ -584,16 +598,24 @@ public Action print_warden_text_all(Handle timer)
 	
 
 	
-	if(warden_id != WARDEN_INVALID)
+	if(!warday_active)
 	{
-		
-		Format(buf, sizeof(buf), "Current Warden: %N", warden_id);
-	}
+		if(warden_id != WARDEN_INVALID)
+		{
+			
+			Format(buf, sizeof(buf), "Current Warden: %N", warden_id);
+		}
 
+
+		else
+		{
+			Format(buf, sizeof(buf), "Current Warden: N/A");
+		}
+	}
 
 	else
 	{
-		Format(buf, sizeof(buf), "Current Warden: N/A");
+		Format(buf, sizeof(buf), "Warday %s",warday_loc);
 	}
 	
 	
@@ -700,6 +722,7 @@ public print_warden_commands(client)
 #endif	
 	PrintToChat(client,"%s!color           %s- %scolor players'",color1,color2,color3);	
 	PrintToChat(client,"%s!reset_color           %s- %sreset player colors'",color1,color2,color3);	
+	PrintToChat(client,"%s!wd %s- %scall a warday %s",color1,color2,color3, warday_round_counter >= WARDAY_ROUND_COUNT? "ready" : "not ready");
 
 }
 
@@ -808,6 +831,9 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 
 public Action round_start(Handle event, const String:name[], bool dontBroadcast) 
 {
+	warday_active = false;
+	warday_round_counter++;
+
 	reset_laser_setting();
 	
 	// if we are running with block on reset the status on round start
