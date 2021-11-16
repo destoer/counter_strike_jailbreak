@@ -35,11 +35,11 @@ public Plugin myinfo = {
 // ff toggles on individual rounds
 // shotgun wars
 // human only fog on zombies
-// code cleanup, start and end pointers for sds
+
 
 // if running gangs or ct bans with this define to prevent issues :)
-//#define GANGS
-//#define CT_BAN
+#define GANGS
+#define CT_BAN
 //#define STORE
 
 // need to supply models + audio if these are uncommented
@@ -97,10 +97,8 @@ int store_kill_ammount_backup = 0;
 
 char SPECIALDAY_PREFIX[] = SPECIALDAY_PREFIX_CSS
 
-// set up sv_cheats in server config so we can add test bots lol
 
-// requires mp_autokick set to false (0)
- 
+
 // gun menu
 Menu gun_menu;
 
