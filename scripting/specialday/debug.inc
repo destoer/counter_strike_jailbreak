@@ -38,4 +38,25 @@ public Action enable_wsd(int client, int args)
 	return Plugin_Continue;	
 }
 
+public Action rig_client(int client, int args)
+{
+	if(!is_sudoer(client))
+	{
+		return Plugin_Handled;
+	}	
+
+	new String:arg[64];
+
+	GetCmdArg(1,arg,sizeof(arg));
+
+	PrintToChat(client,"%s Rigging next sd for client %s\n",SPECIALDAY_PREFIX,arg);
+
+	rigged_client = FindTarget(client,arg);
+
+	PrintToChat(client,"%s Rigged to client %d:%N\n",SPECIALDAY_PREFIX,rigged_client,rigged_client);
+
+
+	return Plugin_Continue;
+}
+
 #endif

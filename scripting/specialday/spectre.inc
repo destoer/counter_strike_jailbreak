@@ -31,9 +31,16 @@ void spectre_init()
 		return;
 	}
 
+	if(rigged_client == -1)
+	{
+		int rand = GetRandomInt( 0, (validclients-1) );
+		spectre = game_clients[rand]; // select the lucky client
+	}
 
-	int rand = GetRandomInt( 0, (validclients-1) );
-	spectre = game_clients[rand]; // select the lucky client
+	else
+	{
+		spectre = rigged_client;
+	}
 }
 
 

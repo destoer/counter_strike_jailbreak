@@ -31,9 +31,17 @@ void init_tank()
 	PrintToChatAll("%s Tank day started", SPECIALDAY_PREFIX);
 	
 	sd_player_init_fptr = tank_player_init;
-	
-	int rand = GetRandomInt( 0, (validclients-1) );
-	tank = game_clients[rand]; // select the lucky client
+
+	if(rigged_client == -1)
+	{
+		int rand = GetRandomInt( 0, (validclients-1) );
+		tank = game_clients[rand]; // select the lucky client
+	}
+
+	else
+	{
+		tank = rigged_client;
+	}
 }
 
 void end_tank()

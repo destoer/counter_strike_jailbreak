@@ -63,6 +63,15 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 					zombie_discon_started(client);
 				}
 			}
+
+
+			case laser_day:
+			{
+				if(client == laser_tank)
+				{
+					laser_discon_started(client);
+				}
+			}
 			
 			default: {}
 		}
@@ -96,6 +105,15 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 					zombie_discon_active(client);
 				}
 			}
+
+			case laser_day:
+			{
+				if(client == laser_tank)
+				{
+					laser_discon_active(client);
+				}
+			}
+
 			
 			default: {}
 		}
@@ -631,7 +649,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	bool in_use = (buttons & IN_USE) == IN_USE;
 	
 	// kill laser
-	if(in_use && special_day == laser_day && sd_state == sd_active)
+	if(in_use && special_day == laser_day && sd_state == sd_active && client == laser_tank)
 	{
 		setup_laser(client,{ 1, 153, 255, 255 },g_lbeam,g_lpoint,true);
 	}	

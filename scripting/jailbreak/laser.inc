@@ -242,20 +242,20 @@ public Action laser_draw(Handle timer)
 
 void do_draw(int client, int color[4])
 {
-		float cur_pos[3];
-		get_client_sight_end(client, cur_pos);
-		
-		// check we are not on the first laser shine
-		bool initial_draw = prev_pos[client][0] == 0.0 && prev_pos[client][1] == 0.0 
-			&& prev_pos[client][2] == 0.0;
-		
-		if(!initial_draw)
-		{
-			// draw a line from the last laser end to the current one
-			TE_SetupBeamPoints(prev_pos[client], cur_pos, g_lbeam, 0, 0, 0, 25.0, 2.0, 2.0, 10, 0.0, color, 0);
-			TE_SendToAll();
-		}
-		prev_pos[client] = cur_pos;		
+	float cur_pos[3];
+	get_client_sight_end(client, cur_pos);
+	
+	// check we are not on the first laser shine
+	bool initial_draw = prev_pos[client][0] == 0.0 && prev_pos[client][1] == 0.0 
+		&& prev_pos[client][2] == 0.0;
+	
+	if(!initial_draw)
+	{
+		// draw a line from the last laser end to the current one
+		TE_SetupBeamPoints(prev_pos[client], cur_pos, g_lbeam, 0, 0, 0, 25.0, 2.0, 2.0, 10, 0.0, color, 0);
+		TE_SendToAll();
+	}
+	prev_pos[client] = cur_pos;		
 }
 
 

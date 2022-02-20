@@ -21,7 +21,7 @@
 #endif
 
 
-#define VERSION "2.6.4 - Violent Intent Jailbreak"
+#define VERSION "2.6.5 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -188,6 +188,8 @@ float death_cords[64][3];
 
 
 int sd_winner = -1;
+
+int rigged_client = -1;
 
 
 // backups
@@ -431,6 +433,7 @@ public OnPluginStart()
 	HookEvent("round_end", OnRoundEnd);
 	
 	RegConsoleCmd("sdv", sd_version);
+	RegConsoleCmd("rig", rig_client);
 	
 	for(int i = 1;i < MaxClients;i++)
 	{
@@ -842,6 +845,8 @@ void EndSd(bool forced=false)
 	}	
 	// reset our function pointer
 	sd_player_init_fptr = sd_player_init_invalid;
+
+	rigged_client = -1;
 }
 
 
@@ -897,7 +902,7 @@ public Action print_specialday_text_all(Handle timer)
 			
 			case laser_day:
 			{
-				Format(buf, sizeof(buf), "laser: %d", round_delay_timer);	
+				Format(buf, sizeof(buf), "laser: %N", laser_tank);	
 			}
 		
 			case spectre_day:

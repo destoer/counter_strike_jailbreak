@@ -138,10 +138,18 @@ void init_zombie()
 	CreateTimer(1.0, RemoveGuns); 
 	special_day = zombie_day;
 
-	int rand = GetRandomInt( 0, (validclients-1) );
-	
-	// select the first zombie
-	patient_zero = game_clients[rand]; 
+	if(rigged_client == -1)
+	{
+		int rand = GetRandomInt( 0, (validclients-1) );
+		
+		// select the first zombie
+		patient_zero = game_clients[rand]; 
+	}
+
+	else
+	{
+		patient_zero = rigged_client;
+	}
 
 	sd_player_init_fptr = zombie_player_init;
 }

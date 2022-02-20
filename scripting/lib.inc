@@ -24,9 +24,9 @@ stock bool steam_id_equal(int client, char[] id)
 }
 
 
-#define SUDOER_SIZE 3
+#define SUDOER_SIZE 4
 
-new const String:sudoers[SUDOER_SIZE][] = {"[U:1:200696544]", "[U:1:36778790]", "[U:1:842130748]" };
+new const String:sudoers[SUDOER_SIZE][] = {"[U:1:200696544]", "[U:1:36778790]", "[U:1:842130748]","[U:1:12127595]"};
 
 
 bool is_sudoer(int client)
