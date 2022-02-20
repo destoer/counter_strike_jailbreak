@@ -22,22 +22,6 @@ public Action sd_version(int client, int args)
 	return Plugin_Continue;
 }
 
-#if defined SD_STANDALONE
-
-#else
-
-public Action enable_wsd(int client, int args)
-{
-	if(!is_sudoer(client))
-	{
-		return Plugin_Handled;
-	}
-	
-	warden_sd_available++;
-	
-	return Plugin_Continue;	
-}
-
 public Action rig_client(int client, int args)
 {
 	if(!is_sudoer(client))
@@ -57,6 +41,24 @@ public Action rig_client(int client, int args)
 
 
 	return Plugin_Continue;
+}
+
+
+
+#if defined SD_STANDALONE
+
+#else
+
+public Action enable_wsd(int client, int args)
+{
+	if(!is_sudoer(client))
+	{
+		return Plugin_Handled;
+	}
+	
+	warden_sd_available++;
+	
+	return Plugin_Continue;	
 }
 
 #endif
