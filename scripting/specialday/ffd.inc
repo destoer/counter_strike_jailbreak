@@ -53,5 +53,5 @@ public void StartFFD()
 
 public void end_ffd()
 {
-	disable_friendly_fire();
+
 }

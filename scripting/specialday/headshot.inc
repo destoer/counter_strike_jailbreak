@@ -10,7 +10,7 @@
 
 void StartHeadshot()
 {
-	enable_friendly_fire();
+	
 }
 
 void headshot_init()

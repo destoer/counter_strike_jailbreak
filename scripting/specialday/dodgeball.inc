@@ -31,7 +31,6 @@ public void StartDodgeball()
 {
 
 	PrintCenterTextAll("Dodgeball active!");
-	enable_friendly_fire();
 	
 	// right now we need to enable all our callback required
 	// 1. give new flashbangs every second (needs a timer callback like moreTimers) (done)

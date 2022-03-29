@@ -24,7 +24,6 @@ void knife_init()
 
 public void StartKnife()
 {
-	enable_friendly_fire();
 	PrintCenterTextAll("Knife day active");
 	CreateTimer(1.0, RemoveGuns);
 }

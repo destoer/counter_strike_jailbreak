@@ -400,6 +400,7 @@ public OnPluginStart()
 #endif
 	// register our special day console command	
 	RegAdminCmd("sd", command_special_day, SD_ADMIN_FLAG);
+	RegAdminCmd("sd_ff", command_ff_special_day, SD_ADMIN_FLAG);
 	RegAdminCmd("sd_cancel", command_cancel_special_day, SD_ADMIN_FLAG);
 	
 #if defined FREEZE_COMMANDS
@@ -865,6 +866,14 @@ void EndSd(bool forced=false)
 	}		
 #endif
 
+	// deal with nade blocking
+#if defined SD_STANDALONE
+	ConVar nade_var = FindConVar("sm_noblock_nades");
+	SetConVarBool(nade_var,true);
+#endif
+
+
+
 	// reset the alpha just to be safe
 	for(int i = 1; i <= MaxClients; i++)
 	{
@@ -993,19 +1002,27 @@ public Action command_warden_special_day(int client,int args)
 }
 #endif
 
+// TODO: maybe expand this into an options menu
+public Action command_ff_special_day(int client, int args)
+{
+	PrintToChatAll("%s Special day started (friendly fire enabled)", SPECIALDAY_PREFIX);
+	enable_friendly_fire();
+
+
+	// open a selection menu for 20 seconds
+	sd_menu.Display(client,20);
+	return Plugin_Handled;
+}
+
+
 public Action command_special_day(int client,int args)  
 {
 
 	PrintToChatAll("%s Special day started", SPECIALDAY_PREFIX);
 
-	// construct our menu
-	
 	// open a selection menu for 20 seconds
 	sd_menu.Display(client,20);
-
-
 	return Plugin_Handled;
-
 }
 
 public Action command_cancel_special_day(int client,args)  
@@ -1260,7 +1277,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 	
 	else if (action == MenuAction_Cancel) 
 	{
-			PrintToServer("Client %d's menu was cancelled. Reason: %d",client,param2);
+		PrintToServer("Client %d's menu was cancelled. Reason: %d",client,param2);
 	}
 	
 	return -1;
@@ -1421,6 +1438,13 @@ public Action MoreTimers(Handle timer)
 // but cant :(
 public StartSD() 
 {
+	// deal with nade blocking
+#if defined SD_STANDALONE
+	ConVar nade_var = FindConVar("sm_noblock_nades");
+	SetConVarBool(nade_var,false);
+#endif
+
+
 	// incase we cancel our sd
 	if(sd_state == sd_inactive)
 	{

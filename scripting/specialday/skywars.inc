@@ -35,5 +35,5 @@ void init_skywars()
 
 public void StartFly()
 {
-	enable_friendly_fire();
+
 }

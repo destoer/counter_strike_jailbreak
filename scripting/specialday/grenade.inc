@@ -30,8 +30,6 @@ void grenade_init()
 
 public void StartGrenade()
 {
-	enable_friendly_fire();
-	
 	// set everyones hp to 250
 	for(new i = 1; i < MaxClients; i++)
 	{

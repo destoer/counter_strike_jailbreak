@@ -52,7 +52,6 @@ public void StartScout()
 {
 	start_round_delay(90);
 	CreateTimer(1.0, RemoveGuns);
-	enable_friendly_fire();
 }
 
 void end_scout()
