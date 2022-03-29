@@ -481,10 +481,17 @@ public OnPluginStart()
 
 public Action weapon_menu(int client, int args)
 {
+	if(sd_state == sd_inactive)
+	{
+		return Plugin_Continue;
+	}
+
 	if(IsClientConnected(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
 	{
 		gun_menu.Display(client,20);
 	}
+
+	return Plugin_Continue;
 }
 #endif
 
