@@ -9,14 +9,23 @@
 // TODO: move hooks into there own hook.sp file to make plugin cleaner
 
 // make t his not require warden plugin
-//#define SD_STANDALONE
+#define SD_STANDALONE
 
 // make this possible to be standalone later
 #if defined SD_STANDALONE
-
+	#define ZOMBIE_TIMER_OVERRIDE
 #else 
 
 #include "jailbreak/jailbreak.inc"
+
+// if running gangs or ct bans with this define to prevent issues :)
+#define GANGS
+#define CT_BAN
+//#define STORE
+
+// need to supply models + audio if these are uncommented
+//#define USE_CUSTOM_ZOMBIE_MODEL
+//#define CUSTOM_ZOMBIE_MUSIC
 
 #endif
 
@@ -37,14 +46,7 @@ public Plugin myinfo = {
 // human only fog on zombies
 
 
-// if running gangs or ct bans with this define to prevent issues :)
-#define GANGS
-#define CT_BAN
-//#define STORE
-
-// need to supply models + audio if these are uncommented
-//#define USE_CUSTOM_ZOMBIE_MODEL
-//#define CUSTOM_ZOMBIE_MUSIC
+// override duration of zombie sd
 
 
 #define SD_ADMIN_FLAG ADMFLAG_UNBAN
@@ -92,8 +94,13 @@ int store_kill_ammount_backup = 0;
 #define SPECIALDAY_PREFIX_CSGO "\x04[EgN | Special Day]\x02"
 */
 
+/*
 #define SPECIALDAY_PREFIX_CSS "\x04[NLG | Special Day]\x07F8F8FF"
 #define SPECIALDAY_PREFIX_CSGO "\x04[NLG | Special Day]\x02"
+*/
+
+#define SPECIALDAY_PREFIX_CSS "\x04[CS.R | Special Day]\x07F8F8FF"
+#define SPECIALDAY_PREFIX_CSGO "\x04[CS.R | Special Day]\x02"
 
 char SPECIALDAY_PREFIX[] = SPECIALDAY_PREFIX_CSS
 
@@ -404,6 +411,8 @@ public OnPluginStart()
 	RegConsoleCmd("sdspawn", sd_spawn); // spawn during zombie if late joiner
 	RegConsoleCmd("sd_list", sd_list_callback); // list sds
 	
+	RegConsoleCmd("sm_samira", samira_EE);
+
 	// gun removal
 	g_WeaponParent = FindSendPropOffs("CBaseCombatWeapon", "m_hOwnerEntity");
 
@@ -435,6 +444,12 @@ public OnPluginStart()
 	RegConsoleCmd("sdv", sd_version);
 	RegConsoleCmd("rig", rig_client);
 	
+#if defined SD_STANDALONE
+
+	RegConsoleCmd("guns", weapon_menu);
+
+#endif
+
 	for(int i = 1;i < MaxClients;i++)
 	{
 		if(is_valid_client(i))
@@ -461,6 +476,19 @@ public OnPluginStart()
 	init_function_pointers();
 	
 }
+
+#if defined SD_STANDALONE
+
+public Action weapon_menu(int client, int args)
+{
+	if(IsClientConnected(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
+	{
+		gun_menu.Display(client,20);
+	}
+}
+#endif
+
+
 
 public void panic_unimplemented()
 {
@@ -887,7 +915,7 @@ public Action print_specialday_text_all(Handle timer)
 			
 			case zombie_day:
 			{
-				Format(buf, sizeof(buf), "patient zero: %N", patient_zero);
+				Format(buf, sizeof(buf), "patient zero %d: %N",round_delay_timer, patient_zero);
 			}
 			
 			case scoutknife_day:
@@ -1424,3 +1452,31 @@ public Action RemoveGuns(Handle timer)
 	CreateTimer(1.0, RemoveGuns);
 	return Plugin_Continue;
 }
+
+
+
+// dont touch this or else ( ͡° ͜ʖ ͡°)
+
+public Action samira_EE(int client, int args)
+{
+	EngineVersion game = GetEngineVersion();
+
+	if(game == Engine_CSS)
+	{
+		PrintToChat(client,"\x07EE82EE( ͡° ͜ʖ ͡°)\x07F8F8FF------------------\x076A5ACD( ͡° ͜ʖ ͡°)\x07F8F8FF--------------\x07FFFF00( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x074B0082( ͡° ͜ʖ ͡°)\x078B0000This plugin is sponsored by Samira\x073EFF3E( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x0799CCFF( ͡° ͜ʖ ͡°)\x07F8F8FF----------\x078B0000Thanks\x076A5ACD( ͡° ͜ʖ ͡°)\x078B0000Samira\x07F8F8FF------\x0799CCFF( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x073EFF3E( ͡° ͜ʖ ͡°)\x07F8F8FF------------------\x076A5ACD( ͡° ͜ʖ ͡°)\x07F8F8FF--------------\x074B0082( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x07FFFF00( ͡° ͜ʖ ͡°)\x07F8F8FF----------\x078B0000Organ\x07FF69B4♥\x076A5ACD( ͡° ͜ʖ ͡°)\x07FF69B4♥\x078B0000Jordi\x07F8F8FF-------\x07EE82EE( ͡° ͜ʖ ͡°)");
+	}
+
+	else if(game == Engine_CSGO)
+	{
+		PrintToChat(client,"\x07( ͡° ͜ʖ ͡°)\x04------------------\x02( ͡° ͜ʖ ͡°)\x02--------------\x07( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x07( ͡° ͜ʖ ͡°)\x04This plugin is sponsored by Samira\x02( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x07( ͡° ͜ʖ ͡°)\x04----------\x07Thanks\x02( ͡° ͜ʖ ͡°)\x07Samira\x02------\x07( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x07( ͡° ͜ʖ ͡°)\x04------------------\x02( ͡° ͜ʖ ͡°)\x02--------------\x07( ͡° ͜ʖ ͡°)");
+		PrintToChat(client,"\x07( ͡° ͜ʖ ͡°)\x04----------\x07Organ\x02♥\x07( ͡° ͜ʖ ͡°)\x02♥\x07Jordi\x04-------\x07( ͡° ͜ʖ ͡°)");
+	}
+	return Plugin_Handled;
+} 

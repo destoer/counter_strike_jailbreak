@@ -230,6 +230,10 @@ public void StartZombie()
 	EmitSoundToAll("music/ravenholm_1.mp3");
 #endif
 	
+
+#if defined ZOMBIE_TIMER_OVERRIDE
+	start_round_delay((4 * 60) + 30);
+#endif
 }
 
 
@@ -309,4 +313,13 @@ void zombie_death(int victim)
 			CreateTimer(3.0, ReviveZombie, victim);
 		}			
 	}
+
+#if defined ZOMBIE_TIMER_OVERRIDE
+	if(get_alive_team_count(team,last_man) == 0)
+	{
+		enable_round_end();
+		slay_all();		
+	}
+#endif
+
 }
