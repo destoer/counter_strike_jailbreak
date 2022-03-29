@@ -442,14 +442,26 @@ public Action OnWeaponEquip(int client, int weapon)
 		return Plugin_Continue;
 	}
 
+
+	char weapon_string[32];
+	GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
+
+
+#if defined SD_STANDALONE
+
+	// all sds
+	if(StrEqual(weapon_string,"weapon_c4"))
+	{
+		return Plugin_Handled;
+	}
+#endif
+
 	switch(special_day)
 	{
 		
 	
 		case dodgeball_day:
 		{
-			char weapon_string[32];
-			GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
 			if(!StrEqual(weapon_string,"weapon_flashbang"))
 			{
 				return Plugin_Handled;
@@ -458,8 +470,6 @@ public Action OnWeaponEquip(int client, int weapon)
 		
 		case grenade_day:
 		{
-			char weapon_string[32];
-			GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
 			if(!StrEqual(weapon_string,"weapon_hegrenade"))
 			{
 				return Plugin_Handled;
@@ -468,8 +478,6 @@ public Action OnWeaponEquip(int client, int weapon)
 		
 		case knife_day:
 		{
-			char weapon_string[32];
-			GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
 			if(!StrEqual(weapon_string,"weapon_knife"))
 			{
 				return Plugin_Handled;
@@ -478,8 +486,6 @@ public Action OnWeaponEquip(int client, int weapon)
 	
 		case scoutknife_day:
 		{
-			char weapon_string[32];
-			GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
 			// need to check for ssg08 incase we are oncsgo
 			if(!(StrEqual(weapon_string,"weapon_scout") || StrEqual(weapon_string,"weapon_knife") || StrEqual(weapon_string,"weapon_ssg08")))
 			{
@@ -491,9 +497,6 @@ public Action OnWeaponEquip(int client, int weapon)
 		{
 			if(sd_state == sd_active)
 			{
-				char weapon_string[32];
-				GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
-				
 				if(GetClientTeam(client) == CS_TEAM_T)
 				{
 					if(!StrEqual(weapon_string,"weapon_knife"))
@@ -509,8 +512,6 @@ public Action OnWeaponEquip(int client, int weapon)
 		{
 			if(sd_state == sd_active)
 			{
-				char weapon_string[32];
-				GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
 				if(client == spectre)
 				{
 					if(!StrEqual(weapon_string,"weapon_knife"))
@@ -526,9 +527,6 @@ public Action OnWeaponEquip(int client, int weapon)
 		{
 			if(sd_state != sd_inactive)
 			{
-				char weapon_string[32];
-				GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
-
 				if(!StrEqual(weapon_string,"weapon_deagle"))
 				{
 					return Plugin_Handled;

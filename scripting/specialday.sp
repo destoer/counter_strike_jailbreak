@@ -1286,6 +1286,19 @@ public int sd_select(int client, int sd)
 
 #if defined SD_STANDALONE	
 
+	// slay all hosties
+	int entity = -1;
+
+	float vec[3] = {5000.0,5000.0,5000.0};
+
+	while((entity = FindEntityByClassname(entity, "hostage_entity")) != -1)
+	{
+		if(IsValidEntity(entity))
+		{
+			TeleportEntity(entity,vec,NULL_VECTOR,NULL_VECTOR);
+		}	
+	}
+
 #else
 	// invoked by a warden reset the round limit
 	if(client == get_warden_id())

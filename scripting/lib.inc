@@ -62,25 +62,28 @@ stock void set_client_speed(int client,float speed)
 new const String:entity_list[][] = { "func_door", "func_movelinear","func_door_rotating","prop_door_rotating" };
 stock void force_open()
 {
-	int entity;
+	int entity = -1;
+
 	// open all doors
 	for(new i = 0; i < sizeof(entity_list); i++)
 	{
 		while((entity = FindEntityByClassname(entity, entity_list[i])) != -1)
-		
-		if(IsValidEntity(entity))
 		{
-			AcceptEntityInput(entity, "Open");
+			if(IsValidEntity(entity))
+			{
+				AcceptEntityInput(entity, "Open");
+			}
 		}	
 	}
 	
 	// destroy all breakables
 	while((entity = FindEntityByClassname(entity, "func_breakable")) != -1)
-		
-	if(IsValidEntity(entity))
 	{
-		AcceptEntityInput(entity, "Break");
-	}	
+		if(IsValidEntity(entity))
+		{
+			AcceptEntityInput(entity, "Break");
+		}
+	}
 }
 
 stock void slay_all()
