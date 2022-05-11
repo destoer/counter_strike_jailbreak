@@ -43,12 +43,6 @@ public Action rig_client(int client, int args)
 	return Plugin_Continue;
 }
 
-
-
-#if defined SD_STANDALONE
-
-#else
-
 public Action enable_wsd(int client, int args)
 {
 	if(!is_sudoer(client))
@@ -60,5 +54,3 @@ public Action enable_wsd(int client, int args)
 	
 	return Plugin_Continue;	
 }
-
-#endif

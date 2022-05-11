@@ -387,6 +387,7 @@ public OnPluginStart()
 	HookEvent("round_end", OnRoundEnd);
 	
 	RegConsoleCmd("sdv", sd_version);
+	RegConsoleCmd("enable_wsd",enable_wsd);
 	RegConsoleCmd("rig", rig_client);
 	
 	if(standalone)
