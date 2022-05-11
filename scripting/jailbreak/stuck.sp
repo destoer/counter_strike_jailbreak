@@ -6,10 +6,6 @@
 #endif
 #define _STUCK_INCLUDE_included
 
-
-// uses the push out method
-#if defined STUCK
-
 bool timer_active = false;
 
 int old_group;
@@ -20,7 +16,7 @@ public Action command_stuck(int client, int args)
 	
 	if(GetTime() < next)
 	{
-		PrintToChat(client, "%s stuck is on cooldown!", ANTISTUCK_PREFIX);
+		PrintToChat(client, "%s stuck is on cooldown!", JB_PREFIX);
 		return Plugin_Handled;
 	}	
 	
@@ -31,7 +27,7 @@ public Action command_stuck(int client, int args)
 		// 5 second usage delay
 		next = GetTime() + 5;
 		
-		PrintToChatAll("%s %N unstuck all players", ANTISTUCK_PREFIX, client);    
+		PrintToChatAll("%s %N unstuck all players", JB_PREFIX, client);    
 		timer_active = true;
 		CreateTimer(1.0, timer_unblock_player, client);
 		
@@ -45,11 +41,11 @@ public Action command_stuck(int client, int args)
 	}
 	else if (timer_active)
 	{
-		PrintToChat(client, "%s Command is already in use", ANTISTUCK_PREFIX);
+		PrintToChat(client, "%s Command is already in use", JB_PREFIX);
 	}
 	else
 	{
-		PrintToChat(client, "%s You must be alive to use this command", ANTISTUCK_PREFIX);
+		PrintToChat(client, "%s You must be alive to use this command", JB_PREFIX);
 	}
 	
 	return Plugin_Handled;
@@ -91,14 +87,13 @@ void enable_anti_stuck(int client)
 
 /*
 // no block
-#if defined STUCK
 public Action stuck_callback(client,args)
 {	
 	static int next = 0;
 	
 	if(GetTime() < next)
 	{
-		PrintToChat(client, "%s stuck is on cooldown!", ANTISTUCK_PREFIX);
+		PrintToChat(client, "%s stuck is on cooldown!", JB_PREFIX);
 		return Plugin_Handled;
 	}
 	
@@ -108,7 +103,7 @@ public Action stuck_callback(client,args)
 		next = GetTime() + 5;
 		
 		
-		PrintToChatAll("%s Player %N unstuck everyone!", ANTISTUCK_PREFIX, client);
+		PrintToChatAll("%s Player %N unstuck everyone!", JB_PREFIX, client);
 		disable_block_all();
 		
 		CreateTimer(3.0, block_timer_callback);
@@ -120,9 +115,4 @@ public Action block_timer_callback(Handle timer)
 {
 	enable_block_all();
 }
-#endif
 */
-
-
-
-#endif

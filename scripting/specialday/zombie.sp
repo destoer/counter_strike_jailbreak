@@ -231,9 +231,10 @@ public void StartZombie()
 #endif
 	
 
-#if defined ZOMBIE_TIMER_OVERRIDE
-	start_round_delay((4 * 60) + 30);
-#endif
+	if(standalone)
+	{
+		start_round_delay((4 * 60) + 30);
+	}
 }
 
 

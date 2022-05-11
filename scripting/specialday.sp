@@ -6,35 +6,19 @@
 #include "specialday/specialday.inc"
 
 
-// TODO: move hooks into there own hook.sp file to make plugin cleaner
-
-// make t his not require warden plugin
-#define SD_STANDALONE
-
-// make this possible to be standalone later
-#if defined SD_STANDALONE
-	#define ZOMBIE_TIMER_OVERRIDE
-#else 
-
 #include "jailbreak/jailbreak.inc"
 
-// if running gangs or ct bans with this define to prevent issues :)
-#define GANGS
-#define CT_BAN
-//#define STORE
 
 // need to supply models + audio if these are uncommented
 //#define USE_CUSTOM_ZOMBIE_MODEL
 //#define CUSTOM_ZOMBIE_MUSIC
 
-#endif
 
-
-#define VERSION "2.6.5 - Violent Intent Jailbreak"
+#define VERSION "2.7 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
-	author = "destoer",
+	author = "destoer(organ harvester)",
 	description = "special days for jailbreak",
 	version = VERSION,
 	url = "https://github.com/destoer/css_jailbreak_plugins"
@@ -53,56 +37,19 @@ public Plugin myinfo = {
 
 #define FREEZE_COMMANDS
 
-#if defined CT_BAN
+
 #undef REQUIRE_PLUGIN
 #include "thirdparty/ctban.inc"
 #define REQUIRE_PLUGIN
-#endif
 
-#if defined STORE
+
 #undef REQUIRE_PLUGIN
 ConVar store_kill_ammount_cvar;
 int store_kill_ammount_backup = 0;
 #include "thirdparty/store.inc"
 #define REQUIRE_PLUGIN
-#endif
-
 
 #include "thirdparty/colorvariables.inc"
-
-#if defined GANGS
-
-#endif
-
-//#define SPECIALDAY_PREFIX "\x04[Vi Special Day]\x07F8F8FF"
-//#define SPECIALDAY_PREFIX "\x04[GK Special Day]\x07F8F8FF"
-//#define SPECIALDAY_PREFIX "\x04[GP Special Day]\x07F8F8FF"
-//#define SPECIALDAY_PREFIX "\x04[3E Special Day]\x07F8F8FF"
-
-/*
-#define SPECIALDAY_PREFIX_CSS "\x04[GP Special Day]\x07F8F8FF"
-#define SPECIALDAY_PREFIX_CSGO "\x04[GP Special Day]\x02"
-*/
-
-/*
-#define SPECIALDAY_PREFIX_CSS "\x04[3E Special Day]\x07F8F8FF"
-#define SPECIALDAY_PREFIX_CSGO "\x04[3E Special Day]\x02"
-*/
-
-/*
-#define SPECIALDAY_PREFIX_CSS "\x04[EgN | Special Day]\x07F8F8FF"
-#define SPECIALDAY_PREFIX_CSGO "\x04[EgN | Special Day]\x02"
-*/
-
-/*
-#define SPECIALDAY_PREFIX_CSS "\x04[NLG | Special Day]\x07F8F8FF"
-#define SPECIALDAY_PREFIX_CSGO "\x04[NLG | Special Day]\x02"
-*/
-
-#define SPECIALDAY_PREFIX_CSS "\x04[CS.R | Special Day]\x07F8F8FF"
-#define SPECIALDAY_PREFIX_CSGO "\x04[CS.R | Special Day]\x02"
-
-char SPECIALDAY_PREFIX[] = SPECIALDAY_PREFIX_CSS
 
 
 
@@ -207,14 +154,10 @@ int rigged_client = -1;
 // gun removal
 int g_WeaponParent;
 
-#if defined SD_STANDALONE
-
-#else
 
 int warden_sd_available = 0;
 int rounds_since_warden_sd = 0;
 
-#endif
 
 // csgo ff
 ConVar convar_mp_teammates_are_enemies;
@@ -227,24 +170,25 @@ int g_lpoint;
 bool sd_init_failure = false;
 
 // split files for sd
-#include "specialday/ffd.inc"
-#include "specialday/tank.inc"
-#include "specialday/ffdg.inc"
-#include "specialday/skywars.inc"
-#include "specialday/hide.inc"
-#include "specialday/dodgeball.inc"
-#include "specialday/grenade.inc"
-#include "specialday/zombie.inc"
-#include "specialday/gungame.inc"
-#include "specialday/knife.inc"
-#include "specialday/scoutknifes.inc"
-#include "specialday/deathmatch.inc"
-#include "specialday/laserwars.inc"
-#include "specialday/spectre.inc"
-#include "specialday/headshot.inc"
-#include "specialday/debug.inc"
-//#include "specialday/spawn.inc"
-#include "specialday/hook.inc"
+#include "specialday/config.sp"
+#include "specialday/ffd.sp"
+#include "specialday/tank.sp"
+#include "specialday/ffdg.sp"
+#include "specialday/skywars.sp"
+#include "specialday/hide.sp"
+#include "specialday/dodgeball.sp"
+#include "specialday/grenade.sp"
+#include "specialday/zombie.sp"
+#include "specialday/gungame.sp"
+#include "specialday/knife.sp"
+#include "specialday/scoutknifes.sp"
+#include "specialday/deathmatch.sp"
+#include "specialday/laserwars.sp"
+#include "specialday/spectre.sp"
+#include "specialday/headshot.sp"
+#include "specialday/debug.sp"
+//#include "specialday/spawn.sp"
+#include "specialday/hook.sp"
 
 // we can then just call this rather than having to switch on the sds in many places
 void sd_player_init(int client)
@@ -329,12 +273,10 @@ void disable_round_end()
 {
 	// if we have a "indefinite" game
 	// do not award credits for kills
-#if defined STORE
-	if(store_kill_ammount_cvar != null)
+	if(store && store_kill_ammount_cvar != null)
 	{
 		SetConVarInt(store_kill_ammount_cvar, 0); 
 	}
-#endif
 	
 	ignore_round_end = true;
 	SetConVarBool(g_ignore_round_win, true);
@@ -360,30 +302,31 @@ public int native_current_day(Handle plugin, int numParam)
 // register our call
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-#if defined STORE
-	MarkNativeAsOptional("Store_GetClientCredits");
-	MarkNativeAsOptional("Store_SetClientCredits");
-#endif
+	if(!store)
+	{
+		MarkNativeAsOptional("Store_GetClientCredits");
+		MarkNativeAsOptional("Store_SetClientCredits");
+	}
 
-#if defined CT_BAN
-	MarkNativeAsOptional("CTBan_IsClientBanned");
-#endif
+	if(ct_ban)
+	{
+		MarkNativeAsOptional("CTBan_IsClientBanned");
+	}
 
+	MarkNativeAsOptional("get_warden_id");
+	MarkNativeAsOptional("remove_warden");
 
-   CreateNative("sd_current_state", native_sd_state);
-   CreateNative("sd_current_day", native_current_day);
-   return APLRes_Success;
+	CreateNative("sd_current_state", native_sd_state);
+	CreateNative("sd_current_day", native_current_day);
+	return APLRes_Success;
 }
 
 public OnPluginStart() 
 {
-	// init text
-	EngineVersion game = GetEngineVersion();
-	if(game == Engine_CSGO)
-	{
-		Format(SPECIALDAY_PREFIX,strlen(SPECIALDAY_PREFIX),SPECIALDAY_PREFIX_CSGO);
-	}
-	
+	create_sd_convar();
+	setup_sd_convar();
+
+
 	SetCollisionGroup = init_set_collision();
 	
 		
@@ -393,21 +336,22 @@ public OnPluginStart()
 	HookEvent("player_hurt", OnPlayerHurt); 
 
 	// warden trigger random sd
-#if defined SD_STANDALONE	
+	if(!standalone)
+	{
+		RegConsoleCmd("wsd", command_warden_special_day);
+	}
 
-#else
-	RegConsoleCmd("wsd", command_warden_special_day);
-#endif
 	// register our special day console command	
 	RegAdminCmd("sd", command_special_day, SD_ADMIN_FLAG);
 	RegAdminCmd("sd_ff", command_ff_special_day, SD_ADMIN_FLAG);
 	RegAdminCmd("sd_cancel", command_cancel_special_day, SD_ADMIN_FLAG);
 	
-#if defined FREEZE_COMMANDS
-	// freeze stuff
-	RegAdminCmd("fr", Freeze,ADMFLAG_BAN);
-	RegAdminCmd("uf",UnFreeze,ADMFLAG_BAN);
-#endif
+	if(freeze)
+	{
+		// freeze stuff
+		RegAdminCmd("fr", Freeze,ADMFLAG_BAN);
+		RegAdminCmd("uf",UnFreeze,ADMFLAG_BAN);
+	}
 
 	RegConsoleCmd("sdspawn", sd_spawn); // spawn during zombie if late joiner
 	RegConsoleCmd("sd_list", sd_list_callback); // list sds
@@ -421,7 +365,7 @@ public OnPluginStart()
 	// hook disonnect incase a vital member leaves
 	HookEvent("player_disconnect", PlayerDisconnect_Event, EventHookMode_Pre);
 
-	
+	EngineVersion game = GetEngineVersion();
 
 	g_hFriendlyFire = FindConVar("mp_friendlyfire"); // get the friendly fire var
 	if(game == Engine_CSGO)
@@ -445,13 +389,12 @@ public OnPluginStart()
 	RegConsoleCmd("sdv", sd_version);
 	RegConsoleCmd("rig", rig_client);
 	
-#if defined SD_STANDALONE
+	if(standalone)
+	{
+		RegConsoleCmd("guns", weapon_menu);
+	}
 
-	RegConsoleCmd("guns", weapon_menu);
-
-#endif
-
-	for(int i = 1;i < MaxClients;i++)
+	for(int i = 1; i < MaxClients;i++)
 	{
 		if(is_valid_client(i))
 		{
@@ -478,8 +421,6 @@ public OnPluginStart()
 	
 }
 
-#if defined SD_STANDALONE
-
 public Action weapon_menu(int client, int args)
 {
 	if(sd_state == sd_inactive)
@@ -494,7 +435,6 @@ public Action weapon_menu(int client, int args)
 
 	return Plugin_Continue;
 }
-#endif
 
 
 
@@ -838,8 +778,7 @@ void EndSd(bool forced=false)
 	}
 	
 	// give winner creds
-#if defined STORE
-	if(!forced)
+	if(store && !forced)
 	{
 		if(sd_winner != -1 && check_command_exists("sm_store"))
 		{
@@ -847,7 +786,6 @@ void EndSd(bool forced=false)
 			PrintToChat(sd_winner,"%s you won 20 credits for winning the sd!",SPECIALDAY_PREFIX)
 		}
 	}
-#endif
 
 	special_day = normal_day;
 	sd_state = sd_inactive;
@@ -859,18 +797,17 @@ void EndSd(bool forced=false)
 	sd_winner = -1;
 	
 	// reset the store kill ammount
-#if defined STORE
-	if(store_kill_ammount_cvar != null)
+	if(store && store_kill_ammount_cvar != null)
 	{
 		SetConVarInt(store_kill_ammount_cvar, store_kill_ammount_backup);
 	}		
-#endif
 
 	// deal with nade blocking
-#if defined SD_STANDALONE
-	ConVar nade_var = FindConVar("sm_noblock_nades");
-	SetConVarBool(nade_var,true);
-#endif
+	if(standalone)
+	{
+		ConVar nade_var = FindConVar("sm_noblock_nades");
+		SetConVarBool(nade_var,true);
+	}
 
 
 
@@ -931,7 +868,15 @@ public Action print_specialday_text_all(Handle timer)
 			
 			case zombie_day:
 			{
-				Format(buf, sizeof(buf), "patient zero %d: %N",round_delay_timer, patient_zero);
+				if(standalone)
+				{
+					Format(buf, sizeof(buf), "patient zero %d: %N",round_delay_timer, patient_zero);
+				}
+
+				else
+				{
+					Format(buf, sizeof(buf), "patient zero %N",patient_zero);
+				}
 			}
 			
 			case scoutknife_day:
@@ -987,9 +932,7 @@ public Action print_specialday_text_all(Handle timer)
 	return Plugin_Continue;
 } 
 
-#if defined SD_STANDALONE
 
-#else
 public Action command_warden_special_day(int client,int args)
 {
 	
@@ -1000,7 +943,6 @@ public Action command_warden_special_day(int client,int args)
 		command_special_day(client, args);
 	}
 }
-#endif
 
 // TODO: maybe expand this into an options menu
 public Action command_ff_special_day(int client, int args)
@@ -1179,21 +1121,25 @@ public BalTeams()
         
         if(switch_ct)
         {
-            #if defined CT_BAN 
+            if(ct_ban)
+			{
                 if(GetClientTeam(i) == CS_TEAM_T && !(check_command_exists("sm_ctban") &&  CTBan_IsClientBanned(i)))
                 {
                     ct += 1;
                     t -= 1;
                     CS_SwitchTeam(i,CS_TEAM_CT);
                 }
-            #else
+			}
+
+			else
+			{
                 if(GetClientTeam(i) == CS_TEAM_T)
                 {
                     ct += 1;
                     t -= 1;
                     CS_SwitchTeam(i,CS_TEAM_CT);
                 }            
-            #endif
+			}
         }
         
         // switch to t
@@ -1222,7 +1168,8 @@ public SaveTeams(bool onlyct)
 			
 			// if ct bans active they can only stay on t anyways
 			// and thus aernt valid for consideration
-			#if defined CT_BAN 
+			if(ct_ban)
+			{
 				if(check_command_exists("sm_ctban") && onlyct)
 				{
 					valid = is_on_team(i) && !CTBan_IsClientBanned(i);
@@ -1232,9 +1179,12 @@ public SaveTeams(bool onlyct)
 				{
 					valid = is_on_team(i);
 				}
-			#else
+			}
+
+			else
+			{
 				valid = is_on_team(i);
-			#endif
+			}
 			
 			if(valid)
 			{
@@ -1301,31 +1251,34 @@ public int sd_select(int client, int sd)
 	// special done begun but not active
 	sd_state = sd_started; 
 
-#if defined SD_STANDALONE	
 
-	// slay all hosties
-	int entity = -1;
-
-	float vec[3] = {5000.0,5000.0,5000.0};
-
-	while((entity = FindEntityByClassname(entity, "hostage_entity")) != -1)
+	if(standalone)
 	{
-		if(IsValidEntity(entity))
+		// slay all hosties
+		int entity = -1;
+
+		float vec[3] = {5000.0,5000.0,5000.0};
+
+		while((entity = FindEntityByClassname(entity, "hostage_entity")) != -1)
 		{
-			TeleportEntity(entity,vec,NULL_VECTOR,NULL_VECTOR);
-		}	
+			if(IsValidEntity(entity))
+			{
+				TeleportEntity(entity,vec,NULL_VECTOR,NULL_VECTOR);
+			}	
+		}
 	}
 
-#else
-	// invoked by a warden reset the round limit
-	if(client == get_warden_id())
+	else
 	{
-		warden_sd_available -= 1;
-	}
+		// invoked by a warden reset the round limit
+		if(client == get_warden_id())
+		{
+			warden_sd_available -= 1;
+		}
 
-	 // sd is started so dont have a warden 
-	remove_warden();
-#endif
+		// sd is started so dont have a warden 
+		remove_warden();
+	}
 
 	force_open();
 	// re-spawn all players
@@ -1439,10 +1392,11 @@ public Action MoreTimers(Handle timer)
 public StartSD() 
 {
 	// deal with nade blocking
-#if defined SD_STANDALONE
-	ConVar nade_var = FindConVar("sm_noblock_nades");
-	SetConVarBool(nade_var,false);
-#endif
+	if(standalone)
+	{
+		ConVar nade_var = FindConVar("sm_noblock_nades");
+		SetConVarBool(nade_var,false);
+	}
 
 
 	// incase we cancel our sd
@@ -1453,12 +1407,13 @@ public StartSD()
 	
 	sd_state = sd_active;
 
-#if defined GANGS
-	if(check_command_exists("sm_gang"))
+	if(gangs)
 	{
-		ServerCommand("sm plugins unload hl_gangs.smx");
+		if(check_command_exists("sm_gang"))
+		{
+			ServerCommand("sm plugins unload hl_gangs.smx");
+		}
 	}
-#endif
 
 	int idx = view_as<int>(special_day);
 	SD_STATE_FUNC start_func = start_fptr[idx];
@@ -1480,7 +1435,7 @@ public Action RemoveGuns(Handle timer)
 	// By Kigen (c) 2008 - Please give me credit. :)
 	int maxent = GetMaxEntities();
 	char weapon[64];
-	for (int i=GetMaxClients(); i < maxent; i++)
+	for (int i= MaxClients; i < maxent; i++)
 	{
 		if ( IsValidEdict(i) && IsValidEntity(i) )
 		{

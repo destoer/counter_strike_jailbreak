@@ -26,24 +26,13 @@ TODO make all names consistent
 	ADMFLAG_CUSTOM6 - toggle laser killing people
 */
 
-//uncomment to make noblock default 
-//#define NOBLOCK_DEFAULT
-
-
-#define CT_ARMOUR  // 50 armour for ct on spawn
-//#define CT_KEVLAR_HELMET // kevlar + helment for cts 
-//#define STUCK
-#define LASER_DEATH
-#define GUN_COMMANDS
-#define T_LASER
-
 #define DONATOR 	ADMFLAG_CUSTOM1
 #define MEMBER 		ADMFLAG_CUSTOM2
 #define ADMIN		ADMFLAG_BAN
 #define DEBUG
 
-#define PLUGIN_AUTHOR "organharvester, jordi"
-#define PLUGIN_VERSION "V3.4.3 - Violent Intent Jailbreak"
+#define PLUGIN_AUTHOR "destoer(organ harvester), jordi"
+#define PLUGIN_VERSION "V3.5 - Violent Intent Jailbreak"
 
 
 #define WARDAY_ROUND_COUNT 5
@@ -52,90 +41,6 @@ bool warday_active = false;
 
 char warday_loc[20];
 
-/*
-#define ANTISTUCK_PREFIX "\x07FF0000[VI Antistuck]\x07F8F8FF"
-#define JB_PREFIX "[VI Jailbreak]"
-#define WARDEN_PREFIX "\x07FF0000[VI Warden]\x07F8F8FF"
-#define WARDEN_PLAYER_PREFIX "\x07FF0000[VI Warden]\x07F8F8FF"
-#define PTS_PREFIX "\x07F8F8FF"
-*/
-
-
-/*
-#define ANTISTUCK_PREFIX "\x07FF0000[GK Antistuck]\x07F8F8FF"
-#define JB_PREFIX "[GameKick Jailbreak]"
-#define WARDEN_PREFIX "\x07FFFF33[GameKick - Warden]\x07F8F8FF"
-#define WARDEN_PLAYER_PREFIX "\x0700008B[Warden]\x07F8F8FF"
-#define PTS_PREFIX "\x07F8F8FF"
-*/
-
-/*
-#define ANTISTUCK_PREFIX "\x07FF0000[3E Antistuck]\x07F8F8FF"
-#define JB_PREFIX "[3E Jailbreak]"
-#define WARDEN_PREFIX "\x07FF0000[3E Warden]\x07F8F8FF"
-#define WARDEN_PLAYER_PREFIX "\x07FF0000[3E Warden]\x07F8F8FF"
-#define PTS_PREFIX "\x07F8F8FF"
-*/
-
-/*
-#define ANTISTUCK_PREFIX_CSS "\x07FF0000[Antistuck]\x07F8F8FF"
-#define JB_PREFIX_CSS "\x04[GP Jailbreak]\x07F8F8FF"
-#define WARDEN_PREFIX_CSS "\x04[GP Warden]\x07F8F8FF"
-#define WARDEN_PLAYER_PREFIX_CSS "\x04[GP Warden]\x0700BFFF"
-#define PTS_PREFIX_CSS "\x07F8F8FF"
-
-#define ANTISTUCK_PREFIX_CSGO "\x07[Antistuck]\x07"
-#define JB_PREFIX_CSGO "\x07[GP Jailbreak]\x07"
-#define WARDEN_PREFIX_CSGO "\x07[GP Warden]\x07"
-#define WARDEN_PLAYER_PREFIX_CSGO "\x07[GP Warden]\x07"
-#define PTS_PREFIX_CSGO "\x07"
-*/
-
-/*
-#define ANTISTUCK_PREFIX_CSS "\x07FF0000[Antistuck]\x07F8F8FF"
-#define JB_PREFIX_CSS "\x04[3E Jailbreak]\x07F8F8FF"
-#define WARDEN_PREFIX_CSS "\x04[3E Warden]\x07F8F8FF"
-#define WARDEN_PLAYER_PREFIX_CSS "\x04[3E Warden]\x0700BFFF"
-#define PTS_PREFIX_CSS "\x07F8F8FF"
-
-#define ANTISTUCK_PREFIX_CSGO "\x07[Antistuck]\x07"
-#define JB_PREFIX_CSGO "\x07[3E Jailbreak]\x07"
-#define WARDEN_PREFIX_CSGO "\x07[3E Warden]\x07"
-#define WARDEN_PLAYER_PREFIX_CSGO "\x07[3E Warden]\x07"
-#define PTS_PREFIX_CSGO "\x07"
-*/
-
-/*
-#define ANTISTUCK_PREFIX_CSS "\x07FF0000[Antistuck]\x07F8F8FF"
-#define JB_PREFIX_CSS "\x04[EgN | Jailbreak]\x07F8F8FF"
-#define WARDEN_PREFIX_CSS "\x04[EgN | Warden]\x07F8F8FF"
-#define WARDEN_PLAYER_PREFIX_CSS "\x04[EgN | Warden]\x0700BFFF"
-#define PTS_PREFIX_CSS "\x07F8F8FF"
-
-#define ANTISTUCK_PREFIX_CSGO "\x07[Antistuck]\x07"
-#define JB_PREFIX_CSGO "\x07[EgN | Jailbreak]\x07"
-#define WARDEN_PREFIX_CSGO "\x07[EgN | Warden]\x07"
-#define WARDEN_PLAYER_PREFIX_CSGO "\x07[EgN | Warden]\x07"
-#define PTS_PREFIX_CSGO "\x07"
-*/
-
-#define ANTISTUCK_PREFIX_CSS "\x07FF0000[Antistuck]\x07F8F8FF"
-#define JB_PREFIX_CSS "\x04[NLG | Jailbreak]\x07F8F8FF"
-#define WARDEN_PREFIX_CSS "\x04[NLG | Warden]\x07F8F8FF"
-#define WARDEN_PLAYER_PREFIX_CSS "\x04[NLG | Warden]\x0700BFFF"
-#define PTS_PREFIX_CSS "\x07F8F8FF"
-
-#define ANTISTUCK_PREFIX_CSGO "\x07[Antistuck]\x07"
-#define JB_PREFIX_CSGO "\x07[NLG | Jailbreak]\x07"
-#define WARDEN_PREFIX_CSGO "\x07[NLG | Warden]\x07"
-#define WARDEN_PLAYER_PREFIX_CSGO "\x07[NLG | Warden]\x07"
-#define PTS_PREFIX_CSGO "\x07"
-
-char ANTISTUCK_PREFIX[] = ANTISTUCK_PREFIX_CSS;
-char JB_PREFIX[] = JB_PREFIX_CSS;
-char WARDEN_PREFIX[] = WARDEN_PREFIX_CSS;
-char WARDEN_PLAYER_PREFIX[] = WARDEN_PLAYER_PREFIX_CSS;
-char PTS_PREFIX[] = PTS_PREFIX_CSS;
 
 const int WARDEN_INVALID = -1;
 // global vars
@@ -165,15 +70,16 @@ Handle client_laser_color_pref;
 
 
 // split files for this plugin
-#include "jailbreak/stuck.inc"
-#include "jailbreak/guns.inc"
-#include "jailbreak/laser.inc"
-#include "jailbreak/circle.inc"
-#include "jailbreak/block.inc"
-#include "jailbreak/debug.inc"
-#include "jailbreak/cookies.inc"
-#include "jailbreak/color.inc"
-#include "jailbreak/warday.inc"
+#include "jailbreak/config.sp"
+#include "jailbreak/stuck.sp"
+#include "jailbreak/guns.sp"
+#include "jailbreak/laser.sp"
+#include "jailbreak/circle.sp"
+#include "jailbreak/block.sp"
+#include "jailbreak/debug.sp"
+#include "jailbreak/cookies.sp"
+#include "jailbreak/color.sp"
+#include "jailbreak/warday.sp"
 
 public Plugin:myinfo = 
 {
@@ -204,9 +110,13 @@ public int native_remove_warden(Handle plugin, int num_param)
 // register our call
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-   CreateNative("get_warden_id", native_get_warden_id);
-   CreateNative("remove_warden", native_remove_warden);
-   return APLRes_Success;
+	CreateNative("get_warden_id", native_get_warden_id);
+	CreateNative("remove_warden", native_remove_warden);
+
+	MarkNativeAsOptional("sd_current_state");
+	MarkNativeAsOptional("sd_current_day");
+
+	return APLRes_Success;
 }
 
 
@@ -345,11 +255,15 @@ public OnMapStart()
 	
 	gun_menu = build_gun_menu(WeaponHandler);
 
-#if defined NOBLOCK_DEFAULT
+	if(noblock)
+	{
 		disable_block_all();
-#else
+	}
+
+	else
+	{
 		enable_block_all();
-#endif
+	}
 }
 
 public OnMapEnd()
@@ -456,24 +370,9 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 // init the plugin
 public OnPluginStart()
 {
-	EngineVersion game = GetEngineVersion();
-	if(game != Engine_CSGO && game != Engine_CSS)
-	{
-		SetFailState("This plugin is for CSGO/CSS only.");	
-	}
-	
+	create_jb_convar();
 
-	// init text
-	if(game == Engine_CSGO)
-	{
-		Format(ANTISTUCK_PREFIX,strlen(ANTISTUCK_PREFIX),ANTISTUCK_PREFIX_CSGO);
-		Format(JB_PREFIX,strlen(JB_PREFIX),JB_PREFIX_CSGO);
-		Format(WARDEN_PLAYER_PREFIX,strlen(WARDEN_PLAYER_PREFIX),WARDEN_PLAYER_PREFIX_CSGO);
-		Format(WARDEN_PREFIX,strlen(WARDEN_PREFIX),WARDEN_PREFIX_CSGO);
-		Format(PTS_PREFIX,strlen(PTS_PREFIX),PTS_PREFIX_CSGO);		
-	}
-
-
+	setup_jb_convar();
 	
 	SetCollisionGroup = init_set_collision();
 	
@@ -487,22 +386,26 @@ public OnPluginStart()
 	RegConsoleCmd("wub", disable_block_warden_callback);	
 	RegConsoleCmd("w", become_warden);
 	RegConsoleCmd("uw", leave_warden);
-#if defined GUN_COMMANDS
-	RegConsoleCmd("wempty", empty_menu);
-	RegConsoleCmd("guns", weapon_menu);
-#endif
+
+	if(gun_commands)
+	{
+		RegConsoleCmd("wempty", empty_menu);
+		RegConsoleCmd("guns", weapon_menu);
+	}
 
 	
-	// disabled
+
 	// command_stuck is push out callback
 	// we currently use the noblock toggle callback
-	#if defined STUCK
-	// workaround for csgo wont support this neatly
-	if(SetCollisionGroup == INVALID_HANDLE)
+	if(stuck)
 	{
-		RegConsoleCmd("stuck", command_stuck);
+		// workaround for csgo wont support this neatly
+		if(SetCollisionGroup == INVALID_HANDLE)
+		{
+			RegConsoleCmd("stuck", command_stuck);
+		}
 	}
-	#endif		
+	
 	
 	// admin commands
 	RegAdminCmd("sm_rw", fire_warden, ADMFLAG_KICK);
@@ -510,12 +413,15 @@ public OnPluginStart()
 	RegAdminCmd("ublock",disable_block_admin, ADMFLAG_BAN);	
 	RegAdminCmd("force_open", force_open_callback, ADMFLAG_UNBAN);
 
-#if defined LASER_DEATH
-	// toggle kill and safe laser
-	RegAdminCmd("kill_laser", kill_laser, ADMFLAG_CUSTOM6);
-	RegAdminCmd("safe_laser", safe_laser, ADMFLAG_CUSTOM6);
-	
-#endif
+	if(laser_death)
+	{
+		// toggle kill and safe laser
+		RegAdminCmd("kill_laser", kill_laser, ADMFLAG_CUSTOM6);
+		RegAdminCmd("safe_laser", safe_laser, ADMFLAG_CUSTOM6);
+	}
+
+
+
 	// custom flag required to do draw laser
 #if defined DRAW_CUSTOM_FLAGS 
 	RegAdminCmd("laser", laser_menu, MEMBER);
@@ -523,9 +429,11 @@ public OnPluginStart()
 	RegConsoleCmd("laser", laser_menu);
 #endif
 
-#if defined T_LASER	
-	RegConsoleCmd("tlaser", t_laser_menu);
-#endif
+
+	if(t_laser)
+	{
+		RegConsoleCmd("tlaser", t_laser_menu);
+	}
 
 #if defined LASER_COLOR_CUSTOM_FLAGS
 	RegAdminCmd("laser_color", command_laser_color, ADMFLAG_CUSTOM4);
@@ -551,11 +459,15 @@ public OnPluginStart()
 	CreateTimer(1.0, print_warden_text_all, _, TIMER_REPEAT);
 	
 	// if no block is default
-#if defined NOBLOCK_DEFAULT
+	if(noblock)
+	{
 		disable_block_all();
-#else
+	}
+
+	else
+	{
 		enable_block_all();
-#endif
+	}
 	
 	
 	// Start a circle timer
@@ -716,9 +628,10 @@ public print_warden_commands(client)
 	PrintToChat(client,"%s!laser_color       %s- %schange laser color",color1,color2,color3);
 	PrintToChat(client,"%s!marker  %s- %s+marker, use mouse to adjust size, then -marker",color1,color2,color3);
 	PrintToChat(client,"%s!wsd           %s- %sstart sd after %d rounds",color1,color2,color3,ROUND_WARDEN_SD);
-#if defined T_LASER
-	PrintToChat(client,"%s!tlaser           %s- %stoggle laser for t's'",color1,color2,color3);
-#endif	
+	if(t_laser)
+	{
+		PrintToChat(client,"%s!tlaser           %s- %stoggle laser for t's'",color1,color2,color3);
+	}	
 	PrintToChat(client,"%s!color           %s- %scolor players'",color1,color2,color3);	
 	PrintToChat(client,"%s!reset_color           %s- %sreset player colors'",color1,color2,color3);	
 	PrintToChat(client,"%s!wd %s- %scall a warday %s",color1,color2,color3, warday_round_counter >= WARDAY_ROUND_COUNT? "ready" : "not ready");
@@ -798,17 +711,17 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 			int dummy = 0;
 			bool first_round = CS_GetTeamScore(CS_TEAM_CT) + CS_GetTeamScore(CS_TEAM_T) <= 0;
 			bool force_setting = first_round || get_alive_team_count(GetClientTeam(client), dummy) <= 1;
-#if defined NOBLOCK_DEFAULT
-			if(noblock_enabled(client) || force_setting)
+
+			if(noblock && (noblock_enabled(client) || force_setting))
 			{
 				unblock_client(client, SetCollisionGroup);
-			}			
-#else
-			if(!noblock_enabled(client) || force_setting)
+			}
+	
+			else if(!noblock && (!noblock_enabled(client) || force_setting))
 			{
 				block_client(client, SetCollisionGroup);
 			}
-#endif
+
 			else
 			{
 				unblock_client(client, SetCollisionGroup);
@@ -817,12 +730,9 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 				
 		if(GetClientTeam(client) == CS_TEAM_CT)
 		{
-			#if defined CT_KEVLAR_HELMET
-				GivePlayerItem(client, "item_assaultsuit");
-			#elseif defined CT_ARMOUR
-				GivePlayerItem(client, "item_kevlar");
-				SetEntProp(client , Prop_Send, "m_ArmorValue", 50, 1);
-			#endif
+			GivePlayerItem(client, "item_assaultsuit");
+			GivePlayerItem(client, "item_kevlar");
+			SetEntProp(client , Prop_Send, "m_ArmorValue", 50, 1);
 		}
 	}
 }
@@ -836,11 +746,15 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 	reset_laser_setting();
 	
 	// if we are running with block on reset the status on round start
-	#if defined NOBLOCK_DEFAULT // does sourcemod have #ifndef?
+	if(noblock)
+	{
 		disable_block_all();
-	#else
+	}
+
+	else
+	{
 		enable_block_all();
-	#endif
+	}
 	
 	// there is no warden
 	warden_id = -1;
