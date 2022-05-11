@@ -119,6 +119,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	return APLRes_Success;
 }
 
+native bool IsClientSpeaking(int client);
 
 public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon)
 {
@@ -216,16 +217,17 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	return Plugin_Continue;
 }
 
-/*
-// used for hooking voice command (USEUD)
-public void OnClientSpeakingEx(client)
+
+// used for hooking voice command
+// requires https://github.com/Franc1sco/VoiceAnnounceEX
+public void OnClientSpeakingEx(int client)
 {
-	if(GetClientTeam(client) == CS_TEAM_CT && IsPlayerAlive(client) && client != warden_id)
+	if(voice && GetClientTeam(client) == CS_TEAM_CT && IsPlayerAlive(client) && client != warden_id)
 	{
 		set_warden(client);
 	}
 }
-*/
+
 
 
 public OnMapStart()

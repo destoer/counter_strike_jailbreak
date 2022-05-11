@@ -12,6 +12,7 @@ ConVar laser_cvar;
 ConVar stuck_cvar;
 ConVar t_laser_cvar;
 ConVar gun_cvar;
+ConVar voice_cvar;
 
 #define PREFIX_SIZE 128
 
@@ -24,6 +25,7 @@ bool laser_death;
 bool t_laser;
 bool stuck;
 bool gun_commands;
+bool voice;
 
 
 void create_jb_convar()
@@ -45,6 +47,7 @@ void create_jb_convar()
     laser_cvar = CreateConVar("jb_kill_laser","1","enable kill laser");
     t_laser_cvar = CreateConVar("jb_t_laser","1","enable t laser");
     gun_cvar = CreateConVar("jb_gun_commands","1","enable ct gun menu");
+    voice_cvar = CreateConVar("jb_warden_voice","1","enable getting warden from voice");
 }
 
 void setup_jb_convar()
@@ -71,6 +74,7 @@ void setup_jb_convar()
     t_laser = GetConVarInt(t_laser_cvar) > 0;
     gun_commands = GetConVarInt(gun_cvar) > 0;
     stuck = GetConVarInt(stuck_cvar) > 0;
+    voice = GetConVarInt(voice_cvar) > 0;
 
 
     if(game == Engine_CSGO)
