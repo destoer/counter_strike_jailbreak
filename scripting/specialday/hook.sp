@@ -204,6 +204,8 @@ public Action OnRoundStart(Handle event, const String:name[], bool dontBroadcast
 {
 	reset_use_key();
 	EndSd();
+
+	return Plugin_Continue;
 }
 
 
@@ -264,6 +266,7 @@ public Action OnPlayerHurt(Handle event, const String:name[], bool dont_broadcas
 		}
 	}
 	
+	return Plugin_Continue;
 }
 
 // make team damage the same as cross team damage
@@ -617,7 +620,7 @@ public Action check_movement(Handle Timer)
 	return Plugin_Continue;
 }
 
-bool use_key[MAXPLAYERS+1] = false;
+bool use_key[MAXPLAYERS+1] = {false};
 
 void reset_use_key()
 {

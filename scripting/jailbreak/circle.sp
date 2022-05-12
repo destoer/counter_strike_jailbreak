@@ -22,6 +22,8 @@ public Action Repetidor(Handle timer)
 			SetupBeacon(i);
 		}
 	}
+	
+	return Plugin_Handled;
 }
 
 public void SetupBeacon(client)

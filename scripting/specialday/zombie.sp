@@ -100,7 +100,7 @@ public Action NewZombie(Handle timer, int client)
 {
 	if(special_day != zombie_day || !IsClientInGame(client))
 	{
-		return;
+		return Plugin_Continue;
 	}
 
 	
@@ -109,13 +109,15 @@ public Action NewZombie(Handle timer, int client)
 	CS_SwitchTeam(client, CS_TEAM_T);
 	MakeZombie(client);
 	EmitSoundToAll("npc/zombie/zombie_voice_idle1.wav");
+
+	return Plugin_Continue;
 }
 
 public Action ReviveZombie(Handle timer, int client)
 {
 	if(special_day != zombie_day || !IsClientInGame(client) || IsPlayerAlive(client))
 	{
-		return;
+		return Plugin_Continue;
 	}
 	
 	if(IsPlayerAlive(patient_zero))
@@ -127,7 +129,9 @@ public Action ReviveZombie(Handle timer, int client)
 		TeleportEntity(client, cords, NULL_VECTOR, NULL_VECTOR);
 		CS_SwitchTeam(client, CS_TEAM_T);
 		MakeZombie(client);
-	}				
+	}
+
+	return Plugin_Continue;				
 }
 
 void init_zombie()
@@ -238,10 +242,8 @@ public void StartZombie()
 }
 
 
-void zombie_discon_started(int client)
+public void zombie_discon_started(int client)
 {
-	// supress unused warning
-	client += 0;
 	SaveTeams(false);
 
 	int rand = GetRandomInt( 0, validclients - 1 );

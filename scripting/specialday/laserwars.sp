@@ -23,6 +23,8 @@ public Action ReviveLaser(Handle Timer, int client)
 		CS_RespawnPlayer(client);
 		sd_player_init(client);
 	}
+
+	return Plugin_Continue;
 }
 
 void laser_init()
@@ -105,9 +107,8 @@ void laser_discon_active(int client)
 	make_laser(laser_tank);		
 }
 
-void laser_discon_started(int client)
+public void laser_discon_started(int client)
 {
-	client += 0; // ignore unused warning
 	SaveTeams(true);
 
 	int rand = GetRandomInt( 0, validclients - 1 );
@@ -115,8 +116,7 @@ void laser_discon_started(int client)
 }
 
 
-void laser_death(int victim)
+public void laser_death(int victim)
 {
-	victim += 0;
 	//CreateTimer(3.0, ReviveLaser, victim);
 }

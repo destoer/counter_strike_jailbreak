@@ -104,6 +104,8 @@ public int native_get_warden_id(Handle plugin, int num_param)
 public int native_remove_warden(Handle plugin, int num_param)
 {
 	remove_warden();
+
+	return 0;
 }
 
 
@@ -217,25 +219,13 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 }
 
 
-void handle_voice_hook(int client)
+// SM 1.11
+public void OnClientSpeaking(int client)
 {
 	if(voice && GetClientTeam(client) == CS_TEAM_CT && IsPlayerAlive(client) && client != warden_id)
 	{
 		set_warden(client);
 	}
-}
-
-// used for hooking voice command
-// requires https://github.com/Franc1sco/VoiceAnnounceEX
-public void OnClientSpeakingEx(int client)
-{
-	handle_voice_hook(client);
-}
-
-// SM 1.11
-public void OnClientSpeaking(int client)
-{
-	handle_voice_hook(client);
 }
 
 
@@ -381,9 +371,6 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 // init the plugin
 public OnPluginStart()
 {
-	AddNormalSoundHook(shook);
-	AddAmbientSoundHook(sahook);
-
 	create_jb_convar();
 
 	setup_jb_convar();
@@ -492,21 +479,6 @@ public OnPluginStart()
 	register_cookies();
 }
 
-public Action shook(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH],
-	  int &entity, int &channel, float &volume, int &level, int &pitch, int &flags,
-	  char soundEntry[PLATFORM_MAX_PATH], int &seed)
-{
-	PrintToChatAll("shook");
-	PrintToChatAll("%i %s", entity, sample);
-}
-
-
-public Action sahook(char sample[PLATFORM_MAX_PATH], int& entity, float& volume, int& level, int& pitch, float pos[3], int& flags, float& delay)
-{
-	PrintToChatAll("sa hook");
-	PrintToChatAll("sa sample %s\n",sample);
-}
-
 
 // if warden drops into spec remove them
 public Action player_team(Event event, const char[] name, bool dontBroadcast)
@@ -517,11 +489,15 @@ public Action player_team(Event event, const char[] name, bool dontBroadcast)
 	{
 		remove_warden();
 	}
+
+	return Plugin_Handled;
 }
 
 public Action force_open_callback (int client, int args)
 {
 	force_open();
+
+	return Plugin_Handled;
 }
 
 // Top Screen Warden Printing
@@ -719,6 +695,8 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 			set_warden(new_warden);
 		}
 	}
+
+	return Plugin_Continue;
 }
 
 // give ct equitment on spawn & set block
@@ -764,6 +742,8 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 			SetEntProp(client , Prop_Send, "m_ArmorValue", 50, 1);
 		}
 	}
+
+	return Plugin_Continue;
 }
 
 

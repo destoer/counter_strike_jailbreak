@@ -54,15 +54,17 @@ public Action GiveGrenade(Handle timer, any entity)
 
 	// giver person who threw a flash after a second +  set hp to one
 	
-	if(special_day != grenade_day) { return; }
+	if(special_day != grenade_day) 
+	{ 
+		return Plugin_Continue; 
+	}
 	
 	
-	
-
 	if(is_valid_client(client) && is_on_team(client) && IsPlayerAlive(client))
 	{
 		strip_all_weapons(client);
 		GivePlayerItem(client, "weapon_hegrenade");
 	}
-		
+
+	return Plugin_Continue;	
 }

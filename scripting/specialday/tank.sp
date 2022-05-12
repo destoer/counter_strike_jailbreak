@@ -104,9 +104,8 @@ void tank_discon_active(int client)
 	MakeTank(tank);		
 }
 
-void tank_discon_started(int client)
+public void tank_discon_started(int client)
 {
-	client += 0; // ignore unused warning
 	SaveTeams(true);
 
 	int rand = GetRandomInt( 0, validclients - 1 );

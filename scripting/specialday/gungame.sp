@@ -87,14 +87,16 @@ public Action ReviveGunGame(Handle timer, int client)
 {
 	if(special_day != gungame_day)
 	{
-		return;
+		return Plugin_Continue;
 	}
 	
 	if(is_valid_client(client) && is_on_team(client))
 	{
 		CS_RespawnPlayer(client);
 		sd_player_init(client);
-	}		
+	}
+
+	return Plugin_Continue;		
 }
 
 public void StartGunGame()

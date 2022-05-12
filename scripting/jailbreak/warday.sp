@@ -63,6 +63,7 @@ void warday_start()
 public Action jam_open_doors(Handle timer)
 {
     force_open();
+    return Plugin_Handled;
 }
 
 

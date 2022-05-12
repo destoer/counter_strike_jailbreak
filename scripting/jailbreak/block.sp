@@ -12,7 +12,7 @@ public disable_block_all()
 	unblock_all_clients(SetCollisionGroup);
 }
 
-public Action disable_block_warden_callback(client, args)
+public Action disable_block_warden_callback(int client, int args)
 {
 	
 	if(client != warden_id)
@@ -27,7 +27,7 @@ public Action disable_block_warden_callback(client, args)
 
 
 // disable block for an admin no warden check
-public Action disable_block_admin(client, args)
+public Action disable_block_admin(int client, int args)
 {
 	PrintCenterTextAll("Player Collision: OFF!");
 	disable_block_all();
@@ -35,10 +35,11 @@ public Action disable_block_admin(client, args)
 }
 
 // same but to enable blocking
-public Action enable_block_admin(client, args)
+public Action enable_block_admin(int client, int args)
 {
 	PrintCenterTextAll("Player Collision: ON");
 	enable_block_all();	
+	return Plugin_Handled;
 }
 
 public enable_block_all()
@@ -46,10 +47,8 @@ public enable_block_all()
 	block_all_clients(SetCollisionGroup);
 }
 
-public Action enable_block_warden_callback(client, args)
+public Action enable_block_warden_callback(int client, int args)
 {
-	
-
 	if(client != warden_id)
 	{
 		return Plugin_Handled;

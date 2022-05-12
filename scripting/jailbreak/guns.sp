@@ -66,6 +66,8 @@ public Action weapon_menu(int client, int args)
 	{
 		gun_menu.Display(client,20);
 	}
+
+	return Plugin_Continue;
 }
 
 

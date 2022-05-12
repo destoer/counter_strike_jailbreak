@@ -32,6 +32,8 @@ public Action ReviveScout(Handle Timer, int client)
 		CS_RespawnPlayer(client);
 		sd_player_init(client);
 	}
+
+	return Plugin_Continue;
 }
 
 

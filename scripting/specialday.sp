@@ -49,10 +49,6 @@ int store_kill_ammount_backup = 0;
 #include "thirdparty/store.inc"
 #define REQUIRE_PLUGIN
 
-#include "thirdparty/colorvariables.inc"
-
-
-
 // gun menu
 Menu gun_menu;
 
@@ -243,6 +239,8 @@ public Action round_delay_tick(Handle Timer)
 			}
 		}
 	}
+
+	return Plugin_Continue;
 }
 
 void enable_friendly_fire()
@@ -580,6 +578,8 @@ public void init_function_pointers()
 public Action WeaponMenu(int client)
 {
 	gun_menu.Display(client, 20);
+
+	return Plugin_Continue;
 }
 
 public Action sd_spawn(int client, int args)
@@ -701,12 +701,14 @@ public Action UnFreeze(client,args)
 public Action sd_list_callback(int client, int args)
 {
 	sd_list_menu.Display(client, 20);
+
+	return Plugin_Continue;
 }
 
 // dummy sd list to show what ones there are
 public int SdListHandler(Menu menu, MenuAction action, int client, int param2)
 {
-
+	return 0;
 }
 
 public SetupFog()
@@ -943,6 +945,8 @@ public Action command_warden_special_day(int client,int args)
 		//ect(client, GetRandomInt(0, view_as<int>(normal_day) - 1));
 		command_special_day(client, args);
 	}
+
+	return Plugin_Continue;
 }
 
 // TODO: maybe expand this into an options menu

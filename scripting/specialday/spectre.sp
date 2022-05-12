@@ -88,9 +88,8 @@ void end_spectre()
 	spectre = -1;
 }
 
-void spectre_discon_started(int client)
+public void spectre_discon_started(int client)
 {
-	client += 0;
 	SaveTeams(true);
 
 	int rand = GetRandomInt( 0, validclients - 1 );

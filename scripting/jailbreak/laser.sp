@@ -51,6 +51,8 @@ int laser_rainbow[7][4] =
 public Action rainbow_timer(Handle timer)
 {
 	rainbow_color = (rainbow_color + 1) % 7;
+
+	return Plugin_Handled;
 }
 
 public Action command_laser_color(int client, int args)
@@ -66,6 +68,7 @@ public Action command_laser_color(int client, int args)
 	lasers.DrawItem("yellow");
 	lasers.Send(client,color_handler,20);
 
+	return Plugin_Continue;
 }
 
 
@@ -108,7 +111,7 @@ public void SetupLaser(int client,int color[4])
 	setup_laser(client, color, g_lbeam, g_lpoint, laser_kill);
 }
 
-int t_client_list[64] = 0;
+int t_client_list[64] = {0};
 
 
 public Action t_laser_menu(int client,int args)
@@ -237,6 +240,8 @@ public Action laser_draw(Handle timer)
 			do_draw(i, {255,0,0,255} );
 		}
 	}
+
+	return Plugin_Handled;
 }
 
 
@@ -269,9 +274,13 @@ void do_draw(int client, int color[4])
 public Action kill_laser (int client, int args)
 {
 	laser_kill = true;
+
+	return Plugin_Handled;
 }
 
 public Action safe_laser (int client, int args)
 {
 	laser_kill = false;
+
+	return Plugin_Handled;
 }

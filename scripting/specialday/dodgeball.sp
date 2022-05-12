@@ -71,7 +71,7 @@ public Action GiveFlash(Handle timer, any entity)
 	// give person who threw a flash after a second +  set hp to one
 	if(special_day != dodgeball_day) 
 	{ 
-		return; 
+		return Plugin_Continue; 
 	}
 	
 	
@@ -81,5 +81,7 @@ public Action GiveFlash(Handle timer, any entity)
 		strip_all_weapons(client);
 		GivePlayerItem(client, "weapon_flashbang");
 		SetEntityHealth(client,1);
-	}		
+	}
+
+	return Plugin_Continue;		
 }
