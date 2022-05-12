@@ -32,7 +32,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi"
-#define PLUGIN_VERSION "V3.5 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.5.1 - Violent Intent Jailbreak"
 
 
 #define WARDAY_ROUND_COUNT 5
@@ -130,7 +130,6 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 		return Plugin_Continue;
 	}
 */	
-	
 	// reset laser cords we are no longer drawing
 	if(!(buttons & IN_USE))
 	{
@@ -218,9 +217,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 }
 
 
-// used for hooking voice command
-// requires https://github.com/Franc1sco/VoiceAnnounceEX
-public void OnClientSpeakingEx(int client)
+void handle_voice_hook(int client)
 {
 	if(voice && GetClientTeam(client) == CS_TEAM_CT && IsPlayerAlive(client) && client != warden_id)
 	{
@@ -228,6 +225,18 @@ public void OnClientSpeakingEx(int client)
 	}
 }
 
+// used for hooking voice command
+// requires https://github.com/Franc1sco/VoiceAnnounceEX
+public void OnClientSpeakingEx(int client)
+{
+	handle_voice_hook(client);
+}
+
+// SM 1.11
+public void OnClientSpeaking(int client)
+{
+	handle_voice_hook(client);
+}
 
 
 public OnMapStart()
@@ -372,6 +381,9 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 // init the plugin
 public OnPluginStart()
 {
+	AddNormalSoundHook(shook);
+	AddAmbientSoundHook(sahook);
+
 	create_jb_convar();
 
 	setup_jb_convar();
@@ -478,6 +490,21 @@ public OnPluginStart()
 	PrecacheSound("bot\\what_have_you_done.wav");
 	
 	register_cookies();
+}
+
+public Action shook(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH],
+	  int &entity, int &channel, float &volume, int &level, int &pitch, int &flags,
+	  char soundEntry[PLATFORM_MAX_PATH], int &seed)
+{
+	PrintToChatAll("shook");
+	PrintToChatAll("%i %s", entity, sample);
+}
+
+
+public Action sahook(char sample[PLATFORM_MAX_PATH], int& entity, float& volume, int& level, int& pitch, float pos[3], int& flags, float& delay)
+{
+	PrintToChatAll("sa hook");
+	PrintToChatAll("sa sample %s\n",sample);
 }
 
 
