@@ -31,6 +31,7 @@ jb_stuck - enable stuck command (bool)
 jb_kill_laser - enable kill laser (bool)  
 jb_t_laser - enable t laser (bool)  
 jb_gun_commands - enable ct gun menu (bool)  
+jb_armor give ct armor on spawn (bool)
 
 
 
