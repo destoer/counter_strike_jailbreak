@@ -14,7 +14,7 @@
 //#define CUSTOM_ZOMBIE_MUSIC
 
 
-#define VERSION "2.7.4 - Violent Intent Jailbreak"
+#define VERSION "2.7.5 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -120,9 +120,9 @@ int fog_ent;
 // round end timer 
 int round_delay_timer = 0;
 
+#define SD_DELAY 15
 
-
-int sdtimer = 20; // timer for sd
+int sdtimer = SD_DELAY; // timer for sd
 
 
 // team saves
@@ -761,6 +761,14 @@ void EndSd(bool forced=false)
 		PrintToChatAll("%s Specialday cancelled!", SPECIALDAY_PREFIX);
 	}
 	
+	// enable lr
+	if(hosties)
+	{
+		ConVar lr_cvar = FindConVar("sm_hosties_lr");
+		SetConVarBool(lr_cvar, true); 
+	}
+
+
 	// call sd cleanup
 	int idx = view_as<int>(special_day);
 
@@ -1269,7 +1277,7 @@ public int sd_select(int client, int sd)
 
 
 
-	sdtimer = 20;
+	sdtimer = SD_DELAY;
 
 	// special done begun but not active
 	sd_state = sd_started; 
@@ -1387,7 +1395,7 @@ public Action MoreTimers(Handle timer)
 	}
 	
 	sdtimer -= 1;
-	PrintCenterTextAll("Special day begins in %d", sdtimer); 
+	PrintCenterTextAll("Special day (%s) begins in %d",sd_list[special_day], sdtimer); 
 	if(sdtimer > 0)
 	{
 		CreateTimer(1.0, MoreTimers);
@@ -1395,7 +1403,7 @@ public Action MoreTimers(Handle timer)
 
 	else 
 	{ 
-		sdtimer = 20; 
+		sdtimer = SD_DELAY; 
 		
 		
 		
@@ -1448,6 +1456,13 @@ public StartSD()
 		{
 			ServerCommand("sm plugins unload hl_gangs.smx");
 		}
+	}
+
+	// disable lr
+	if(hosties)
+	{
+		ConVar lr_cvar = FindConVar("sm_hosties_lr");
+		SetConVarBool(lr_cvar, false); 
 	}
 
 	int idx = view_as<int>(special_day);

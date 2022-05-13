@@ -8,6 +8,7 @@ ConVar gangs_cvar;
 ConVar store_cvar;
 ConVar standalone_cvar;
 ConVar freeze_cvar;
+ConVar hosties_cvar;
 
 
 bool ct_ban;
@@ -15,6 +16,7 @@ bool store;
 bool gangs;
 bool standalone;
 bool freeze;
+bool hosties;
 
 #define PREFIX_SIZE 128
 
@@ -32,6 +34,7 @@ void create_sd_convar()
     store_cvar = CreateConVar("sd_store","0","enable store support");
     standalone_cvar = CreateConVar("sd_standalone","0","make plugin operate without jailbreak");
     freeze_cvar = CreateConVar("sd_freeze","1","enable freeze commands");
+    hosties_cvar = CreateConVar("sd_hosties","1","disable hosties on sd");
 }
 
 void setup_sd_convar()
@@ -59,5 +62,6 @@ void setup_sd_convar()
     gangs = GetConVarInt(gangs_cvar) > 0;
     store = GetConVarInt(store_cvar) > 0;
     standalone = GetConVarInt(standalone_cvar) > 0;
-    freeze = GetConVarInt(freeze_cvar) > 0;    
+    freeze = GetConVarInt(freeze_cvar) > 0;  
+    hosties = GetConVarInt(hosties_cvar) > 0;  
 }

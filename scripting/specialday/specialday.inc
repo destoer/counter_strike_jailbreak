@@ -38,10 +38,7 @@ enum SdState
 native SdState sd_current_state();
 native SpecialDay sd_current_day();
 
-//#define ROUND_WARDEN_SD 50
-//#define ROUND_STACK_LIM 1
-//#define ROUND_PLAYER_REQ 8
 
-#define ROUND_WARDEN_SD 13
+#define ROUND_WARDEN_SD 15
 #define ROUND_STACK_LIM 2
 #define ROUND_PLAYER_REQ 3
