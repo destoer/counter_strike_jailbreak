@@ -14,7 +14,7 @@
 //#define CUSTOM_ZOMBIE_MUSIC
 
 
-#define VERSION "2.7.3 - Violent Intent Jailbreak"
+#define VERSION "2.7.4 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
