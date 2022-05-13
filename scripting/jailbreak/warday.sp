@@ -47,21 +47,31 @@ void warday_start()
     PrintToChatAll("%s war day started doors will auto open in 20 seconds", WARDEN_PREFIX);
 
 
-    // give every t a gun
+    // give every ct a gun
     for(int i = 0; i < 64; i++)
     {
-        if(is_valid_client(i))
+        if(is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT)
         {
             gun_menu.Display(i,20);
         }
     }
 
     // after 20 seconds jam open every door
-    CreateTimer(20.0,jam_open_doors);
+    CreateTimer(20.0,start_warday);
 }
 
-public Action jam_open_doors(Handle timer)
+public Action start_warday(Handle timer)
 {
+    // give every t a gun
+    for(int i = 0; i < 64; i++)
+    {
+        if(is_valid_client(i) && GetClientTeam(i) == CS_TEAM_T)
+        {
+            gun_menu.Display(i,20);
+        }
+    }
+
+
     force_open();
     return Plugin_Handled;
 }
