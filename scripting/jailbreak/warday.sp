@@ -50,7 +50,7 @@ void warday_start()
     // give every ct a gun
     for(int i = 0; i < 64; i++)
     {
-        if(is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT)
+        if(is_valid_client(i) && IsPlayerAlive(i) && GetClientTeam(i) == CS_TEAM_CT)
         {
             gun_menu.Display(i,20);
         }
@@ -65,7 +65,7 @@ public Action start_warday(Handle timer)
     // give every t a gun
     for(int i = 0; i < 64; i++)
     {
-        if(is_valid_client(i) && GetClientTeam(i) == CS_TEAM_T)
+        if(is_valid_client(i) && IsPlayerAlive(i) && GetClientTeam(i) == CS_TEAM_T)
         {
             gun_menu.Display(i,20);
         }
