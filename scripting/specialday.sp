@@ -14,7 +14,7 @@
 //#define CUSTOM_ZOMBIE_MUSIC
 
 
-#define VERSION "2.7.2 - Violent Intent Jailbreak"
+#define VERSION "2.7.3 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -549,7 +549,7 @@ public void init_function_pointers()
 		
 			case laser_day:
 			{
-				end_fptr[i] = callback_dummy;
+				end_fptr[i] = end_laser;
 				start_fptr[i] = StartLaser;
 				init_fptr[i] = laser_init;
 			}

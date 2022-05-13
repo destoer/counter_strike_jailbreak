@@ -224,8 +224,8 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 }
 
 
-// SM 1.11
-public void OnClientSpeaking(int client)
+// NOTE: SM 1.11 use OnClientSpeaking
+public void OnClientSpeakingEx(int client)
 {
 	if(voice && GetClientTeam(client) == CS_TEAM_CT && IsPlayerAlive(client) && client != warden_id)
 	{

@@ -58,7 +58,7 @@ void laser_init()
 
 void make_laser(int client)
 {
-	SetEntityHealth(client, 30 * GetClientCount(true));
+	SetEntityHealth(client, 15 * GetClientCount(true));
 	CS_SwitchTeam(client,CS_TEAM_CT);
 	SetEntityRenderColor(client, 255, 0, 0, 255);
 	PrintCenterTextAll("%N has the kill laser!", client);
@@ -115,6 +115,15 @@ public void laser_discon_started(int client)
 	laser_tank = game_clients[rand]; // select the lucky client
 }
 
+
+
+void end_laser()
+{
+	PrintToChatAll("%s Laser day over", SPECIALDAY_PREFIX);
+	RestoreTeams();
+	SetEntityRenderColor(tank, 255, 255, 255, 255);
+	laser_tank = -1;	
+}
 
 public void laser_death(int victim)
 {
