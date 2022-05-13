@@ -8,6 +8,7 @@
 */
 
 
+
 /*
 TODO make all names consistent 
 */
@@ -32,7 +33,11 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi"
-#define PLUGIN_VERSION "V3.5.1 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.5.2 - Violent Intent Jailbreak"
+
+/*
+	onwards to the new era ( ͡° ͜ʖ ͡°)
+*/
 
 
 #define WARDAY_ROUND_COUNT 5
@@ -378,13 +383,16 @@ public OnPluginStart()
 	SetCollisionGroup = init_set_collision();
 	
 	// user commands
-	RegConsoleCmd("wb", enable_block_warden_callback);
-
+	
 	RegConsoleCmd("wd", warday_callback);
 
 
+	if(warden_block)
+	{
+		RegConsoleCmd("wub", disable_block_warden_callback);
+		RegConsoleCmd("wb", enable_block_warden_callback);
+	}
 
-	RegConsoleCmd("wub", disable_block_warden_callback);	
 	RegConsoleCmd("w", become_warden);
 	RegConsoleCmd("uw", leave_warden);
 
@@ -627,19 +635,31 @@ public print_warden_commands(client)
 
 	PrintToChat(client,"%s!w           %s- %sbecome warden",color1,color2,color3);
 	PrintToChat(client,"%s!uw         %s- %sexit warden",color1,color2,color3);
-	PrintToChat(client,"%s!wb         %s- %sturn on block",color1,color2,color3);
-	PrintToChat(client,"%s!wub       %s- %sturn off block",color1,color2,color3);
+
+	if(warden_block)
+	{
+		PrintToChat(client,"%s!wb         %s- %sturn on block",color1,color2,color3);
+		PrintToChat(client,"%s!wub       %s- %sturn off block",color1,color2,color3);
+	}
+
 	PrintToChat(client,"%s!laser       %s- %sswitch point/draw laser",color1,color2,color3);
 	PrintToChat(client,"%s!laser_color       %s- %schange laser color",color1,color2,color3);
 	PrintToChat(client,"%s!marker  %s- %s+marker, use mouse to adjust size, then -marker",color1,color2,color3);
+
+
 	PrintToChat(client,"%s!wsd           %s- %sstart sd after %d rounds",color1,color2,color3,ROUND_WARDEN_SD);
+	PrintToChat(client,"%s!wsd_ff           %s- %sstart ff sd after %d rounds",color1,color2,color3,ROUND_WARDEN_SD);
+	PrintToChat(client,"%s!wd %s- %scall a warday %s",color1,color2,color3, warday_round_counter >= WARDAY_ROUND_COUNT? "ready" : "not ready");
+
+
 	if(t_laser)
 	{
 		PrintToChat(client,"%s!tlaser           %s- %stoggle laser for t's'",color1,color2,color3);
 	}	
+
 	PrintToChat(client,"%s!color           %s- %scolor players'",color1,color2,color3);	
 	PrintToChat(client,"%s!reset_color           %s- %sreset player colors'",color1,color2,color3);	
-	PrintToChat(client,"%s!wd %s- %scall a warday %s",color1,color2,color3, warday_round_counter >= WARDAY_ROUND_COUNT? "ready" : "not ready");
+	
 
 }
 

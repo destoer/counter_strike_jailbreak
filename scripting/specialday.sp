@@ -14,7 +14,7 @@
 //#define CUSTOM_ZOMBIE_MUSIC
 
 
-#define VERSION "2.7 - Violent Intent Jailbreak"
+#define VERSION "2.7.1 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -164,6 +164,8 @@ int g_lbeam;
 int g_lpoint;
 
 bool sd_init_failure = false;
+
+bool wsd_ff = false;
 
 // split files for sd
 #include "specialday/config.sp"
@@ -337,6 +339,7 @@ public OnPluginStart()
 	if(!standalone)
 	{
 		RegConsoleCmd("wsd", command_warden_special_day);
+		RegConsoleCmd("wsd_ff",command_warden_special_day_ff);
 	}
 
 	// register our special day console command	
@@ -936,15 +939,31 @@ public Action print_specialday_text_all(Handle timer)
 } 
 
 
-public Action command_warden_special_day(int client,int args)
+void warden_sd_internal(int client)
 {
-	
 	if(warden_sd_available > 0 && client == get_warden_id()
 		&& sd_state == sd_inactive)
 	{
-		//ect(client, GetRandomInt(0, view_as<int>(normal_day) - 1));
-		command_special_day(client, args);
-	}
+		// randomize the sd (unused)
+		//(client, GetRandomInt(0, view_as<int>(normal_day) - 1));
+
+		// open a selection menu for 20 seconds
+		sd_menu.Display(client,20);
+	}	
+}
+
+public Action command_warden_special_day(int client,int args)
+{
+	wsd_ff = false;
+	warden_sd_internal(client);
+
+	return Plugin_Continue;
+}
+
+public Action command_warden_special_day_ff(int client,int args)
+{
+	wsd_ff = true;
+	warden_sd_internal(client);
 
 	return Plugin_Continue;
 }
@@ -964,7 +983,6 @@ public Action command_ff_special_day(int client, int args)
 
 public Action command_special_day(int client,int args)  
 {
-
 	PrintToChatAll("%s Special day started", SPECIALDAY_PREFIX);
 
 	// open a selection menu for 20 seconds
@@ -1278,6 +1296,18 @@ public int sd_select(int client, int sd)
 		// invoked by a warden reset the round limit
 		if(client == get_warden_id())
 		{
+			if(wsd_ff)
+			{
+				PrintToChatAll("%s Special day started (friendly fire enabled)", SPECIALDAY_PREFIX);
+				enable_friendly_fire();
+				wsd_ff = false;
+			}
+
+			else
+			{
+				PrintToChatAll("%s Special day started", SPECIALDAY_PREFIX);
+			}
+
 			warden_sd_available -= 1;
 		}
 

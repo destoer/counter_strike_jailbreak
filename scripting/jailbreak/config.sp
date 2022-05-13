@@ -14,6 +14,7 @@ ConVar t_laser_cvar;
 ConVar gun_cvar;
 ConVar voice_cvar;
 ConVar armor_cvar;
+ConVar warden_block_cvar;
 
 #define PREFIX_SIZE 128
 
@@ -28,6 +29,7 @@ bool stuck;
 bool gun_commands;
 bool voice;
 bool armor;
+bool warden_block;
 
 void create_jb_convar()
 {
@@ -50,6 +52,7 @@ void create_jb_convar()
     gun_cvar = CreateConVar("jb_gun_commands","1","enable ct gun menu");
     voice_cvar = CreateConVar("jb_warden_voice","1","enable getting warden from voice");
     armor_cvar = CreateConVar("jb_armor","0","give ct armor on spawn");
+    warden_block_cvar = CreateConVar("jb_warden_block","1","enable warden block commands");
 }
 
 void setup_jb_convar()
@@ -78,6 +81,7 @@ void setup_jb_convar()
     stuck = GetConVarInt(stuck_cvar) > 0;
     voice = GetConVarInt(voice_cvar) > 0;
     armor = GetConVarInt(armor_cvar) > 0;
+    warden_block = GetConVarInt(warden_block_cvar) > 0;
 
 
     if(game == Engine_CSGO)
