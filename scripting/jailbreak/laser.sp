@@ -52,7 +52,7 @@ public Action rainbow_timer(Handle timer)
 {
 	rainbow_color = (rainbow_color + 1) % 7;
 
-	return Plugin_Handled;
+	return Plugin_Continue;
 }
 
 public Action command_laser_color(int client, int args)

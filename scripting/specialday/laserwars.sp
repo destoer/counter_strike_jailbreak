@@ -61,6 +61,9 @@ void make_laser(int client)
 	SetEntityHealth(client, 15 * GetClientCount(true));
 	CS_SwitchTeam(client,CS_TEAM_CT);
 	SetEntityRenderColor(client, 255, 0, 0, 255);
+
+	ServerCommand("sm_beacon %N",client);
+
 	PrintCenterTextAll("%N has the kill laser!", client);
 }
 

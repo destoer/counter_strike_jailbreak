@@ -33,7 +33,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi"
-#define PLUGIN_VERSION "V3.5.4 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.5.5 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -79,12 +79,12 @@ Handle client_laser_color_pref;
 #include "jailbreak/stuck.sp"
 #include "jailbreak/guns.sp"
 #include "jailbreak/laser.sp"
-#include "jailbreak/circle.sp"
 #include "jailbreak/block.sp"
 #include "jailbreak/debug.sp"
 #include "jailbreak/cookies.sp"
 #include "jailbreak/color.sp"
 #include "jailbreak/warday.sp"
+#include "jailbreak/circle.sp"
 
 public Plugin:myinfo = 
 {
@@ -245,11 +245,17 @@ public OnMapStart()
 	// precache laser sprites
 	g_lbeam = PrecacheModel("materials/sprites/laserbeam.vmt");
 	g_lpoint = PrecacheModel("materials/sprites/glow07.vmt");
+
+
 	PrecacheSound("bot\\what_have_you_done.wav");
 	
 	// laser draw timer
-	CreateTimer(0.1, laser_draw, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
-	
+	CreateTimer(0.1, laser_draw, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+
+
+	CreateTimer(RING_LIFTEIME,beacon_callback , _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+	CreateTimer(0.3, rainbow_timer, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+
 	
 	// reset laser settings
 	for (int i = 0; i < MAXPLAYERS + 1; i++)
@@ -480,8 +486,6 @@ public OnPluginStart()
 	
 	
 	// Start a circle timer
-	CreateTimer(0.1, Repetidor, _, TIMER_REPEAT);
-	CreateTimer(0.3, rainbow_timer, _, TIMER_REPEAT);
 	PrecacheSound("bot\\what_have_you_done.wav");
 	
 	register_cookies();

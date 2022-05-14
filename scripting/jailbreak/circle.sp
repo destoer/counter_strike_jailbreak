@@ -7,30 +7,24 @@
 #define _CIRCLE_INCLUDE_included
 
 
+#define RING_LIFTEIME 0.1
+
 // circle stuff
 
 // circle globals
-new g_BeamSprite;
-new g_HaloSprite;
+int g_BeamSprite;
+int g_HaloSprite;
 
-public Action Repetidor(Handle timer)
+public Action beacon_callback(Handle timer)
 {
-	for (int i = 1; i <= MaxClients; i++)
+	if(warden_id != WARDEN_INVALID && is_valid_client(warden_id) && IsPlayerAlive(warden_id))
 	{
-		if(IsClientInGame(i) && IsPlayerAlive(i) && i == warden_id)
-		{
-			SetupBeacon(i);
-		}
+		float vec[3];
+		GetClientAbsOrigin(warden_id, vec);
+		vec[2] += 10.0;
+		TE_SetupBeamRingPoint(vec, 35.0, 35.1, g_BeamSprite, g_HaloSprite, 0, 5, RING_LIFTEIME, 5.2, 0.0, player_color[0], 1000, 0);
+		TE_SendToAll();
 	}
-	
-	return Plugin_Handled;
-}
 
-public void SetupBeacon(client)
-{
-	float vec[3];
-	GetClientAbsOrigin(client, vec);
-	vec[2] += 10;
-	TE_SetupBeamRingPoint(vec, 35.0, 35.1, g_BeamSprite, g_HaloSprite, 0, 5, 0.1, 5.2, 0.0, {1, 153, 255, 255}, 1000, 0);
-	TE_SendToAll();
+	return Plugin_Continue;
 }

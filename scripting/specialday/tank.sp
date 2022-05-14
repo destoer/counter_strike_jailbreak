@@ -57,6 +57,10 @@ public void MakeTank(int client)
 {
 	SetEntityHealth(client, 250 * GetClientCount(true));
 	CS_SwitchTeam(client,CS_TEAM_CT);
+
+	// beacon the tank
+	ServerCommand("sm_beacon %N",client);
+
 	SetEntityRenderColor(client, 255, 0, 0, 255);
 	PrintCenterTextAll("%N is the TANK!", client);
 }
