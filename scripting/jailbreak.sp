@@ -33,7 +33,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi"
-#define PLUGIN_VERSION "V3.5.5 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.5.6 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -227,7 +227,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 // NOTE: SM 1.11 use OnClientSpeaking
 public void OnClientSpeakingEx(int client)
 {
-	if(voice && GetClientTeam(client) == CS_TEAM_CT && IsPlayerAlive(client) && client != warden_id)
+	if(voice && GetClientTeam(client) == CS_TEAM_CT && IsPlayerAlive(client) && warden_id == WARDEN_INVALID)
 	{
 		set_warden(client);
 	}

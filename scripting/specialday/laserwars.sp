@@ -58,7 +58,7 @@ void laser_init()
 
 void make_laser(int client)
 {
-	SetEntityHealth(client, 15 * GetClientCount(true));
+	SetEntityHealth(client, 25 * validclients);
 	CS_SwitchTeam(client,CS_TEAM_CT);
 	SetEntityRenderColor(client, 255, 0, 0, 255);
 

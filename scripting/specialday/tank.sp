@@ -55,7 +55,7 @@ void end_tank()
 
 public void MakeTank(int client)
 {
-	SetEntityHealth(client, 250 * GetClientCount(true));
+	SetEntityHealth(client, 200 * validclients);
 	CS_SwitchTeam(client,CS_TEAM_CT);
 
 	// beacon the tank
