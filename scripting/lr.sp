@@ -29,15 +29,16 @@ enum lr_type
 {
     knife_fight,
     dodgeball,
+    grenade,
 }
 
-const int LR_SIZE = 2;
+const int LR_SIZE = 3;
 new const String:lr_list[LR_SIZE][] =
 {	
     "Knife fight",
     "Dodgeball",
-/*
     "Nade war",
+/*
     "Russian roulette",
     "Gun toss",
     "Shot for shot",
@@ -80,6 +81,7 @@ int g_lbeam;
 #include "lr/debug.sp"
 #include "lr/hook.sp"
 #include "lr/dodgeball.sp"
+#include "lr/grenade.sp"
 
 
 // handle for sdkcall
@@ -139,8 +141,6 @@ void end_lr(LrPair pair)
     pair.active = false;
     pair.ct = -1;
     pair.t = -1;
-
-    print_pair(FindTarget(-1,"organ"),pair)
 }
 
 int get_inactive_pair()
@@ -196,15 +196,29 @@ void end_beacon(LrPair pair)
     }
 
     // stop beacon
-    ServerCommand("sm_beacon %N",pair.ct);
-    ServerCommand("sm_beacon %N",pair.t);
+    if(is_valid_client(pair.ct))
+    {
+        ServerCommand("sm_beacon %N",pair.ct);
+    }
+
+    if(is_valid_client(pair.t))
+    {
+        ServerCommand("sm_beacon %N",pair.t);
+    }
 }
 
 void start_beacon(int id)
 {
     // do beacon
-    ServerCommand("sm_beacon %N",pairs[id].ct);
-    ServerCommand("sm_beacon %N",pairs[id].t);
+    if(is_valid_client(pairs[id].ct))
+    {
+        ServerCommand("sm_beacon %N",pairs[id].ct);
+    }
+
+    if(is_valid_client(pairs[id].t))
+    {
+        ServerCommand("sm_beacon %N",pairs[id].t);
+    }
 
     pairs[id].beacon_timer = CreateTimer(BEACON_TIMER,draw_beacon,id,TIMER_REPEAT);
 }
@@ -232,6 +246,11 @@ void start_lr(int id, int t, int ct, lr_type type)
         case dodgeball:
         {
             start_dodgeball(pairs[id]);
+        }
+
+        case grenade:
+        {
+            start_grenade(pairs[id]);
         }
     }
 

@@ -120,6 +120,19 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
     }
 
 
+    switch(pair.type)
+    {
+    
+        case dodgeball:
+        {
+            // any damage kills 
+            // prevents cheaters from healing 
+            damage = 500.0;
+
+            return Plugin_Changed;
+        }
+    }
+
     return Plugin_Continue;
 }
 
@@ -150,11 +163,57 @@ public Action OnWeaponEquip(int client, int weapon)
                 return Plugin_Handled;
             }      
         }
+
+        case dodgeball:
+        {
+            if(!StrEqual(weapon_string,"weapon_flashbang"))
+            {
+                return Plugin_Handled;
+            }            
+        }
     }
 
     return Plugin_Continue;
 }
 
+public Action OnEntitySpawn(int entity)
+{
+    char classname[64];
+    GetEntityClassname(entity,classname,sizeof(classname) - 1);
+
+    int client = GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity");
+    int id = get_pair(client);
+
+    if(id == INVALID_PAIR)
+    {
+        return;
+    }
+
+    switch(pairs[id].type)
+    {
+        case dodgeball:
+        {
+            if (StrEqual(classname, "flashbang_projectile"))
+            {
+                CreateTimer(1.4, GiveFlash, entity);
+            }
+        }
+
+		case grenade:
+		{
+			if (StrEqual(classname, "hegrenade_projectile"))
+            {
+			    CreateTimer(1.4, GiveGrenade, entity);
+            }
+		}
+    }
+}
+
+public OnEntityCreated(int entity, const String:classname[])
+{
+    SDKHook(entity, SDKHook_Spawn, OnEntitySpawn); 
+}
+		
 
 public void OnClientPutInServer(int client)
 {

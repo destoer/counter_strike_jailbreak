@@ -58,7 +58,7 @@ public void StartDodgeball()
 }
 
 
-public Action GiveFlash(Handle timer, any entity)
+public Action GiveFlash(Handle timer, int entity)
 {
 	int client = GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity");
 

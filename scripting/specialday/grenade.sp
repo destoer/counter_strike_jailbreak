@@ -16,6 +16,7 @@ void grenade_player_init(int client)
 	GivePlayerItem(client, "weapon_hegrenade");
 	SetEntProp(client, Prop_Data, "m_ArmorValue", 0.0);  
 	SetEntityGravity(client, 0.6);
+	SetEntityHealth(client,250);
 }
 
 
