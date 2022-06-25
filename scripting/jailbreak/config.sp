@@ -63,16 +63,22 @@ void setup_jb_convar()
         SetFailState("This plugin is for CSGO/CSS only.");	
     }
 
-    // hosties block settings dont match our's
-    // dont boot
-    Handle hosties_cvar = FindConVar("sm_hosties_noblock_enable");
-    bool hosties_noblock = GetConVarInt(hosties_cvar) > 0;
 
     noblock = GetConVarInt(noblock_cvar) > 0;
 
-    if(hosties_noblock != noblock)
+
+    // hosties block settings dont match our's
+    // dont boot
+
+    Handle hosties_cvar = FindConVar("sm_hosties_noblock_enable");
+    if(hosties_cvar)
     {
-        PrintToServer("Warning hosties no block differs from jb setting");
+        bool hosties_noblock = GetConVarInt(hosties_cvar) > 0;
+
+        if(hosties_noblock != noblock)
+        {
+            PrintToServer("Warning hosties no block differs from jb setting");
+        }
     }
 
     laser_death = GetConVarInt(laser_cvar) > 0;
