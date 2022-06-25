@@ -132,16 +132,3 @@ public Action empty_menu(client,args)
 			
 	return Plugin_Handled;	
 }
-
-// empty a clients specified weapon
-public empty_weapon(client, weapon)
-{ 
- 	if (IsValidEntity(weapon)) 
- 	{
-	    //primary ammo
-	    set_reserve_ammo(client, weapon, 0);
-	    
-	    //clip
-	    set_clip_ammo(client, weapon, 0);
-	}
-}

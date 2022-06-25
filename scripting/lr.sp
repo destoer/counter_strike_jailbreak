@@ -14,6 +14,7 @@
 */
 
 // TODO: add cancel lr command
+// TODO: prevent gun dropping, on shot for shot, and bullet games
 
 public Plugin:myinfo = 
 {
@@ -34,10 +35,10 @@ enum lr_type
     grenade,
     no_scope,
     gun_toss,
-
+    shot_for_shot,
 }
 
-const int LR_SIZE = 5;
+const int LR_SIZE = 6;
 new const String:lr_list[LR_SIZE][] =
 {	
     "Knife fight",
@@ -45,10 +46,10 @@ new const String:lr_list[LR_SIZE][] =
     "Nade war",
     "No scope",
     "Gun toss",
+    "Shot for shot",
 
 /*
     "Russian roulette",
-    "Shot for shot",
     "Shotgun War",
     "Mag for mag",
     "Sumo",
@@ -74,8 +75,12 @@ enum struct LrSlot
     Handle timer;
     bool gun_dropped;
 
+    int bullet_count;
+    int bullet_max;
+
     // this is the slot to our partner
     int partner;
+
 
     Handle line_timer;
 }
@@ -105,6 +110,7 @@ int g_lbeam;
 #include "lr/grenade.sp"
 #include "lr/no_scope.sp"
 #include "lr/gun_toss.sp"
+#include "lr/shot_for_shot.sp"
 
 // handle for sdkcall
 Handle SetCollisionGroup;
@@ -184,6 +190,8 @@ void end_lr(LrSlot slot)
 
     slot.weapon = -1;
 
+    slot.bullet_count = -1;
+    slot.bullet_max = -1;
 
     kill_handle(slot.timer);
 
@@ -318,8 +326,19 @@ void start_lr(int t, int ct, lr_type type)
         {
             start_gun_toss(t_slot,ct_slot);
         }
+
+        case shot_for_shot:
+        {
+            start_shot_for_shot(t_slot,ct_slot);
+        }
     }
 
+}
+
+void set_lr_clip(int id)
+{
+    set_clip_ammo(slots[id].client,slots[id].weapon,slots[id].bullet_max);
+    slots[id].bullet_count = 1;
 }
 
 bool is_valid_t(int client)

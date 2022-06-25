@@ -304,6 +304,19 @@ stock void set_reserve_ammo(int client, int weapon, int ammo)
 	}
 }
 
+// empty a clients specified weapon
+stock void empty_weapon(int client, int weapon)
+{ 
+ 	if (IsValidEntity(weapon)) 
+ 	{
+	    //primary ammo
+	    set_reserve_ammo(client, weapon, 0);
+	    
+	    //clip
+	    set_clip_ammo(client, weapon, 0);
+	}
+}
+
 stock bool cmp_vec(float vec1[3], float vec2[3])
 {
 	for(int i = 0; i < 3; i++)

@@ -159,6 +159,14 @@ public Action OnWeaponEquip(int client, int weapon)
                 return Plugin_Handled;
             }               
         }
+
+        case shot_for_shot:
+        {
+            if(!StrEqual(weapon_string,"weapon_deagle"))
+            {
+                return Plugin_Handled;
+            }                           
+        }
     }
 
     return Plugin_Continue;
