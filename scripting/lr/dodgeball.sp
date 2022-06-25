@@ -10,10 +10,10 @@ void dodgeball_player_init(int client)
 	SetEntityGravity(client, 0.6);
 }
 
-void start_dodgeball(LrPair pair)
+void start_dodgeball(int t_slot, int ct_slot)
 {
-    dodgeball_player_init(pair.t);
-    dodgeball_player_init(pair.ct);
+    dodgeball_player_init(slots[t_slot].client);
+    dodgeball_player_init(slots[ct_slot].client);
 }
 
 

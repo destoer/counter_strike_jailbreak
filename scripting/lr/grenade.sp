@@ -36,8 +36,8 @@ void grenade_player_init(int client)
 }
 
 
-void start_grenade(LrPair pair)
+void start_grenade(int t_slot, int ct_slot)
 {
-    grenade_player_init(pair.t);
-    grenade_player_init(pair.ct);
+    grenade_player_init(slots[t_slot].client);
+    grenade_player_init(slots[ct_slot].client);
 }

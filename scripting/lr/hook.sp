@@ -2,9 +2,9 @@
 
 public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 {
-    for(int i = 0; i < LR_PAIRS; i++)
+    for(int i = 0; i < LR_SLOTS; i++)
     {
-        end_lr(pairs[i]);
+        end_lr(slots[i]);
     }    
 }
 
@@ -12,38 +12,36 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 {
     int victim = GetClientOfUserId(GetEventInt(event, "userid"));
 
-    int id = get_pair(victim);
+    int id = get_slot(victim);
 
-    if(id != INVALID_PAIR)
+    if(id != INVALID_SLOT)
     {
-        LrPair pair;
+        LrSlot slot;
 
-        pair = pairs[id];
+        slot = slots[id];
 
-        if(victim == pair.ct)
+        if(victim == slot.client)
         {
-            PrintToChatAll("%s %N won %s, %N lost\n",LR_PREFIX,pair.t,lr_list[pair.type],pair.ct);
+            PrintToChatAll("%s %N won %s, %N lost\n",LR_PREFIX,slots[slot.partner].client,lr_list[slot.type],slot.client);
         }
-
-        else
-        {
-            PrintToChatAll("%s %N won %s, %N lost\n",LR_PREFIX,pair.ct,lr_list[pair.type],pair.t);
-        }
-
-        end_lr(pairs[id]);
+        
+        // end both peoples lr
+        end_lr(slots[id]);
+        end_lr(slots[slots[id].partner]);
     }
+
 }
 
 public Action PlayerDisconnect_Event(Handle event, const String:name[], bool dontBroadcast)
 {
     int client = GetClientOfUserId(GetEventInt(event,"userid"));
 
-    int id = get_pair(client);
+    int id = get_slot(client);
 
-    if(id != INVALID_PAIR)
+    if(id != INVALID_SLOT)
     {
         PrintToChat(client,"%s %s disconnected during LR",LR_PREFIX,client);
-        end_lr(pairs[id]);
+        end_lr(slots[id]);
     }
 }
 
@@ -51,33 +49,26 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3]) 
 {
     // if player is in a lr only allow damage to partner
-    int id = get_pair(attacker);
+    int id = get_slot(attacker);
 
-    if(id == INVALID_PAIR)
+    if(id == INVALID_SLOT)
     {
         return Plugin_Continue;
     }
 
 
-    LrPair pair;
-    pair = pairs[id];
+    LrSlot slot;
+    slot = slots[id];
 
-    if(victim == pair.ct)
+    if(victim == slot.client)
     {
-        if(attacker != pair.t)
+        // attack is not other partner, there is no damage
+        if(attacker != slots[slot.partner].client)
         {
             return Plugin_Handled;
         }
     }
 
-
-    else if(victim == pair.t)
-    {
-        if(attacker != pair.ct)
-        {
-            return Plugin_Handled;            
-        }
-    }
 
     return Plugin_Continue;
 }
@@ -87,21 +78,21 @@ public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &
 public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
 {
     // if player is in a lr only allow damage to partner
-    int id = get_pair(attacker);
+    int id = get_slot(attacker);
 
-    if(id == INVALID_PAIR)
+    if(id == INVALID_SLOT)
     {
         return Plugin_Continue;
     }
 
 
-    LrPair pair;
-    pair = pairs[id];
+    LrSlot slot;
+    slot = slots[id];
 
-    if(victim == pair.ct)
+    if(victim == slot.client)
     {
         // attack is not other partner, there is no damage
-        if(attacker != pair.t)
+        if(attacker != slots[slot.partner].client)
         {
             damage = 0.0;
             return Plugin_Handled;
@@ -109,18 +100,7 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
     }
 
 
-    else if(victim == pair.t)
-    {
-        // attacker is not other partner there is no damage
-        if(attacker != pair.ct)
-        {
-            damage = 0.0;
-            return Plugin_Handled;            
-        }
-    }
-
-
-    switch(pair.type)
+    switch(slot.type)
     {
     
         case dodgeball:
@@ -138,23 +118,23 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 
 public Action OnWeaponEquip(int client, int weapon) 
 {
-    int id = get_pair(client);
+    int id = get_slot(client);
 
-    if(id == INVALID_PAIR)
+    if(id == INVALID_SLOT)
     {
         return Plugin_Continue;
     }
 
-    LrPair pair;
-    pair = pairs[id];
+    LrSlot slot;
+    slot = slots[id];
 
-    //print_pair(client,pair);
+    //print_slot(client,slot);
 
     char weapon_string[32];
     GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
 
 
-    switch(pair.type)
+    switch(slot.type)
     {
         case knife_fight:
         {
@@ -171,6 +151,14 @@ public Action OnWeaponEquip(int client, int weapon)
                 return Plugin_Handled;
             }            
         }
+
+        case no_scope:
+        {
+            if(!StrEqual(weapon_string,"weapon_awp"))
+            {
+                return Plugin_Handled;
+            }               
+        }
     }
 
     return Plugin_Continue;
@@ -182,14 +170,14 @@ public Action OnEntitySpawn(int entity)
     GetEntityClassname(entity,classname,sizeof(classname) - 1);
 
     int client = GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity");
-    int id = get_pair(client);
+    int id = get_slot(client);
 
-    if(id == INVALID_PAIR)
+    if(id == INVALID_SLOT)
     {
         return;
     }
 
-    switch(pairs[id].type)
+    switch(slots[id].type)
     {
         case dodgeball:
         {
@@ -217,17 +205,18 @@ public OnEntityCreated(int entity, const String:classname[])
 
 public Action OnWeaponZoom(Handle event, const String:weaponName[], bool dontBroadcast)
 {
+
     int client = GetClientOfUserId(GetEventInt(event,"userid"));
 
-    int id = get_pair(client);
+    int id = get_slot(client);
 
-    if(id == INVALID_PAIR)
+    if(id == INVALID_SLOT)
     {
         return Plugin_Continue;
     }
 
 
-    switch(pairs[id].type)
+    switch(slots[id].type)
     {
         case no_scope:
         {
@@ -242,37 +231,29 @@ public Action OnWeaponZoom(Handle event, const String:weaponName[], bool dontBro
 
 public Action OnWeaponDrop(int client, int weapon) 
 {
-    int id = get_pair(client);
+    int id = get_slot(client);
 
-    if(id == INVALID_PAIR)
+    if(id == INVALID_SLOT)
     {
         return Plugin_Continue;
     }
 
-    switch(pairs[id].type)
+    switch(slots[id].type)
     {
         case gun_toss:
         {
-            if(weapon == pairs[id].ct_weapon)
+            if(weapon == slots[id].weapon)
             {
-
-
-            }
-
-            else if(weapon == pairs[id].t_weapon)
-            {
-               GetClientAbsOrigin(pairs[id].t, pairs[id].t_pos);
-               CreateTimer(0.1, get_gun_end, pack_int(id,pairs[id].t) ,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+               GetClientAbsOrigin(slots[id].client, slots[id].pos);
+               CreateTimer(0.1, get_gun_end, id ,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
             }
         }
     }
-
     return Plugin_Continue;
 }
 
 public void OnClientPutInServer(int client)
 {
-    // for sd
     SDKHook(client, SDKHook_TraceAttack, HookTraceAttack); // block damage
     SDKHook(client, SDKHook_WeaponEquip, OnWeaponEquip); // block weapon pickups
     SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);

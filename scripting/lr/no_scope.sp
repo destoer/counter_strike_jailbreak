@@ -5,10 +5,10 @@ void noscope_player_init(int client)
 	GivePlayerItem(client, "weapon_awp");
 }
 
-void start_no_scope(LrPair pair)
+void start_no_scope(int t_slot, int ct_slot)
 {
-    noscope_player_init(pair.t);
-    noscope_player_init(pair.ct);
+    noscope_player_init(slots[t_slot].client);
+    noscope_player_init(slots[ct_slot].client);
 }
 
 public Action give_no_scope(Handle Timer, int client)

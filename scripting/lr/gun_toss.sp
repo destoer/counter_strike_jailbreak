@@ -9,10 +9,10 @@ int gun_toss_player_init(int client)
     return weapon;
 }
 
-void start_gun_toss(LrPair pair)
+void start_gun_toss(int t_slot, int ct_slot)
 {
-    pair.t_weapon = gun_toss_player_init(pair.t);
-    pair.ct_weapon = gun_toss_player_init(pair.ct);
+    slots[t_slot].weapon = gun_toss_player_init(slots[t_slot].client);
+    slots[ct_slot].weapon = gun_toss_player_init(slots[ct_slot].client);
 }
 
 void draw_toss(float start[3], float end[3], int line_color[4])
@@ -21,75 +21,45 @@ void draw_toss(float start[3], float end[3], int line_color[4])
     TE_SendToAll();    
 }
 
-public Action draw_toss_timer(Handle timer, int pack)
+public Action draw_toss_timer(Handle timer, int id)
 {
-    int id; int client;
-    unpack_int(pack,id,client);
+    LrSlot slot;
+    slot = slots[id];
 
-    if(pairs[id].t == client)
+    if(GetClientTeam(slot.client) == CS_TEAM_T)
     {
-        draw_toss(pairs[id].t_pos,pairs[id].t_gun_pos,{255,0,0,255});
+        draw_toss(slot.pos,slot.gun_pos,{255,0,0,255});
     }
 
-    else if(pairs[id].ct == client)
+    else 
     {
-        draw_toss(pairs[id].ct_pos,pairs[id].ct_gun_pos,{0,0,255,255});
+        draw_toss(slot.pos,slot.gun_pos,{0,0,255,255});
     }    
 }
 
-public Action get_gun_end(Handle timer, int pack)
+public Action get_gun_end(Handle timer, int id)
 {
-
-    int id; int client;
-    unpack_int(pack,id,client);
-
-
-    if(!pairs[id].active)
+    if(!slots[id].active)
     {
         return Plugin_Stop;
     }
 
 
-    // TODO: its code like this , that means we should probably have the pair be stored seperately from eachover
-    // if we dont want to lose our minds LOL
 
-    // TODO: kill the timer if we drop the gun again....
+    float pos[3]
+    GetEntPropVector(slots[id].weapon, Prop_Send, "m_vecOrigin", pos);
 
-    if(pairs[id].t == client)
+    // vel has hit zero (draw the line and print the display result)
+    if(cmp_vec(pos,slots[id].gun_pos))
     {
-        float pos[3]
-        GetEntPropVector(pairs[id].t_weapon, Prop_Send, "m_vecOrigin", pos);
+        float distance = GetVectorDistance(slots[id].pos,pos);
+        PrintToChatAll("%s %N distance %f",LR_PREFIX,slots[id].client,distance);
+        KillTimer(timer);
 
-        // vel has hit zero (draw the line and print the display result)
-        if(cmp_vec(pos,pairs[id].t_gun_pos))
-        {
-            float distance = GetVectorDistance(pairs[id].t_pos,pos);
-            PrintToChatAll("%s %N distance %f",LR_PREFIX,client,distance);
-            KillTimer(timer);
-
-            pairs[id].t_timer = CreateTimer(GUNTOSS_TIMER,draw_toss_timer,pack_int(id,client),TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
-        }
-
-        pairs[id].t_gun_pos = pos;
+        slots[id].timer = CreateTimer(GUNTOSS_TIMER,draw_toss_timer,id,TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
     }
 
-    else 
-    {
-        float pos[3]
-        GetEntPropVector(pairs[id].ct_weapon, Prop_Send, "m_vecOrigin", pos);
-
-        // vel has hit zero (draw the line and print the display result)
-        if(cmp_vec(pos,pairs[id].ct_gun_pos))
-        {
-            float distance = GetVectorDistance(pairs[id].ct_pos,pos);
-            PrintToChatAll("%s %N distance %f",LR_PREFIX,client,distance);
-            KillTimer(timer);
-
-            pairs[id].ct_timer = CreateTimer(GUNTOSS_TIMER,draw_toss_timer,pack_int(id,client),TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
-        }
-
-        pairs[id].ct_gun_pos = pos;
-    }
+    slots[id].gun_pos = pos;
     
     return Plugin_Continue;
 }

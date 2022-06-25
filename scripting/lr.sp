@@ -13,6 +13,8 @@
 	onwards to the new era ( ͡° ͜ʖ ͡°)
 */
 
+// TODO: add cancel lr command
+
 public Plugin:myinfo = 
 {
 	name = "last request",
@@ -32,6 +34,7 @@ enum lr_type
     grenade,
     no_scope,
     gun_toss,
+
 }
 
 const int LR_SIZE = 5;
@@ -42,6 +45,7 @@ new const String:lr_list[LR_SIZE][] =
     "Nade war",
     "No scope",
     "Gun toss",
+
 /*
     "Russian roulette",
     "Shot for shot",
@@ -57,41 +61,36 @@ new const String:lr_list[LR_SIZE][] =
 };
 
 
-enum struct LrPair  
+enum struct LrSlot  
 {
     bool active;
-    int ct;
-    int t;
+    int client;
     lr_type type;
 
-    
-    int t_weapon;
-    int ct_weapon;
+    int weapon;
 
-    float t_pos[3];
-    float t_gun_pos[3];
-    Handle t_timer;
-    bool t_gun_dropped;
+    float pos[3];
+    float gun_pos[3];
+    Handle timer;
+    bool gun_dropped;
 
-    float ct_pos[3];
-    float ct_gun_pos[3];
-    Handle ct_timer;
-    bool ct_gun_dropped;
+    // this is the slot to our partner
+    int partner;
 
-    Handle beacon_timer;
+    Handle line_timer;
 }
 
-#define LR_PAIRS 2
+#define LR_SLOTS 4
 
-#define INVALID_PAIR -1
+#define INVALID_SLOT -1
 
-#define BEACON_TIMER 0.1
+#define LINE_TIMER 0.1
 
 #define GUNTOSS_TIMER 0.1
 
 // NOTE: only take a copy for convience
 // it only passes as reference when we directly access it
-LrPair pairs[LR_PAIRS];
+LrSlot slots[LR_SLOTS];
 
 Menu lr_menu;
 
@@ -106,7 +105,6 @@ int g_lbeam;
 #include "lr/grenade.sp"
 #include "lr/no_scope.sp"
 #include "lr/gun_toss.sp"
-
 
 // handle for sdkcall
 Handle SetCollisionGroup;
@@ -136,142 +134,148 @@ public OnPluginStart()
 }
 
 
-int get_pair(int client)
+int get_slot(int client)
 {
     if(!is_valid_client(client))
     {
-        return INVALID_PAIR;
+        return INVALID_SLOT;
     }
 
-    // NOTE: this should be fine for a low pair number
-    // otherwhise we are gonna need a client to pair lookup
-    for(int i = 0; i < LR_PAIRS; i++)
+    // NOTE: this should be fine for a low slot number
+    // otherwhise we are gonna need a client to slot lookup
+    for(int i = 0; i < LR_SLOTS; i++)
     {
-        if(pairs[i].ct == client || pairs[i].t == client)
+        if(slots[i].client == client)
         {
             return i;
         }
     }
 
-    return INVALID_PAIR;
+    return INVALID_SLOT;
 }
 
 bool in_lr(int client)
 {
-    return get_pair(client) != INVALID_PAIR;
+    return get_slot(client) != INVALID_SLOT;
 }
 
 
-void end_lr(LrPair pair)
+void end_lr(LrSlot slot)
 {
-    end_beacon(pair);
+    end_beacon(slot);
 
-    if(is_valid_client(pair.ct) && IsPlayerAlive(pair.ct))
+    if(is_valid_client(slot.client) && IsPlayerAlive(slot.client))
     {
-        GivePlayerItem(pair.ct,"weapon_knife");
-        GivePlayerItem(pair.ct,"weapon_m4a1");
-    }
-
-    if(is_valid_client(pair.t) && IsPlayerAlive(pair.t))
-    {
-        GivePlayerItem(pair.t,"weapon_knife");
-    }
-
-    pair.active = false;
-    pair.ct = -1;
-    pair.t = -1;
-
-    pair.t_weapon = -1;
-    pair.ct_weapon = -1;
-
-    kill_handle(pair.t_timer);
-    kill_handle(pair.ct_timer);
-
-    pair.t_gun_dropped = false;
-    pair.ct_gun_dropped = false;
-}
-
-int get_inactive_pair()
-{
-    for(int i = 0; i < LR_PAIRS; i++)
-    {
-        if(!pairs[i].active)
+        if(GetClientTeam(slot.client) == CS_TEAM_CT)
         {
+            GivePlayerItem(slot.client,"weapon_knife");
+            GivePlayerItem(slot.client,"weapon_m4a1");
+        }
+
+        else
+        {
+            GivePlayerItem(slot.client,"weapon_knife");
+        }
+    }
+
+
+    slot.active = false;
+    slot.client = -1;
+
+    slot.weapon = -1;
+
+
+    kill_handle(slot.timer);
+
+    slot.gun_dropped = false;
+
+    end_line(slot);
+}
+
+int get_inactive_slot()
+{
+    for(int i = 0; i < LR_SLOTS; i++)
+    {
+        if(!slots[i].active)
+        {
+            slots[i].active = true;
             return i;
         }
     }
 
-    SetFailState("Could not find an empty lr pair");    
+    SetFailState("Could not find an empty lr slot");    
 
     return -1;
 }
 
 
-public Action draw_beacon(Handle timer,int id)
+public Action draw_line(Handle timer,int id)
 {
-    LrPair pair;
-    pair = pairs[id];
+    LrSlot slot;
+    slot = slots[id];
 
 
-    if(!pair.active || !is_valid_client(pair.t) || !is_valid_client(pair.ct))
+    if(!slot.active || !is_valid_client(slot.client))
     {
-        return Plugin_Handled;
+        return Plugin_Continue;
     }
 
-    float ct_cords[3];
-    float t_cords[3];
+    float client_cords[3];
+    float partner_cords[3];
 
-    GetClientAbsOrigin(pair.ct,ct_cords); ct_cords[2] += 10.0;
-    GetClientAbsOrigin(pair.t,t_cords); t_cords[2] += 10.0;
+    GetClientAbsOrigin(slot.client,client_cords); client_cords[2] += 10.0;
+    GetClientAbsOrigin(slots[slot.partner].client,partner_cords); partner_cords[2] += 10.0;
 
 
     // pulse handled by funcommands for now
 
     // draw line between players
-    TE_SetupBeamPoints(ct_cords, t_cords, g_lbeam, 0, 0, 0, BEACON_TIMER, 0.8, 0.8, 2, 0.0, { 1, 153, 255, 255 }, 0);
+    TE_SetupBeamPoints(client_cords, partner_cords, g_lbeam, 0, 0, 0, LINE_TIMER, 0.8, 0.8, 2, 0.0, { 1, 153, 255, 255 }, 0);
     TE_SendToAll();
 
 
     return Plugin_Continue;
 }
 
-void end_beacon(LrPair pair)
+void end_beacon(LrSlot slot)
 {
-    if(pair.beacon_timer != INVALID_HANDLE)
-    {
-        KillTimer(pair.beacon_timer);
-        pair.beacon_timer = INVALID_HANDLE;
-    }
-
     // stop beacon
-    if(is_valid_client(pair.ct))
+    if(is_valid_client(slot.client))
     {
-        ServerCommand("sm_beacon %N",pair.ct);
-    }
-
-    if(is_valid_client(pair.t))
-    {
-        ServerCommand("sm_beacon %N",pair.t);
+        ServerCommand("sm_beacon %N",slot.client);
     }
 }
 
 void start_beacon(int id)
 {
     // do beacon
-    if(is_valid_client(pairs[id].ct))
+    if(is_valid_client(slots[id].client))
     {
-        ServerCommand("sm_beacon %N",pairs[id].ct);
+        ServerCommand("sm_beacon %N",slots[id].client);
     }
-
-    if(is_valid_client(pairs[id].t))
-    {
-        ServerCommand("sm_beacon %N",pairs[id].t);
-    }
-
-    pairs[id].beacon_timer = CreateTimer(BEACON_TIMER,draw_beacon,id,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 }
 
-void start_lr(int id, int t, int ct, lr_type type)
+void start_line(int id)
+{
+    slots[id].line_timer = CreateTimer(LINE_TIMER,draw_line,id,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+}
+
+void end_line(LrSlot slot)
+{
+    kill_handle(slot.line_timer);
+}
+
+void init_slot(int id, int client, int partner, lr_type type)
+{
+    slots[id].client = client;
+    slots[id].type = type;
+    slots[id].active = true;
+    slots[id].partner = partner;
+
+    start_beacon(id);
+}
+
+void start_lr(int t, int ct, lr_type type)
 {
     if(!is_valid_t(t) || !is_valid_partner(ct))
     {
@@ -281,13 +285,15 @@ void start_lr(int id, int t, int ct, lr_type type)
     PrintToChat(t,"%s Lr %s vs %N\n",LR_PREFIX,lr_list[type],ct);
     PrintToChat(ct,"%s Lr %s vs %N\n",LR_PREFIX,lr_list[type],t)
 
-    pairs[id].t = t;
-    pairs[id].ct = ct;
-    pairs[id].active = true;
+    int t_slot = get_inactive_slot();
+    int ct_slot = get_inactive_slot();
 
-    pairs[id].type = type;
 
-    start_beacon(id);
+    init_slot(t_slot,t,ct_slot,type);
+    init_slot(ct_slot,ct,t_slot,type);
+
+    // only really need one of these to draw
+    start_line(t_slot);
 
     switch(type)
     {
@@ -295,22 +301,22 @@ void start_lr(int id, int t, int ct, lr_type type)
 
         case dodgeball:
         {
-            start_dodgeball(pairs[id]);
+            start_dodgeball(t_slot,ct_slot);
         }
 
         case grenade:
         {
-            start_grenade(pairs[id]);
+            start_grenade(t_slot,ct_slot)
         }
 
         case no_scope:
         {
-            start_no_scope(pairs[id]);
+            start_no_scope(t_slot,ct_slot);
         }
 
         case gun_toss:
         {
-            start_gun_toss(pairs[id]);
+            start_gun_toss(t_slot,ct_slot);
         }
     }
 
@@ -326,9 +332,9 @@ bool is_valid_t(int client)
 
     if(in_lr(client))
     {
-        int id = get_pair(client);
+        int id = get_slot(client);
 
-        print_pair(client,pairs[id]);
+        print_slot(client,slots[id]);
 
         PrintToChat(client,"%s You are allready in a lr\n",LR_PREFIX);
         return false;
@@ -355,9 +361,9 @@ Action command_lr (int client, int args)
 
     int unused;
     int alive_t = get_alive_team_count(CS_TEAM_T,unused);
-    if(alive_t > LR_PAIRS)
+    if(alive_t > LR_SLOTS / 2)
     {
-        PrintToChat(client,"%s Too many players left alive %d : %d\n",LR_PREFIX,alive_t,LR_PAIRS);
+        PrintToChat(client,"%s Too many players left alive %d : %d\n",LR_PREFIX,alive_t,LR_SLOTS / 2);
         return Plugin_Handled;
     }
 
@@ -405,9 +411,7 @@ public int partner_handler(Menu menu, MenuAction action, int t, int param2)
 
         lr_type type = lr_request[t];
 
-        int idx = get_inactive_pair();
-
-        start_lr(idx,t,partner,type);
+        start_lr(t,partner,type);
     }
 
     else if (action == MenuAction_End)
