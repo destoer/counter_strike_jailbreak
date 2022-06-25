@@ -12,8 +12,6 @@
 
 
 
-
-
 stock bool steam_id_equal(int client, char[] id)
 {
 	char buf[64];
@@ -306,6 +304,19 @@ stock void set_reserve_ammo(int client, int weapon, int ammo)
 	}
 }
 
+stock bool cmp_vec(float vec1[3], float vec2[3])
+{
+	for(int i = 0; i < 3; i++)
+	{
+		if(vec2[i] != vec1[i])
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 
 // filter to ignore a ray hitting a player
 // kill settings if > max players is on
@@ -414,6 +425,28 @@ stock int get_alive_team_count(int team, int &client)
 	return number;
 }  
 
+// just sourcemod things lol
+int pack_int(int v1, int v2)
+{
+	return (v1 << 0) | (v2 << 8);
+}
+
+void unpack_int(int pack,int &v1, int &v2)
+{
+	v1 = (pack >> 0) & 0xff;
+	v2 = (pack >> 8) & 0xff;
+}
+
+
+void kill_handle(Handle& handle)
+{
+	if(handle != INVALID_HANDLE)
+	{
+		CloseHandle(handle);
+	}
+
+	handle = INVALID_HANDLE;
+}
 
 
 // remove all client weapons

@@ -30,22 +30,28 @@ enum lr_type
     knife_fight,
     dodgeball,
     grenade,
+    no_scope,
+    gun_toss,
 }
 
-const int LR_SIZE = 3;
+const int LR_SIZE = 5;
 new const String:lr_list[LR_SIZE][] =
 {	
     "Knife fight",
     "Dodgeball",
     "Nade war",
+    "No scope",
+    "Gun toss",
 /*
     "Russian roulette",
-    "Gun toss",
     "Shot for shot",
-    "No scope",
     "Shotgun War",
     "Mag for mag",
     "Sumo",
+    "Race",
+    "Rock paper scissors",
+    "Hot potato",
+    "Chicken fight",
     "Rebel"
 */
 };
@@ -58,6 +64,20 @@ enum struct LrPair
     int t;
     lr_type type;
 
+    
+    int t_weapon;
+    int ct_weapon;
+
+    float t_pos[3];
+    float t_gun_pos[3];
+    Handle t_timer;
+    bool t_gun_dropped;
+
+    float ct_pos[3];
+    float ct_gun_pos[3];
+    Handle ct_timer;
+    bool ct_gun_dropped;
+
     Handle beacon_timer;
 }
 
@@ -66,6 +86,8 @@ enum struct LrPair
 #define INVALID_PAIR -1
 
 #define BEACON_TIMER 0.1
+
+#define GUNTOSS_TIMER 0.1
 
 // NOTE: only take a copy for convience
 // it only passes as reference when we directly access it
@@ -82,6 +104,8 @@ int g_lbeam;
 #include "lr/hook.sp"
 #include "lr/dodgeball.sp"
 #include "lr/grenade.sp"
+#include "lr/no_scope.sp"
+#include "lr/gun_toss.sp"
 
 
 // handle for sdkcall
@@ -96,6 +120,9 @@ public OnPluginStart()
 
     // hook disonnect incase a vital member leaves
     HookEvent("player_disconnect", PlayerDisconnect_Event, EventHookMode_Pre);
+
+    
+    HookEvent("weapon_zoom",OnWeaponZoom,EventHookMode_Pre);
 
     for(int i = 0; i < MaxClients;i++)
     {
@@ -134,13 +161,34 @@ bool in_lr(int client)
     return get_pair(client) != INVALID_PAIR;
 }
 
+
 void end_lr(LrPair pair)
 {
     end_beacon(pair);
 
+    if(is_valid_client(pair.ct) && IsPlayerAlive(pair.ct))
+    {
+        GivePlayerItem(pair.ct,"weapon_knife");
+        GivePlayerItem(pair.ct,"weapon_m4a1");
+    }
+
+    if(is_valid_client(pair.t) && IsPlayerAlive(pair.t))
+    {
+        GivePlayerItem(pair.t,"weapon_knife");
+    }
+
     pair.active = false;
     pair.ct = -1;
     pair.t = -1;
+
+    pair.t_weapon = -1;
+    pair.ct_weapon = -1;
+
+    kill_handle(pair.t_timer);
+    kill_handle(pair.ct_timer);
+
+    pair.t_gun_dropped = false;
+    pair.ct_gun_dropped = false;
 }
 
 int get_inactive_pair()
@@ -220,7 +268,7 @@ void start_beacon(int id)
         ServerCommand("sm_beacon %N",pairs[id].t);
     }
 
-    pairs[id].beacon_timer = CreateTimer(BEACON_TIMER,draw_beacon,id,TIMER_REPEAT);
+    pairs[id].beacon_timer = CreateTimer(BEACON_TIMER,draw_beacon,id,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 }
 
 void start_lr(int id, int t, int ct, lr_type type)
@@ -243,6 +291,8 @@ void start_lr(int id, int t, int ct, lr_type type)
 
     switch(type)
     {
+        case knife_fight: {}
+
         case dodgeball:
         {
             start_dodgeball(pairs[id]);
@@ -251,6 +301,16 @@ void start_lr(int id, int t, int ct, lr_type type)
         case grenade:
         {
             start_grenade(pairs[id]);
+        }
+
+        case no_scope:
+        {
+            start_no_scope(pairs[id]);
+        }
+
+        case gun_toss:
+        {
+            start_gun_toss(pairs[id]);
         }
     }
 

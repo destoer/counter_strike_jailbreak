@@ -215,12 +215,68 @@ public OnEntityCreated(int entity, const String:classname[])
 }
 		
 
+public Action OnWeaponZoom(Handle event, const String:weaponName[], bool dontBroadcast)
+{
+    int client = GetClientOfUserId(GetEventInt(event,"userid"));
+
+    int id = get_pair(client);
+
+    if(id == INVALID_PAIR)
+    {
+        return Plugin_Continue;
+    }
+
+
+    switch(pairs[id].type)
+    {
+        case no_scope:
+        {
+            strip_all_weapons(client);
+            CreateTimer(0.1,give_no_scope,client);
+        }
+    }
+
+    return Plugin_Continue;
+}
+
+
+public Action OnWeaponDrop(int client, int weapon) 
+{
+    int id = get_pair(client);
+
+    if(id == INVALID_PAIR)
+    {
+        return Plugin_Continue;
+    }
+
+    switch(pairs[id].type)
+    {
+        case gun_toss:
+        {
+            if(weapon == pairs[id].ct_weapon)
+            {
+
+
+            }
+
+            else if(weapon == pairs[id].t_weapon)
+            {
+               GetClientAbsOrigin(pairs[id].t, pairs[id].t_pos);
+               CreateTimer(0.1, get_gun_end, pack_int(id,pairs[id].t) ,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+            }
+        }
+    }
+
+    return Plugin_Continue;
+}
+
 public void OnClientPutInServer(int client)
 {
-	// for sd
-	SDKHook(client, SDKHook_TraceAttack, HookTraceAttack); // block damage
-	SDKHook(client, SDKHook_WeaponEquip, OnWeaponEquip); // block weapon pickups
-	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+    // for sd
+    SDKHook(client, SDKHook_TraceAttack, HookTraceAttack); // block damage
+    SDKHook(client, SDKHook_WeaponEquip, OnWeaponEquip); // block weapon pickups
+    SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+    SDKHook(client, SDKHook_WeaponDrop, OnWeaponDrop);
 }
 
 public OnMapStart()
