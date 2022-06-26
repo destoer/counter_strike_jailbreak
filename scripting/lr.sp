@@ -14,7 +14,6 @@
 */
 
 // TODO: add cancel lr command
-// TODO: prevent gun dropping, on shot for shot, and bullet games
 
 public Plugin:myinfo = 
 {
@@ -36,9 +35,11 @@ enum lr_type
     no_scope,
     gun_toss,
     shot_for_shot,
+    mag_for_mag,
+    shotgun_war,
 }
 
-const int LR_SIZE = 6;
+const int LR_SIZE = 8;
 new const String:lr_list[LR_SIZE][] =
 {	
     "Knife fight",
@@ -47,11 +48,11 @@ new const String:lr_list[LR_SIZE][] =
     "No scope",
     "Gun toss",
     "Shot for shot",
+    "Mag for Mag",
+    "Shotgun war",
 
 /*
     "Russian roulette",
-    "Shotgun War",
-    "Mag for mag",
     "Sumo",
     "Race",
     "Rock paper scissors",
@@ -82,6 +83,8 @@ enum struct LrSlot
     int partner;
 
 
+    char weapon_string[64];
+
     Handle line_timer;
 }
 
@@ -106,11 +109,13 @@ int g_lbeam;
 // unity build
 #include "lr/debug.sp"
 #include "lr/hook.sp"
+#include "/lr/knife_fight.sp"
 #include "lr/dodgeball.sp"
 #include "lr/grenade.sp"
 #include "lr/no_scope.sp"
 #include "lr/gun_toss.sp"
 #include "lr/shot_for_shot.sp"
+#include "lr/shotgun_war.sp"
 
 // handle for sdkcall
 Handle SetCollisionGroup;
@@ -313,7 +318,10 @@ void start_lr(int t, int ct, lr_type type)
 
     switch(type)
     {
-        case knife_fight: {}
+        case knife_fight: 
+        {
+            start_knife_fight(t_slot,ct_slot);
+        }
 
         case dodgeball:
         {
@@ -337,7 +345,17 @@ void start_lr(int t, int ct, lr_type type)
 
         case shot_for_shot:
         {
-            start_shot_for_shot(t_slot,ct_slot);
+            start_shot_for_shot(t_slot,ct_slot,1);
+        }
+
+        case mag_for_mag:
+        {
+            start_shot_for_shot(t_slot,ct_slot,7);
+        }
+
+        case shotgun_war:
+        {
+            start_shotgun_war(t_slot,ct_slot);
         }
     }
 

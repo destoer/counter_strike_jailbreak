@@ -1,18 +1,21 @@
-int gun_toss_player_init(int client)
+void gun_toss_player_init(int id)
 {
+    int client = slots[id].client;
+
     SetEntityHealth(client,100); // set health to 1
     strip_all_weapons(client); // remove all the players weapons
     int weapon =  GivePlayerItem(client, "weapon_deagle");
     GivePlayerItem(client,"weapon_knife");
 
 
-    return weapon;
+    slots[id].weapon = weapon;
+    slots[id].weapon_string = "weapon_deagle"
 }
 
 void start_gun_toss(int t_slot, int ct_slot)
 {
-    slots[t_slot].weapon = gun_toss_player_init(slots[t_slot].client);
-    slots[ct_slot].weapon = gun_toss_player_init(slots[ct_slot].client);
+    gun_toss_player_init(t_slot);
+    gun_toss_player_init(ct_slot);
 }
 
 void draw_toss(float start[3], float end[3], int line_color[4])
@@ -25,6 +28,12 @@ public Action draw_toss_timer(Handle timer, int id)
 {
     LrSlot slot;
     slot = slots[id];
+
+    if(!is_valid_client(slot.client) || !slot.active)
+    {
+        kill_handle(slots[id].timer);
+        return Plugin_Continue;
+    }
 
     if(GetClientTeam(slot.client) == CS_TEAM_T)
     {

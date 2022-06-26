@@ -1,5 +1,3 @@
-// USE THIS : https://wiki.alliedmods.net/Counter-Strike:_Global_Offensive_Events#weapon_fire
-
 public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 {
     for(int i = 0; i < LR_SLOTS; i++)
@@ -158,40 +156,13 @@ public Action OnWeaponEquip(int client, int weapon)
     char weapon_string[32];
     GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
 
-
-    switch(slot.type)
+    // if we have a string
+    if(slots[id].weapon_string[0])
     {
-        case knife_fight:
+        if(!StrEqual(weapon_string,slots[id].weapon_string))
         {
-            if(!StrEqual(weapon_string,"weapon_knife"))
-            {
-                return Plugin_Handled;
-            }      
-        }
-
-        case dodgeball:
-        {
-            if(!StrEqual(weapon_string,"weapon_flashbang"))
-            {
-                return Plugin_Handled;
-            }            
-        }
-
-        case no_scope:
-        {
-            if(!StrEqual(weapon_string,"weapon_awp"))
-            {
-                return Plugin_Handled;
-            }               
-        }
-
-        case shot_for_shot:
-        {
-            if(!StrEqual(weapon_string,"weapon_deagle"))
-            {
-                return Plugin_Handled;
-            }                           
-        }
+            return Plugin_Handled;
+        }         
     }
 
     return Plugin_Continue;
@@ -280,6 +251,21 @@ public Action OnWeaponDrop(int client, int weapon)
                GetClientAbsOrigin(slots[id].client, slots[id].pos);
                CreateTimer(0.1, get_gun_end, id ,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
             }
+        }
+
+        case shot_for_shot:
+        {
+            return Plugin_Handled;
+        }
+
+        case no_scope:
+        {
+            return Plugin_Handled;
+        }
+
+        case shotgun_war:
+        {
+            return Plugin_Handled;
         }
     }
     return Plugin_Continue;

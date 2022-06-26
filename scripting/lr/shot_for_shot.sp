@@ -1,6 +1,6 @@
 
 
-void shot_for_shot_player_init(int id)
+void shot_for_shot_player_init(int id, int bullets)
 {
     int client = slots[id].client;
 
@@ -8,16 +8,18 @@ void shot_for_shot_player_init(int id)
     int weapon = GivePlayerItem(client, "weapon_deagle");
     SetEntProp(client, Prop_Data, "m_ArmorValue", 0.0);
 
-    slots[id].bullet_max = 1;
+    slots[id].bullet_max = bullets;
     slots[id].weapon = weapon;
 
     empty_weapon(client,weapon);
+
+    slots[id].weapon_string = "weapon_deagle";
 }
 
-void start_shot_for_shot(int t_slot, int ct_slot)
+void start_shot_for_shot(int t_slot, int ct_slot, int bullets)
 {
-    shot_for_shot_player_init(t_slot);
-    shot_for_shot_player_init(ct_slot);
+    shot_for_shot_player_init(t_slot,bullets);
+    shot_for_shot_player_init(ct_slot,bullets);
 
 
     if(GetRandomInt(0,1) == 0)
