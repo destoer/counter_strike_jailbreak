@@ -1,4 +1,4 @@
-
+// USE THIS : https://wiki.alliedmods.net/Counter-Strike:_Global_Offensive_Events#weapon_fire
 
 public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 {
@@ -25,9 +25,32 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
             PrintToChatAll("%s %N won %s, %N lost\n",LR_PREFIX,slots[slot.partner].client,lr_list[slot.type],slot.client);
         }
         
-        // end both peoples lr
-        end_lr(slots[id]);
-        end_lr(slots[slots[id].partner]);
+        int partner = slots[id].partner;
+        end_lr_pair(id,partner);
+    }
+
+}
+
+public Action OnWeaponFire(Handle event, const String:name[], bool dontBroadcast)
+{
+    int client = GetClientOfUserId(GetEventInt(event,"userid"));
+    int id = get_slot(client);
+
+    if(id != INVALID_SLOT)
+    {
+        switch(slots[id].type)
+        {
+            case shot_for_shot:
+            {
+                slots[id].bullet_count -= 1;
+
+                if(!slots[id].bullet_count)
+                {
+                    int partner = slots[id].partner;
+                    set_lr_clip(partner);
+                }
+            }
+        }
     }
 
 }
@@ -41,7 +64,9 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
     if(id != INVALID_SLOT)
     {
         PrintToChat(client,"%s %s disconnected during LR",LR_PREFIX,client);
-        end_lr(slots[id]);
+
+        int partner = slots[id].partner;
+        end_lr_pair(id,partner);
     }
 }
 

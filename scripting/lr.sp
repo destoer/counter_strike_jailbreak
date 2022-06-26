@@ -127,6 +127,7 @@ public OnPluginStart()
 
     
     HookEvent("weapon_zoom",OnWeaponZoom,EventHookMode_Pre);
+    HookEvent("weapon_fire",OnWeaponFire,EventHookMode_Post);
 
     for(int i = 0; i < MaxClients;i++)
     {
@@ -165,6 +166,11 @@ bool in_lr(int client)
     return get_slot(client) != INVALID_SLOT;
 }
 
+void end_lr_pair(int id, int partner)
+{
+    end_lr(slots[id]);
+    end_lr(slots[partner]);    
+}
 
 void end_lr(LrSlot slot)
 {
@@ -192,6 +198,8 @@ void end_lr(LrSlot slot)
 
     slot.bullet_count = -1;
     slot.bullet_max = -1;
+
+    slot.partner = -1;
 
     kill_handle(slot.timer);
 
@@ -337,8 +345,9 @@ void start_lr(int t, int ct, lr_type type)
 
 void set_lr_clip(int id)
 {
+    PrintToChat(slots[id].client,"%s Take your shots",LR_PREFIX);
     set_clip_ammo(slots[id].client,slots[id].weapon,slots[id].bullet_max);
-    slots[id].bullet_count = 1;
+    slots[id].bullet_count = slots[id].bullet_max;
 }
 
 bool is_valid_t(int client)
