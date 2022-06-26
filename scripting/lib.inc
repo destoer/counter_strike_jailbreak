@@ -418,7 +418,7 @@ stock setup_laser(int client,int color[4],int beam_model, int point_model, bool 
 
 stock bool is_valid_client(int client)
 {
-	if(client <= 1) 
+	if(client <= 0) 
 	{
 		return false;
 	}

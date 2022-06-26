@@ -15,3 +15,17 @@ void print_slot(int client,LrSlot pair)
         PrintToConsole(client,"client: %N",pair.client);
     }
 }
+
+public Action lr_version(int client, int args)
+{
+	// undocumented command
+	if(!is_sudoer(client))
+	{
+		return Plugin_Handled;
+	}	
+	
+	
+	PrintToChat(client, "%s LR VERSION: %s",LR_PREFIX, PLUGIN_VERSION);
+	
+	return Plugin_Continue;
+}

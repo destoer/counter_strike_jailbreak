@@ -143,6 +143,8 @@ public OnPluginStart()
 
     RegConsoleCmd("lr",command_lr);
 
+    RegConsoleCmd("lrv", lr_version);
+
     RegAdminCmd("cancel_lr",command_cancel_lr,ADMFLAG_KICK);
 
     HookEvent("player_death", OnPlayerDeath,EventHookMode_Post);
@@ -328,27 +330,15 @@ void init_slot(int id, int client, int partner, lr_type type)
     start_beacon(id);
 }
 
-void start_lr(int t, int ct, lr_type type)
+public Action start_lr_callback(Handle timer, int id)
 {
-    if(!is_valid_t(t) || !is_valid_partner(ct))
-    {
-        return;
-    }
+    slots[id].timer = null;
 
-    PrintToChat(t,"%s Lr %s vs %N\n",LR_PREFIX,lr_list[type],ct);
-    PrintToChat(ct,"%s Lr %s vs %N\n",LR_PREFIX,lr_list[type],t)
+    // by convention the t triggers the lr
+    int t_slot = id;
+    int ct_slot = slots[id].partner;
 
-    int t_slot = get_inactive_slot();
-    int ct_slot = get_inactive_slot();
-
-
-    init_slot(t_slot,t,ct_slot,type);
-    init_slot(ct_slot,ct,t_slot,type);
-
-    // only really need one of these to draw
-    start_line(t_slot);
-
-    switch(type)
+    switch(slots[id].type)
     {
         case knife_fight: 
         {
@@ -396,6 +386,36 @@ void start_lr(int t, int ct, lr_type type)
         }
     }
 
+
+}
+
+void start_lr(int t, int ct, lr_type type)
+{
+    if(!is_valid_t(t) || !is_valid_partner(ct))
+    {
+        return;
+    }
+
+    PrintToChat(t,"%s Lr %s vs %N\n",LR_PREFIX,lr_list[type],ct);
+    PrintToChat(ct,"%s Lr %s vs %N\n",LR_PREFIX,lr_list[type],t)
+
+    int t_slot = get_inactive_slot();
+    int ct_slot = get_inactive_slot();
+
+
+    init_slot(t_slot,t,ct_slot,type);
+    init_slot(ct_slot,ct,t_slot,type);
+
+    // only really need one of these to draw
+    start_line(t_slot);
+
+    strip_all_weapons(t);
+    strip_all_weapons(ct);
+
+    PrintCenterText(t,"Lr starting in 5 seconds against %N!",ct);
+    PrintCenterText(ct,"Lr starting in 5 seconds against %N!",t);
+
+    slots[t_slot].timer = CreateTimer(5.0,start_lr_callback,t_slot,TIMER_FLAG_NO_MAPCHANGE);
 }
 
 void set_lr_clip(int id)
