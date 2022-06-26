@@ -1,22 +1,17 @@
 
 
-Handle mute_timer;
+Handle mute_timer = null;
 
-void mute_all()
+
+void mute_t()
 {
-    for(int i = 0; i < 64; i++)
+    for(int i = 1; i < 64; i++)
     {
         if(is_valid_client(i) && GetClientTeam(i) != CS_TEAM_CT && !is_muted(i) && !is_admin(i))
         {
             mute_client(i);
         }
     }
-   
-}
-
-void mute_t()
-{
-    mute_all();
 
     PrintToChatAll("%s T's are muted for the first 30 seconds",JB_PREFIX);
 
@@ -27,9 +22,9 @@ void mute_t()
 
 void unmute_all()
 {
-    for(int i = 0; i < 64; i++)
+    for(int i = 1; i < 64; i++)
     {
-        if(is_valid_client(i) && GetClientTeam(i) != CS_TEAM_CT && is_muted(i))
+        if(is_valid_client(i) & is_muted(i))
         {
             unmute_client(i);
         }
@@ -38,6 +33,8 @@ void unmute_all()
 
 public Action unmute_t(Handle timer)
 {
+    mute_timer = null;
+
     unmute_all();
 
     PrintToChatAll("%s T's can now speak",JB_PREFIX);

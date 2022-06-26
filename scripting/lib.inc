@@ -13,17 +13,28 @@
 
 stock bool is_muted(int client)
 {
-	return BaseComm_IsClientMuted(client);
+	if(!is_valid_client(client))
+	{
+		return false;
+	}
+
+	return !(GetClientListeningFlags(client) & VOICE_MUTED);
 }
 
 stock void mute_client(int client)
 {
-	BaseComm_SetClientMute(client,true);
+	if(is_valid_client(client))
+	{
+		SetClientListeningFlags(client, VOICE_MUTED);
+	}
 }
 
 stock void unmute_client(int client)
 {
-	BaseComm_SetClientMute(client,false);
+	if(is_valid_client(client))
+	{
+		SetClientListeningFlags(client, VOICE_NORMAL);
+	}
 }
 
 stock bool steam_id_equal(int client, char[] id)
@@ -407,7 +418,7 @@ stock setup_laser(int client,int color[4],int beam_model, int point_model, bool 
 
 stock bool is_valid_client(int client)
 {
-	if(client <= 0) 
+	if(client <= 1) 
 	{
 		return false;
 	}
@@ -421,6 +432,7 @@ stock bool is_valid_client(int client)
 	{
 		return false;
 	}
+
 	return IsClientInGame(client);
 }
 
@@ -472,12 +484,10 @@ void unpack_int(int pack,int &v1, int &v2)
 
 void kill_handle(Handle& handle)
 {
-	if(handle != INVALID_HANDLE)
+	if(handle)
 	{
-		CloseHandle(handle);
+		delete handle;
 	}
-
-	handle = INVALID_HANDLE;
 }
 
 
