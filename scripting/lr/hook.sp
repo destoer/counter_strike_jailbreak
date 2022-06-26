@@ -48,6 +48,34 @@ public Action OnWeaponFire(Handle event, const String:name[], bool dontBroadcast
                     set_lr_clip(partner);
                 }
             }
+
+            case russian_roulette:
+            {
+                slots[id].bullet_count -= 1;
+
+                if(!slots[id].bullet_count)
+                {
+                    int partner = slots[id].partner;
+                    set_lr_clip(partner);
+                }
+
+                if(slots[id].chamber == slots[id].bullet_chamber)
+                {
+                    PrintToChatAll("%s BANG!",LR_PREFIX);
+                    ForcePlayerSuicide(client);
+                }
+
+                else
+                {
+                    PrintToChatAll("%s click!",LR_PREFIX);
+                }
+
+                slots[id].chamber = (slots[id].chamber + 1) % 6;
+
+                int partner = slots[id].partner;
+
+                slots[partner].chamber = (slots[partner].chamber + 1) % 6;
+            }
         }
     }
 
@@ -72,7 +100,7 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3]) 
 {
     // if player is in a lr only allow damage to partner
-    int id = get_slot(attacker);
+    int id = get_slot(victim);
 
     if(id == INVALID_SLOT)
     {
@@ -83,15 +111,31 @@ public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &
     LrSlot slot;
     slot = slots[id];
 
-    if(victim == slot.client)
+    // rebel etc, attack anyone
+    if(slot.partner == INVALID_SLOT)
     {
-        // attack is not other partner, there is no damage
-        if(attacker != slots[slot.partner].client)
-        {
-            return Plugin_Handled;
-        }
+        return Plugin_Continue;
     }
 
+    // attack is not other partner, there is no damage
+    if(attacker != slots[slot.partner].client)
+    {
+        return Plugin_Handled;
+    }
+    
+    switch(slot.type)
+    {
+        case gun_toss:
+        {
+            int partner = slots[id].partner;
+
+            // cant do damange until gun has been dropped
+            if(!slots[partner].gun_dropped  && !slots[id].gun_dropped)
+            {
+                return Plugin_Handled;
+            }
+        }        
+    }
 
     return Plugin_Continue;
 }
@@ -101,7 +145,7 @@ public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &
 public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
 {
     // if player is in a lr only allow damage to partner
-    int id = get_slot(attacker);
+    int id = get_slot(victim);
 
     if(id == INVALID_SLOT)
     {
@@ -112,16 +156,20 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
     LrSlot slot;
     slot = slots[id];
 
-    if(victim == slot.client)
+    // rebel etc, attack anyone
+    if(slot.partner == INVALID_SLOT)
     {
-        // attack is not other partner, there is no damage
-        if(attacker != slots[slot.partner].client)
-        {
-            damage = 0.0;
-            return Plugin_Handled;
-        }
+        return Plugin_Continue;
     }
 
+
+    // attack is not other partner, there is no damage
+    if(attacker != slots[slot.partner].client)
+    {
+        damage = 0.0;
+        return Plugin_Changed;
+    }
+    
 
     switch(slot.type)
     {
@@ -133,6 +181,24 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
             damage = 500.0;
 
             return Plugin_Changed;
+        }
+
+        case russian_roulette:
+        {
+            damage = 0.0;
+            return Plugin_Changed;
+        }
+
+        case gun_toss:
+        {
+            int partner = slots[id].partner;
+
+            // cant do damange until a gun has been dropped
+            if(!slots[partner].gun_dropped && !slots[id].gun_dropped)
+            {
+                damage = 0.0;
+                return Plugin_Changed;
+            }
         }
     }
 
@@ -242,30 +308,21 @@ public Action OnWeaponDrop(int client, int weapon)
         return Plugin_Continue;
     }
 
+    if(slots[id].restrict_drop)
+    {
+        return Plugin_Handled;
+    }
+
     switch(slots[id].type)
     {
         case gun_toss:
         {
             if(weapon == slots[id].weapon)
             {
-               GetClientAbsOrigin(slots[id].client, slots[id].pos);
-               CreateTimer(0.1, get_gun_end, id ,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+                slots[id].gun_dropped = true;
+                GetClientAbsOrigin(slots[id].client, slots[id].pos);
+                CreateTimer(0.1, get_gun_end, id ,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
             }
-        }
-
-        case shot_for_shot:
-        {
-            return Plugin_Handled;
-        }
-
-        case no_scope:
-        {
-            return Plugin_Handled;
-        }
-
-        case shotgun_war:
-        {
-            return Plugin_Handled;
         }
     }
     return Plugin_Continue;

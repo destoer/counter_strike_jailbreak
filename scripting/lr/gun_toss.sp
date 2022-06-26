@@ -43,7 +43,9 @@ public Action draw_toss_timer(Handle timer, int id)
     else 
     {
         draw_toss(slot.pos,slot.gun_pos,{0,0,255,255});
-    }    
+    }  
+
+    return Plugin_Continue;  
 }
 
 public Action get_gun_end(Handle timer, int id)

@@ -762,11 +762,25 @@ void EndSd(bool forced=false)
 	}
 	
 	// enable lr
-	if(hosties)
+	if(lr)
 	{
-		ConVar lr_cvar = FindConVar("sm_hosties_lr");
-		SetConVarBool(lr_cvar, true); 
+		ConVar hosties_enabled = FindConVar("sm_hosties_lr");
+
+		if(hosties_enabled)
+		{
+			SetConVarBool(hosties_enabled, true); 
+		}
+
+		// see if if replacement is active
+		ConVar lr_enabled = FindConVar("destoer_lr");
+
+		if(lr_enabled)
+		{
+			lr_enabled.IntValue = 1;
+		}
+		
 	}
+
 
 
 	// call sd cleanup
@@ -1459,10 +1473,22 @@ public StartSD()
 	}
 
 	// disable lr
-	if(hosties)
+	if(lr)
 	{
-		ConVar lr_cvar = FindConVar("sm_hosties_lr");
-		SetConVarBool(lr_cvar, false); 
+		ConVar hosties_enabled = FindConVar("sm_hosties_lr");
+
+		if(hosties_enabled)
+		{
+			SetConVarBool(hosties_enabled, false); 
+		}
+
+		// see if if replacement is active
+		ConVar lr_enabled = FindConVar("destoer_lr");
+
+		if(lr_enabled)
+		{
+			lr_enabled.IntValue = 0; 
+		}	
 	}
 
 	int idx = view_as<int>(special_day);

@@ -14,6 +14,8 @@ void shot_for_shot_player_init(int id, int bullets)
     empty_weapon(client,weapon);
 
     slots[id].weapon_string = "weapon_deagle";
+
+    slots[id].restrict_drop = true;
 }
 
 void start_shot_for_shot(int t_slot, int ct_slot, int bullets)

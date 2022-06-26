@@ -7,13 +7,14 @@
 #include "lib.inc"
 
 #define PLUGIN_AUTHOR "destoer(organ harvester)"
-#define PLUGIN_VERSION "V0.1 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V0.2 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
 */
 
-// TODO: add cancel lr command
+// TODO: add options to mag for mag, no scope etc
+// TODO: impl more lr's
 
 public Plugin:myinfo = 
 {
@@ -37,9 +38,11 @@ enum lr_type
     shot_for_shot,
     mag_for_mag,
     shotgun_war,
+    russian_roulette,
+    rebel,
 }
 
-const int LR_SIZE = 8;
+const int LR_SIZE = 10;
 new const String:lr_list[LR_SIZE][] =
 {	
     "Knife fight",
@@ -50,15 +53,14 @@ new const String:lr_list[LR_SIZE][] =
     "Shot for shot",
     "Mag for Mag",
     "Shotgun war",
-
-/*
     "Russian roulette",
+    "Rebel",
+/*
     "Sumo",
     "Race",
     "Rock paper scissors",
     "Hot potato",
     "Chicken fight",
-    "Rebel"
 */
 };
 
@@ -79,9 +81,13 @@ enum struct LrSlot
     int bullet_count;
     int bullet_max;
 
+    int chamber;
+    int bullet_chamber;
+
+    bool restrict_drop;
+
     // this is the slot to our partner
     int partner;
-
 
     char weapon_string[64];
 
@@ -116,13 +122,28 @@ int g_lbeam;
 #include "lr/gun_toss.sp"
 #include "lr/shot_for_shot.sp"
 #include "lr/shotgun_war.sp"
+#include "lr/russian_roulette.sp"
+#include "lr/rebel.sp"
+#include "lr/config.sp"
 
 // handle for sdkcall
 Handle SetCollisionGroup;
 
+public Action command_cancel_lr(int client , int args)
+{
+    for(int i = 0; i < LR_SLOTS; i++)
+    {
+        end_lr(slots[i]);
+    }        
+}
+
 public OnPluginStart()
 {
+    create_lr_convar();
+
     RegConsoleCmd("lr",command_lr);
+
+    RegAdminCmd("cancel_lr",command_cancel_lr,ADMFLAG_KICK);
 
     HookEvent("player_death", OnPlayerDeath,EventHookMode_Post);
     HookEvent("round_end", OnRoundEnd);
@@ -183,6 +204,9 @@ void end_lr(LrSlot slot)
 
     if(is_valid_client(slot.client) && IsPlayerAlive(slot.client))
     {
+        SetEntityHealth(slot.client,100);
+        strip_all_weapons(slot.client);        
+
         if(GetClientTeam(slot.client) == CS_TEAM_CT)
         {
             GivePlayerItem(slot.client,"weapon_knife");
@@ -191,6 +215,7 @@ void end_lr(LrSlot slot)
 
         else
         {
+       
             GivePlayerItem(slot.client,"weapon_knife");
         }
     }
@@ -205,6 +230,13 @@ void end_lr(LrSlot slot)
     slot.bullet_max = -1;
 
     slot.partner = -1;
+
+    slot.bullet_chamber = -1;
+    slot.chamber = -1;
+
+    slot.restrict_drop = false;
+
+    slot.weapon_string = "";
 
     kill_handle(slot.timer);
 
@@ -357,6 +389,11 @@ void start_lr(int t, int ct, lr_type type)
         {
             start_shotgun_war(t_slot,ct_slot);
         }
+
+        case russian_roulette:
+        {
+            start_russian_roulette(t_slot,ct_slot);
+        }
     }
 
 }
@@ -398,6 +435,13 @@ bool is_valid_t(int client)
 Action command_lr (int client, int args)
 {
     SetCollisionGroup = init_set_collision();
+
+
+    // lr is not enabled
+    if(lr_cvar.IntValue == 0)
+    {
+        return Plugin_Continue;
+    }
 
     if(!is_valid_t(client))
     {
@@ -474,6 +518,27 @@ public int lr_select(int client, int lr)
     if(!is_valid_t(client))
     {
         return -1;
+    }
+
+
+    lr_type type = view_as<lr_type>(lr);
+
+    // rebel has only one user
+    if(type == rebel)
+    {
+        int unused;
+        int alive_t = get_alive_team_count(CS_TEAM_T,unused);
+        if(alive_t == 1)
+        {
+            rebel_player_init(client);
+            return 0;
+        }
+
+        else
+        {
+            PrintToChat(client,"%s You must be last t alive to rebel",LR_PREFIX);
+            return -1;
+        }
     }
 
     Menu menu = new Menu(partner_handler);

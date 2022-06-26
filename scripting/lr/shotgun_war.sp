@@ -12,6 +12,8 @@ int shotgun_war_player_init(int id)
 
     slots[id].weapon = weapon;
     slots[id].weapon_string = "weapon_xm1014";
+
+    slots[id].restrict_drop = true;
 }
 
 void start_shotgun_war(int t_slot, int ct_slot)

@@ -7,6 +7,8 @@ void noscope_player_init(int id)
     GivePlayerItem(client, "weapon_awp");
 
     slots[id].weapon_string = "weapon_awp";
+
+    slots[id].restrict_drop = true;
 }
 
 void start_no_scope(int t_slot, int ct_slot)
