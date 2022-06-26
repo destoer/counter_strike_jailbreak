@@ -11,6 +11,20 @@
 #define COLLISION_GROUP_PUSHAWAY 17 // antistuck
 
 
+stock bool is_muted(int client)
+{
+	return BaseComm_IsClientMuted(client);
+}
+
+stock void mute_client(int client)
+{
+	BaseComm_SetClientMute(client,true);
+}
+
+stock void unmute_client(int client)
+{
+	BaseComm_SetClientMute(client,false);
+}
 
 stock bool steam_id_equal(int client, char[] id)
 {
@@ -94,6 +108,11 @@ stock void slay_all()
 			ForcePlayerSuicide(i);
 		}
 	}	
+}
+
+stock bool is_admin(int client)
+{
+	return CheckCommandAccess(client, "generic_admin", ADMFLAG_GENERIC, false);	
 }
 
 stock bool check_command_exists(const String:command[])

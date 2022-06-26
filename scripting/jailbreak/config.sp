@@ -15,6 +15,8 @@ ConVar gun_cvar;
 ConVar voice_cvar;
 ConVar armor_cvar;
 ConVar warden_block_cvar;
+ConVar mute_cvar;
+ConVar print_rebel_cvar;
 
 #define PREFIX_SIZE 128
 
@@ -30,6 +32,9 @@ bool gun_commands;
 bool voice;
 bool armor;
 bool warden_block;
+bool mute;
+bool print_rebel;
+
 
 void create_jb_convar()
 {
@@ -53,6 +58,9 @@ void create_jb_convar()
     voice_cvar = CreateConVar("jb_warden_voice","1","enable getting warden from voice");
     armor_cvar = CreateConVar("jb_armor","0","give ct armor on spawn");
     warden_block_cvar = CreateConVar("jb_warden_block","1","enable warden block commands");
+
+    mute_cvar = CreateConVar("jb_mute","1","mute t's at round start");
+    print_rebel_cvar = CreateConVar("jb_rebel","1","print rebels being killed");
 }
 
 void setup_jb_convar()
@@ -88,6 +96,8 @@ void setup_jb_convar()
     voice = GetConVarInt(voice_cvar) > 0;
     armor = GetConVarInt(armor_cvar) > 0;
     warden_block = GetConVarInt(warden_block_cvar) > 0;
+    mute = GetConVarInt(mute_cvar) > 0;
+    print_rebel = GetConVarInt(print_rebel_cvar) > 0;
 
 
     if(game == Engine_CSGO)

@@ -33,7 +33,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi"
-#define PLUGIN_VERSION "V3.5.6 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.6 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -62,7 +62,9 @@ Handle SetCollisionGroup;
 
 #include <sourcemod>
 #include <sdktools>
+#include <sdkhooks>
 #include <cstrike>
+#include <basecomm>
 #include "lib.inc"
 #include "specialday/specialday.inc"
 
@@ -85,6 +87,9 @@ Handle client_laser_color_pref;
 #include "jailbreak/color.sp"
 #include "jailbreak/warday.sp"
 #include "jailbreak/circle.sp"
+#include "jailbreak/mute.sp"
+
+bool rebel[64];
 
 public Plugin:myinfo = 
 {
@@ -466,6 +471,7 @@ public OnPluginStart()
 	
 	// hooks
 	HookEvent("round_start", round_start); // For the round start
+	HookEvent("round_end", round_end); // For the round start
 	HookEvent("player_spawn", player_spawn); 
 	HookEvent("player_death", player_death); // To check when our warden dies :)
 	HookEvent("player_team", player_team);
@@ -702,8 +708,13 @@ public set_warden(int client)
 public Action player_death(Handle event, const String:name[], bool dontBroadcast) 
 {
 	int client = GetClientOfUserId(GetEventInt(event, "userid")); // Get the dead clients id
-	
-	
+	int attacker = GetClientOfUserId(GetEventInt(event, "attacker")); // Get the dead clients id
+
+	if(rebel[client] && is_valid_client(attacker) && print_rebel)
+	{
+		PrintToChatAll("%s %N killed the rebel %N",JB_PREFIX,attacker,client);
+	}
+
 	// if its the warden we need to remove him
 	if(client == warden_id)
 	{
@@ -770,11 +781,26 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 	return Plugin_Continue;
 }
 
+public Action round_end(Handle event, const String:name[], bool dontBroadcast) 
+{
+	if(mute)
+	{
+		kill_handle(mute_timer);
+		unmute_all();
+	}
+
+	return Plugin_Continue;
+}
 
 public Action round_start(Handle event, const String:name[], bool dontBroadcast) 
 {
 	warday_active = false;
 	warday_round_counter++;
+
+	if(mute)
+	{
+		mute_t();
+	}
 
 	reset_laser_setting();
 	
@@ -801,6 +827,11 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 		set_warden(client);
 	}
 	
+	for(int i = 0; i < 64; i++)
+	{
+		rebel[i] = false;
+	}
+
 	return Plugin_Continue;
 }
 
@@ -838,3 +869,48 @@ public remove_warden()
 	// deregister the warden
 	warden_id = WARDEN_INVALID;
 }
+
+
+public void OnClientPutInServer(int client)
+{
+	SDKHook(client, SDKHook_OnTakeDamage, take_damage);
+	SDKHook(client, SDKHook_WeaponEquip, weapon_equip); 
+}
+
+public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
+{
+	if(sd_current_state() == sd_active)
+	{
+		return Plugin_Continue;
+	}
+
+	if(is_valid_client(attacker) && GetClientTeam(attacker) == CS_TEAM_T && GetClientTeam(victim) == CS_TEAM_CT)
+	{
+		rebel[attacker] = true;
+	}
+
+	return Plugin_Continue;
+}
+
+public Action weapon_equip(int client, int weapon) 
+{
+	// dont care
+	if(GetClientTeam(client) == CS_TEAM_CT || sd_current_state() == sd_active)
+	{
+		return Plugin_Continue;
+	}
+
+
+	char weapon_string[32];
+	GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
+
+	if(!StrEqual(weapon_string,"weapon_knife") && !StrEqual(weapon_string,"weapon_hegrenade") 
+		&& !StrEqual(weapon_string,"weapon_flashbang") && !StrEqual(weapon_string,"weapon_c4"))
+	{
+		rebel[client] = true;
+	}
+
+
+	return Plugin_Continue;
+}
+
