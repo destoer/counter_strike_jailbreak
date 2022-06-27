@@ -7,7 +7,7 @@
 #include "lib.inc"
 
 #define PLUGIN_AUTHOR "destoer(organ harvester)"
-#define PLUGIN_VERSION "V0.3 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V0.3.1 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -239,6 +239,12 @@ void end_lr(LrSlot slot)
     slot.restrict_drop = false;
 
     slot.weapon_string = "";
+
+    for(int i = 0; i < 3; i++)
+    {
+        slot.pos[i] = 0.0;
+        slot.gun_pos[i] = 1.0;
+    }
 
     kill_handle(slot.timer);
 

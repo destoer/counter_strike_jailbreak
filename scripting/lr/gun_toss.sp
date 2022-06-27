@@ -29,7 +29,7 @@ public Action draw_toss_timer(Handle timer, int id)
     LrSlot slot;
     slot = slots[id];
 
-    if(!is_valid_client(slot.client) || !slot.active)
+    if(!is_valid_client(slot.client) || !slot.active || slots[id].type != gun_toss)
     {
         kill_handle(slots[id].timer);
         return Plugin_Continue;
