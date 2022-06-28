@@ -17,6 +17,7 @@ ConVar armor_cvar;
 ConVar warden_block_cvar;
 ConVar mute_cvar;
 ConVar print_rebel_cvar;
+ConVar guns_cvar;
 
 #define PREFIX_SIZE 128
 
@@ -34,7 +35,7 @@ bool armor;
 bool warden_block;
 bool mute;
 bool print_rebel;
-
+bool guns;
 
 void create_jb_convar()
 {
@@ -61,6 +62,8 @@ void create_jb_convar()
 
     mute_cvar = CreateConVar("jb_mute","1","mute t's at round start");
     print_rebel_cvar = CreateConVar("jb_rebel","1","print rebels being killed");
+
+    guns_cvar = CreateConVar("jb_guns","1","give ct's guns at round start");
 }
 
 void setup_jb_convar()
@@ -98,6 +101,7 @@ void setup_jb_convar()
     warden_block = GetConVarInt(warden_block_cvar) > 0;
     mute = GetConVarInt(mute_cvar) > 0;
     print_rebel = GetConVarInt(print_rebel_cvar) > 0;
+    guns = guns_cvar.IntValue > 0;
 
 
     if(game == Engine_CSGO)

@@ -18,7 +18,7 @@ stock bool is_muted(int client)
 		return false;
 	}
 
-	return !(GetClientListeningFlags(client) & VOICE_MUTED);
+	return (GetClientListeningFlags(client) & VOICE_MUTED) != 0;
 }
 
 stock void mute_client(int client)

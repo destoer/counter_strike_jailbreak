@@ -9,7 +9,7 @@
 
 public Action jailbreak_version(int client, int args)
 {
-	// undocumented command
+	// debugging command
 	if(!is_sudoer(client))
 	{
 		return Plugin_Handled;
@@ -23,7 +23,7 @@ public Action jailbreak_version(int client, int args)
 
 public Action is_blocked_cmd(int client, int args)
 {
-	// undocumented command
+	// debugging command
 	if(!is_sudoer(client))
 	{
 		return Plugin_Handled;
@@ -51,9 +51,28 @@ public Action is_blocked_cmd(int client, int args)
 }
 
 
-public Action wd_rounds(int client, int args)
+public Action is_muted_cmd(int client, int args)
 {
 	// undocumented command
+	if(!is_sudoer(client))
+	{
+		return Plugin_Handled;
+	}
+
+	for (int i = 0; i < MaxClients; i++)
+	{
+		if(is_valid_client(i))
+		{
+			PrintToConsole(client, "muted: %N %s", i, is_muted(i) ? "true" : "false");
+		}
+	}
+
+	return Plugin_Continue;	
+}
+
+public Action wd_rounds(int client, int args)
+{
+	// debugging command
 	if(!is_sudoer(client))
 	{
 		return Plugin_Handled;
@@ -66,7 +85,7 @@ public Action wd_rounds(int client, int args)
 
 public Action enable_wd(int client, int args)
 {
-	// undocumented command
+	// debugging command
 	if(!is_sudoer(client))
 	{
 		return Plugin_Handled;

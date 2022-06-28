@@ -33,7 +33,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi"
-#define PLUGIN_VERSION "V3.6 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.6.1 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -299,6 +299,8 @@ public void OnClientConnected(int client)
 		use_draw_laser_settings[client] = false;
 		laser_color[client] = 0;
 	}
+
+	mute_client(client);
 }
 
 public void OnClientDisconnect(int client)
@@ -466,6 +468,7 @@ public OnPluginStart()
 	
 	RegConsoleCmd("wv", jailbreak_version);
 	RegConsoleCmd("is_blocked", is_blocked_cmd);
+	RegConsoleCmd("is_muted", is_muted_cmd);
 	RegConsoleCmd("wd_rounds",wd_rounds);
 	RegConsoleCmd("enable_wd",enable_wd);
 	
@@ -720,6 +723,13 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 	{
 		remove_warden();
 	}
+
+	if(!is_admin(client))
+	{
+		PrintToChat(client,"%s You are muted until the start of the round\n",client);
+		mute_client(client);
+	}
+
 	
 	int new_warden = 0;
 	// if there is only one ct left alive automatically warden him
@@ -741,6 +751,12 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 	
 	if(is_valid_client(client))
 	{
+		// spawned in and there is not a current mute
+		if(!mute_timer)
+		{
+			unmute_client(client);
+		}
+
 		if(sd_current_state() == sd_inactive)
 		{
 		
@@ -830,6 +846,19 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 	for(int i = 0; i < 64; i++)
 	{
 		rebel[i] = false;
+
+		if(!is_valid_client(i))
+		{
+			continue;
+		}
+
+		// give ct's guns
+		if(guns && GetClientTeam(i) == CS_TEAM_CT)
+		{
+			GivePlayerItem(i,"weapon_deagle");
+			GivePlayerItem(i,"weapon_m4a1");
+		}
+
 	}
 
 	return Plugin_Continue;
