@@ -13,20 +13,23 @@
 	onwards to the new era ( ͡° ͜ʖ ͡°)
 */
 
-// TODO: add options to mag for mag, no scope etc
 
 /*
--Add back button in LR menu
--Remove gravity from dodgeball
+-Add gravity options for dodgeball and nadewar
 -Add more guns in noscope (AWP,Scout,SG550,G3SG1) with knife
 -Add more guns in shot4shot and mag4mag (Glock,USP,P228,Fiveseven,Deagle,Elite)
 -Add more styles in knife fight (Speed mode, Drunk mode, Low grav mode)
+-Add more gun options in shotgun war, and change name to war
+
+// TODO: later
+-Add back button in LR menu
 -Add sumo lr
+-Add headshot only
 -Add chicken fight lr
 -Add hot potato lr
 -Add auto open LR menu to non rebellers when availiable
 -impl more lr's
-- remove guns on slay
+-remove guns on slay (probs easiest to just hook the comamnds like in the team bal plugin)
 */
 
 public Plugin:myinfo = 
@@ -128,6 +131,8 @@ lr_type lr_request[64]
 int g_lbeam;
 
 bool rebel_lr_active = false;
+
+bool lr_ready = false;
 
 // unity build
 #include "lr/debug.sp"

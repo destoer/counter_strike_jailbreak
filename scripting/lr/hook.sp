@@ -1,6 +1,7 @@
 void purge_state()
 {
     rebel_lr_active = false;
+    lr_ready = false;
 
     for(int i = 0; i < LR_SLOTS; i++)
     {
@@ -43,8 +44,9 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
     int unused;
     int alive_t = get_alive_team_count(CS_TEAM_T,unused);
 
-    if(alive_t == (LR_SLOTS / 2))
+    if(alive_t == (LR_SLOTS / 2) && !lr_ready)
     {
+        lr_ready = true;
         PrintToChatAll("%s Last request is now ready type !lr",LR_PREFIX);
     }
 
@@ -360,9 +362,13 @@ public OnMapStart()
     lr_menu = build_lr_menu();
 
     g_lbeam = PrecacheModel("materials/sprites/laserbeam.vmt");
+
+    purge_state();
 }
 
 public OnMapEnd()
 {
+    purge_state();
+
     delete lr_menu;
 }
