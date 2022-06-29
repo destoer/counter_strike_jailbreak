@@ -15,6 +15,7 @@
 
 // TODO: add options to mag for mag, no scope etc
 // TODO: impl more lr's
+// TODO: add notif for lr active
 
 public Plugin:myinfo = 
 {
@@ -81,6 +82,8 @@ enum struct LrSlot
     int bullet_count;
     int bullet_max;
 
+    int delay;
+
     int chamber;
     int bullet_chamber;
 
@@ -111,6 +114,8 @@ Menu lr_menu;
 lr_type lr_request[64]
 
 int g_lbeam;
+
+bool rebel_lr_active = false;
 
 // unity build
 #include "lr/debug.sp"
@@ -143,9 +148,15 @@ public OnPluginStart()
 
     RegConsoleCmd("lr",command_lr);
 
+    // debugging
+    RegConsoleCmd("register_console",register_console);
     RegConsoleCmd("lrv", lr_version);
+    RegConsoleCmd("dump_slots",dump_slots);
+    RegConsoleCmd("force_lr",force_lr);
 
     RegAdminCmd("cancel_lr",command_cancel_lr,ADMFLAG_KICK);
+    RegAdminCmd("cancellr",command_cancel_lr,ADMFLAG_KICK);
+    
 
     HookEvent("player_death", OnPlayerDeath,EventHookMode_Post);
     HookEvent("round_end", OnRoundEnd);
@@ -189,10 +200,39 @@ int get_slot(int client)
     return INVALID_SLOT;
 }
 
+bool is_valid_slot(int id)
+{
+    return id != INVALID_SLOT;
+}
+
 bool in_lr(int client)
 {
-    return get_slot(client) != INVALID_SLOT;
+    int slot = get_slot(client);
+
+    return is_valid_slot(slot);
 }
+
+bool is_pair(int c1, int c2)
+{
+    int id1 = get_slot(c1);
+    int id2 = get_slot(c2);
+
+    // both in lr
+    if(is_valid_slot(id1) && is_valid_slot(id2))
+    {
+        int partner = slots[id1].partner;
+
+        // if partner matches id then they are a pair
+        return partner == id2;
+    }
+
+    // one is not in lr they are not a pair
+    else
+    {
+        return false;
+    }
+}
+
 
 void end_lr_pair(int id, int partner)
 {
@@ -235,6 +275,8 @@ void end_lr(LrSlot slot)
 
     slot.bullet_chamber = -1;
     slot.chamber = -1;
+
+    slot.delay = 0;
 
     slot.restrict_drop = false;
 
@@ -333,16 +375,40 @@ void init_slot(int id, int client, int partner, lr_type type)
     slots[id].active = true;
     slots[id].partner = partner;
 
+    print_slot(id);
+
     start_beacon(id);
 }
 
 public Action start_lr_callback(Handle timer, int id)
 {
-    slots[id].timer = null;
 
     // by convention the t triggers the lr
     int t_slot = id;
     int ct_slot = slots[id].partner;
+
+    int t = slots[t_slot].client;
+    int ct = slots[ct_slot].client;
+
+    if(slots[t_slot].delay)
+    {
+        PrintCenterText(t,"Lr starting in %d seconds against %N!",slots[id].delay,ct);
+        PrintCenterText(ct,"Lr starting in %d seconds against %N!",slots[id].delay,t);
+
+        slots[id].timer = CreateTimer(1.0,start_lr_callback,id,TIMER_FLAG_NO_MAPCHANGE);
+        slots[id].delay -= 1;
+
+        return Plugin_Handled;
+    }
+
+    else
+    {
+        slots[id].timer = null;
+    }
+
+
+    PrintCenterText(t,"Go!");
+    PrintCenterText(ct,"Go!");
 
     switch(slots[id].type)
     {
@@ -392,16 +458,11 @@ public Action start_lr_callback(Handle timer, int id)
         }
     }
 
-
+    return Plugin_Continue;
 }
 
-void start_lr(int t, int ct, lr_type type)
+void start_lr_internal(int t, int ct, lr_type type)
 {
-    if(!is_valid_t(t) || !is_valid_partner(ct))
-    {
-        return;
-    }
-
     PrintToChat(t,"%s Lr %s vs %N\n",LR_PREFIX,lr_list[type],ct);
     PrintToChat(ct,"%s Lr %s vs %N\n",LR_PREFIX,lr_list[type],t)
 
@@ -412,16 +473,27 @@ void start_lr(int t, int ct, lr_type type)
     init_slot(t_slot,t,ct_slot,type);
     init_slot(ct_slot,ct,t_slot,type);
 
+
     // only really need one of these to draw
     start_line(t_slot);
 
     strip_all_weapons(t);
     strip_all_weapons(ct);
 
-    PrintCenterText(t,"Lr starting in 5 seconds against %N!",ct);
-    PrintCenterText(ct,"Lr starting in 5 seconds against %N!",t);
 
-    slots[t_slot].timer = CreateTimer(5.0,start_lr_callback,t_slot,TIMER_FLAG_NO_MAPCHANGE);
+
+    slots[t_slot].timer = CreateTimer(1.0,start_lr_callback,t_slot,TIMER_FLAG_NO_MAPCHANGE);
+    slots[t_slot].delay = 5;    
+}
+
+void start_lr(int t, int ct, lr_type type)
+{
+    if(!is_valid_t(t) || !is_valid_partner(ct))
+    {
+        return;
+    }
+
+    start_lr_internal(t,ct,type);
 }
 
 void set_lr_clip(int id)
@@ -441,10 +513,6 @@ bool is_valid_t(int client)
 
     if(in_lr(client))
     {
-        int id = get_slot(client);
-
-        print_slot(client,slots[id]);
-
         PrintToChat(client,"%s You are allready in a lr\n",LR_PREFIX);
         return false;
     }
@@ -460,6 +528,11 @@ bool is_valid_t(int client)
 
 Action command_lr (int client, int args)
 {
+    if(rebel_lr_active)
+    {
+        return Plugin_Continue;
+    }
+
     SetCollisionGroup = init_set_collision();
 
 
@@ -523,7 +596,12 @@ public int partner_handler(Menu menu, MenuAction action, int t, int param2)
         char name[64]
         menu.GetItem(param2,name,sizeof(name) - 1);
 
-        int partner = FindTarget(t,name);
+        int partner = FindTarget(t,name,false,false);
+
+        if(partner == -1)
+        {
+            PrintToChat(t,"%s No such player: %s\n",LR_PREFIX,name)
+        }
 
         lr_type type = lr_request[t];
 

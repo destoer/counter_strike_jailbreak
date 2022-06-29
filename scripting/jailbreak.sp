@@ -33,7 +33,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi"
-#define PLUGIN_VERSION "V3.6.1 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.6.2 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -294,6 +294,7 @@ public OnMapEnd()
 public void OnClientConnected(int client)
 {
 	laser_use[client] = false;
+	rebel[client] = false;
 	if(!AreClientCookiesCached(client))
 	{
 		use_draw_laser_settings[client] = false;
@@ -308,6 +309,7 @@ public void OnClientDisconnect(int client)
 	laser_use[client] = false;
 	use_draw_laser_settings[client] = false;
 	laser_color[client] = 0;
+	rebel[client] = false;
 	if(client == warden_id)
 	{
 		warden_id = WARDEN_INVALID;
@@ -325,7 +327,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	}    
 	
 	
-	if (warden_id == client)
+	if (warden_id == client && is_valid_client(client))
 	{
 		char color1[] = "\x07000000";
 		char color2[] = "\x07FFC0CB";
@@ -336,48 +338,32 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 			Format(color2,strlen(color2),"\x06");
 		}
 
-		if (is_valid_client(client) && IsPlayerAlive(client) && GetClientTeam(client) == CS_TEAM_CT)
-	    {
-	        if (!StrEqual(command, "say_team"))
-	        {    
-	                if (!CheckCommandAccess(client, "sm_say", ADMFLAG_CHAT))
-	                {
-	                    PrintToChatAll("%s %N %s: %s%s", WARDEN_PLAYER_PREFIX, client,color1,color2, sArgs);
-	                    LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
-	                    return Plugin_Handled;                    
-	                }
-	                else 
-	                {
-	                    if (sArgs[0] != '@')
-	                    {
-	                        PrintToChatAll("%s %N %s: %s%s", WARDEN_PLAYER_PREFIX, client,color1,color2, sArgs);
-	                        LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
-	                        return Plugin_Handled;
-	                    }
-	                }
-	        }
-	        else
-	        {
-	            for (new i = 1; i <= MaxClients; i++)
-	            {
-	                if (is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT)
-	                {
-	                    if (sArgs[0] != '@')
-	                    {
-	                        PrintToChat(i, "%s %N %s: %s%s", WARDEN_PLAYER_PREFIX, client,color1,color2, sArgs);
-	                        LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
-	                    }
-	                }
-	            }
-	            return Plugin_Handled;
-	        }
-	    }
+
+		if(sArgs[0] == '@')
+		{
+			return Plugin_Continue;
+		}
+
+		else if (!StrEqual(command, "say_team"))
+		{    
+			PrintToChatAll("%s %N %s: %s%s", WARDEN_PLAYER_PREFIX, client,color1,color2, sArgs);
+			LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
+			return Plugin_Handled;	
+		}
+
+		// ct team chat
 		else
-	    {
-	        PrintToChatAll("%s %N %s: %s%s", WARDEN_PLAYER_PREFIX, client,color1,color2, sArgs);
-	        LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
-	        return Plugin_Handled;
-	    }   
+		{
+			for (int i = 1; i <= MaxClients; i++)
+			{
+				if (is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT && sArgs[0] != '@')
+				{
+					PrintToChat(i, "%s (Counter-Terrorist) %N %s: %s%s", WARDEN_PLAYER_PREFIX, client,color1,color2, sArgs);
+					LogAction(client, -1, "[Warden CT] %N : %s", client, sArgs);
+				}
+			}
+			return Plugin_Handled;
+		}
 	}
 	
 	

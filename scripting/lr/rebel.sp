@@ -1,8 +1,6 @@
 int rebel_player_init(int client)
 {
-    int id = get_inactive_slot();
-
-    init_slot(id,client,INVALID_SLOT,rebel);
+    rebel_lr_active = true;
 
     int unused;
     int alive_ct = get_alive_team_count(CS_TEAM_CT,unused);
@@ -16,12 +14,6 @@ int rebel_player_init(int client)
     set_clip_ammo(client,weapon,999);
     set_reserve_ammo(client,weapon,999);
 
-
-
-    slots[id].weapon = weapon;
-    slots[id].weapon_string = "";
-
-    slots[id].restrict_drop = false;
 
     PrintToChatAll("%s %N is a rebel!",LR_PREFIX,client);
 }

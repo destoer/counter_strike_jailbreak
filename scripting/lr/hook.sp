@@ -1,9 +1,21 @@
-public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
+void purge_state()
 {
+    rebel_lr_active = false;
+
     for(int i = 0; i < LR_SLOTS; i++)
     {
         end_lr(slots[i]);
-    }    
+    }        
+}
+
+public Action OnRoundStart(Handle event, const String:name[], bool dontBroadcast)
+{
+    purge_state();
+}
+
+public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
+{
+    purge_state();
 }
 
 public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcast)
@@ -85,6 +97,11 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 {
     int client = GetClientOfUserId(GetEventInt(event,"userid"));
 
+    if(client == console)
+    {
+        console = -1;
+    }
+
     int id = get_slot(client);
 
     if(id != INVALID_SLOT)
@@ -99,36 +116,25 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 //remove damage and aimpunch
 public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3]) 
 {
-    // if player is in a lr only allow damage to partner
-    int id = get_slot(victim);
-
-    if(id == INVALID_SLOT)
+    // both not in lr
+    if(!in_lr(victim) && !in_lr(attacker))
     {
         return Plugin_Continue;
     }
 
-
-    LrSlot slot;
-    slot = slots[id];
-
-    // rebel etc, attack anyone
-    if(slot.partner == INVALID_SLOT)
-    {
-        return Plugin_Continue;
-    }
-
-    // attack is not other partner, there is no damage
-    if(attacker != slots[slot.partner].client)
+    // not in the same lr
+    else if(!is_pair(attacker,victim))
     {
         return Plugin_Handled;
     }
-    
-    switch(slot.type)
+
+    int id = get_slot(attacker);
+    int partner = slots[id].partner;
+
+    switch(slots[id].type)
     {
         case gun_toss:
         {
-            int partner = slots[id].partner;
-
             // cant do damange until gun has been dropped
             if(!slots[partner].gun_dropped  && !slots[id].gun_dropped)
             {
@@ -136,6 +142,7 @@ public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &
             }
         }        
     }
+    
 
     return Plugin_Continue;
 }
@@ -144,36 +151,26 @@ public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &
 
 public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
 {
-    // if player is in a lr only allow damage to partner
-    int id = get_slot(victim);
-
-    if(id == INVALID_SLOT)
+    if(!in_lr(victim) && !in_lr(attacker))
     {
         return Plugin_Continue;
     }
 
-
-    LrSlot slot;
-    slot = slots[id];
-
-    // rebel etc, attack anyone
-    if(slot.partner == INVALID_SLOT)
-    {
-        return Plugin_Continue;
-    }
-
-
-    // attack is not other partner, there is no damage
-    if(attacker != slots[slot.partner].client)
+    // not in the same lr
+    else if(!is_pair(attacker,victim))
     {
         damage = 0.0;
         return Plugin_Changed;
     }
-    
 
-    switch(slot.type)
+
+    int id = get_slot(attacker);
+    int partner = slots[id].partner;
+
+
+    // now in the same lr
+    switch(slots[id].type)
     {
-    
         case dodgeball:
         {
             // any damage kills 
@@ -191,19 +188,20 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 
         case gun_toss:
         {
-            int partner = slots[id].partner;
-
             // cant do damange until a gun has been dropped
             if(!slots[partner].gun_dropped && !slots[id].gun_dropped)
             {
                 damage = 0.0;
                 return Plugin_Changed;
             }
-        }
+        } 
     }
+
 
     return Plugin_Continue;
 }
+
+
 
 public Action OnWeaponEquip(int client, int weapon) 
 {
@@ -222,11 +220,17 @@ public Action OnWeaponEquip(int client, int weapon)
     char weapon_string[32];
     GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
 
+
     // if we have a string
     if(slots[id].weapon_string[0])
     {
         if(!StrEqual(weapon_string,slots[id].weapon_string))
         {
+            if(console != -1)
+            {
+                PrintToConsole(console,"%s restrict '%s' : '%s'",LR_PREFIX,weapon_string,slots[id].weapon_string);
+            }
+
             return Plugin_Handled;
         }         
     }
