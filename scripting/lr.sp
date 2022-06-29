@@ -14,8 +14,20 @@
 */
 
 // TODO: add options to mag for mag, no scope etc
-// TODO: impl more lr's
-// TODO: add notif for lr active
+
+/*
+-Add back button in LR menu
+-Remove gravity from dodgeball
+-Add more guns in noscope (AWP,Scout,SG550,G3SG1) with knife
+-Add more guns in shot4shot and mag4mag (Glock,USP,P228,Fiveseven,Deagle,Elite)
+-Add more styles in knife fight (Speed mode, Drunk mode, Low grav mode)
+-Add sumo lr
+-Add chicken fight lr
+-Add hot potato lr
+-Add auto open LR menu to non rebellers when availiable
+-impl more lr's
+- remove guns on slay
+*/
 
 public Plugin:myinfo = 
 {
@@ -483,7 +495,7 @@ void start_lr_internal(int t, int ct, lr_type type)
 
 
     slots[t_slot].timer = CreateTimer(1.0,start_lr_callback,t_slot,TIMER_FLAG_NO_MAPCHANGE);
-    slots[t_slot].delay = 5;    
+    slots[t_slot].delay = 3;    
 }
 
 void start_lr(int t, int ct, lr_type type)

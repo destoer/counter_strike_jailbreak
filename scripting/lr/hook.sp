@@ -39,6 +39,15 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
         end_lr_pair(id,partner);
     }
 
+
+    int unused;
+    int alive_t = get_alive_team_count(CS_TEAM_T,unused);
+
+    if(alive_t == (LR_SLOTS / 2))
+    {
+        PrintToChatAll("%s Last request is now ready type !lr",LR_PREFIX);
+    }
+
 }
 
 public Action OnWeaponFire(Handle event, const String:name[], bool dontBroadcast)
@@ -321,6 +330,12 @@ public Action OnWeaponDrop(int client, int weapon)
     {
         case gun_toss:
         {
+            // only mark the first drop
+            if(slots[id].gun_dropped)
+            {
+                return Plugin_Continue;
+            }
+
             if(weapon == slots[id].weapon)
             {
                 slots[id].gun_dropped = true;

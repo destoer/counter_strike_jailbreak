@@ -699,6 +699,11 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 	int client = GetClientOfUserId(GetEventInt(event, "userid")); // Get the dead clients id
 	int attacker = GetClientOfUserId(GetEventInt(event, "attacker")); // Get the dead clients id
 
+	if(!is_valid_client(attacker) || attacker == client)
+	{
+		strip_all_weapons(client);
+	}
+
 	if(rebel[client] && is_valid_client(attacker) && print_rebel)
 	{
 		PrintToChatAll("%s %N killed the rebel %N",JB_PREFIX,attacker,client);

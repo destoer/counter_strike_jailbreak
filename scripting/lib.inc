@@ -484,7 +484,7 @@ void unpack_int(int pack,int &v1, int &v2)
 
 void kill_handle(Handle& handle)
 {
-	if(handle)
+	if(handle != null)
 	{
 		delete handle;
 	}

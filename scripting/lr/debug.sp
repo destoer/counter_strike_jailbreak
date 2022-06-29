@@ -98,6 +98,7 @@ public Action force_lr(int client, int args)
     if(GetClientTeam(cli1) != CS_TEAM_CT && GetClientTeam(cli2) != CS_TEAM_T)
     {
         PrintToChat(client,"%s invalid teams",LR_PREFIX);
+        return Plugin_Handled;
     }
 
     start_lr_internal(cli1, cli2, type);

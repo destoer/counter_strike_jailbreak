@@ -31,8 +31,8 @@ public Action draw_toss_timer(Handle timer, int id)
 
     if(!is_valid_client(slot.client) || !slot.active || slots[id].type != gun_toss)
     {
-        kill_handle(slots[id].timer);
-        return Plugin_Continue;
+        slots[id].timer = null;
+        return Plugin_Stop;
     }
 
     if(GetClientTeam(slot.client) == CS_TEAM_T)
@@ -54,7 +54,6 @@ public Action get_gun_end(Handle timer, int id)
     {
         return Plugin_Stop;
     }
-
 
 
     float pos[3]
