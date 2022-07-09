@@ -32,6 +32,9 @@ void print_slot(int id)
         PrintToConsole(console,"client: %N",client);
     }
 
+    PrintToConsole(console,"bullet max: %d\n",slots[id].bullet_max);
+    PrintToConsole(console,"bullet count: %d\n", slots[id].bullet_count)
+
     PrintToConsole(console,"weapon: %s : %d",slots[id].weapon_string,slots[id].weapon);
 
     PrintToConsole(console,"--------------");

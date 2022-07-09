@@ -7,7 +7,7 @@
 #include "lib.inc"
 
 #define PLUGIN_AUTHOR "destoer(organ harvester)"
-#define PLUGIN_VERSION "V0.3.1 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V0.3.2 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -86,6 +86,7 @@ enum struct LrSlot
     bool active;
     int client;
     lr_type type;
+    int option;
 
     int weapon;
 
@@ -126,7 +127,13 @@ LrSlot slots[LR_SLOTS];
 
 Menu lr_menu;
 
-lr_type lr_request[64]
+enum struct Choice
+{
+    lr_type type;
+    int option;
+}
+
+Choice lr_choice[64]
 
 int g_lbeam;
 
@@ -282,6 +289,7 @@ void end_lr(LrSlot slot)
 
     slot.active = false;
     slot.client = -1;
+    slot.option = 0;
 
     slot.weapon = -1;
 
@@ -385,12 +393,13 @@ void end_line(LrSlot slot)
     kill_handle(slot.line_timer);
 }
 
-void init_slot(int id, int client, int partner, lr_type type)
+void init_slot(int id, int client, int partner, lr_type type, int option)
 {
     slots[id].client = client;
     slots[id].type = type;
     slots[id].active = true;
     slots[id].partner = partner;
+    slots[id].option = option;
 
     print_slot(id);
 
@@ -456,12 +465,12 @@ public Action start_lr_callback(Handle timer, int id)
 
         case shot_for_shot:
         {
-            start_shot_for_shot(t_slot,ct_slot,1);
+            start_shot_for_shot(t_slot,ct_slot,false);
         }
 
         case mag_for_mag:
         {
-            start_shot_for_shot(t_slot,ct_slot,7);
+            start_shot_for_shot(t_slot,ct_slot,true);
         }
 
         case shotgun_war:
@@ -487,8 +496,8 @@ void start_lr_internal(int t, int ct, lr_type type)
     int ct_slot = get_inactive_slot();
 
 
-    init_slot(t_slot,t,ct_slot,type);
-    init_slot(ct_slot,ct,t_slot,type);
+    init_slot(t_slot,t,ct_slot,type, lr_choice[t].option);
+    init_slot(ct_slot,ct,t_slot,type, lr_choice[t].option);
 
 
     // only really need one of these to draw
@@ -620,7 +629,7 @@ public int partner_handler(Menu menu, MenuAction action, int t, int param2)
             PrintToChat(t,"%s No such player: %s\n",LR_PREFIX,name)
         }
 
-        lr_type type = lr_request[t];
+        lr_type type = lr_choice[t].type;
 
         start_lr(t,partner,type);
     }
@@ -630,6 +639,37 @@ public int partner_handler(Menu menu, MenuAction action, int t, int param2)
         delete menu;
     }
   
+}
+
+void pick_partner(int client)
+{
+    Menu menu = new Menu(partner_handler);
+    menu.SetTitle("Pick partner");
+
+    int valid_players = 0;
+
+    // Build a list of valid players
+    for(int i = 0; i < MaxClients; i++)
+    {
+        if(is_valid_partner(i))
+        {
+            char name[64];
+            GetClientName(i,name,sizeof(name) - 1)
+
+            menu.AddItem(name,name);
+            valid_players++;
+        }
+    }
+    
+    menu.ExitButton = false;
+
+    if(!valid_players)
+    {
+        PrintToChat(client,"%s There are no players alive to lr with\n",LR_PREFIX);
+        return;
+    }
+
+    menu.Display(client,20);    
 }
 
 public int lr_select(int client, int lr)
@@ -662,36 +702,33 @@ public int lr_select(int client, int lr)
         }
     }
 
-    Menu menu = new Menu(partner_handler);
-    menu.SetTitle("Pick partner");
+    // save what lr the current client is requesting so we can pull it inside the player handler
+    lr_choice[client].type = view_as<lr_type>(lr);
+    lr_choice[client].option = 0;
 
-    int valid_players = 0;
-
-    // Build a list of valid players
-    for(int i = 0; i < MaxClients; i++)
+    switch(lr_choice[client].type)
     {
-        if(is_valid_partner(i))
+        case no_scope:
         {
-            char name[64];
-            GetClientName(i,name,sizeof(name) - 1)
+            no_scope_menu(client);
+        }
 
-            menu.AddItem(name,name);
-            valid_players++;
+        case shot_for_shot:
+        {
+            shot_for_shot_menu(client);
+        }
+
+        case mag_for_mag:
+        {
+            shot_for_shot_menu(client);
+        }
+
+        default:
+        {
+            pick_partner(client);            
         }
     }
-    
-    menu.ExitButton = false;
 
-    if(!valid_players)
-    {
-        PrintToChat(client,"%s There are no players alive to lr with\n",LR_PREFIX);
-        return -1;
-    }
-
-    // save what lr the current client is requesting so we can pull it inside the player handler
-    lr_request[client] = view_as<lr_type>(lr);
-
-    menu.Display(client,20);
 
     return 0;
 }

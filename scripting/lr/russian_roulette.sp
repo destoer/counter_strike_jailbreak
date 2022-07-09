@@ -7,8 +7,6 @@ void russian_roulette_player_init(int id, int starting_chamber, int bullet)
     int weapon =  GivePlayerItem(client, "weapon_deagle");
     empty_weapon(client,weapon);
 
-    GivePlayerItem(client,"weapon_knife");
-
     
     slots[id].bullet_max = 1;
 

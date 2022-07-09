@@ -33,7 +33,7 @@ TODO make all names consistent
 #define DEBUG
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi"
-#define PLUGIN_VERSION "V3.6.2 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.6.3 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -58,6 +58,7 @@ int warden_id = WARDEN_INVALID;
 Handle SetCollisionGroup;
 
 
+bool rebel[64];
 
 
 #include <sourcemod>
@@ -75,7 +76,6 @@ Handle client_laser_draw_pref;
 Handle client_laser_color_pref;
 
 
-
 // split files for this plugin
 #include "jailbreak/config.sp"
 #include "jailbreak/stuck.sp"
@@ -89,7 +89,7 @@ Handle client_laser_color_pref;
 #include "jailbreak/circle.sp"
 #include "jailbreak/mute.sp"
 
-bool rebel[64];
+
 
 public Plugin:myinfo = 
 {
@@ -455,6 +455,7 @@ public OnPluginStart()
 	RegConsoleCmd("wv", jailbreak_version);
 	RegConsoleCmd("is_blocked", is_blocked_cmd);
 	RegConsoleCmd("is_muted", is_muted_cmd);
+	RegConsoleCmd("is_rebel", is_rebel_cmd);
 	RegConsoleCmd("wd_rounds",wd_rounds);
 	RegConsoleCmd("enable_wd",enable_wd);
 	
@@ -479,6 +480,13 @@ public OnPluginStart()
 		enable_block_all();
 	}
 	
+	for(int i = 1; i < MaxClients;i++)
+	{
+		if(is_valid_client(i))
+		{
+			OnClientPutInServer(i);
+		}
+	}
 	
 	// Start a circle timer
 	PrecacheSound("bot\\what_have_you_done.wav");
@@ -700,7 +708,7 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 	int attacker = GetClientOfUserId(GetEventInt(event, "attacker")); // Get the dead clients id
 
 
-	if(rebel[client] && is_valid_client(attacker) && print_rebel)
+	if(rebel[client] && is_valid_client(attacker) && print_rebel && attacker != client)
 	{
 		PrintToChatAll("%s %N killed the rebel %N",JB_PREFIX,attacker,client);
 	}
@@ -895,7 +903,7 @@ public void OnClientPutInServer(int client)
 
 public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
 {
-	if(sd_current_state() == sd_active)
+	if(sd_current_state() != sd_inactive)
 	{
 		return Plugin_Continue;
 	}
@@ -911,7 +919,7 @@ public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damaget
 public Action weapon_equip(int client, int weapon) 
 {
 	// dont care
-	if(GetClientTeam(client) == CS_TEAM_CT || sd_current_state() == sd_active)
+	if(GetClientTeam(client) == CS_TEAM_CT || sd_current_state() != sd_inactive)
 	{
 		return Plugin_Continue;
 	}
@@ -925,7 +933,6 @@ public Action weapon_equip(int client, int weapon)
 	{
 		rebel[client] = true;
 	}
-
 
 	return Plugin_Continue;
 }

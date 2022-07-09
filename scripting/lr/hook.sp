@@ -61,6 +61,17 @@ public Action OnWeaponFire(Handle event, const String:name[], bool dontBroadcast
     {
         switch(slots[id].type)
         {
+            case mag_for_mag:
+            {
+                slots[id].bullet_count -= 1;
+
+                if(!slots[id].bullet_count)
+                {
+                    int partner = slots[id].partner;
+                    set_lr_clip(partner);
+                }
+            }
+
             case shot_for_shot:
             {
                 slots[id].bullet_count -= 1;
@@ -86,6 +97,7 @@ public Action OnWeaponFire(Handle event, const String:name[], bool dontBroadcast
                 {
                     PrintToChatAll("%s BANG!",LR_PREFIX);
                     ForcePlayerSuicide(client);
+                    return Plugin_Handled;
                 }
 
                 else
@@ -102,6 +114,7 @@ public Action OnWeaponFire(Handle event, const String:name[], bool dontBroadcast
         }
     }
 
+    return Plugin_Continue;
 }
 
 public Action PlayerDisconnect_Event(Handle event, const String:name[], bool dontBroadcast)

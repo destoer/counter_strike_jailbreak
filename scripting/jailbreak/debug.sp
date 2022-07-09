@@ -50,6 +50,25 @@ public Action is_blocked_cmd(int client, int args)
 	return Plugin_Continue;
 }
 
+public Action is_rebel_cmd(int client, int args)
+{
+	// debugging command
+	if(!is_sudoer(client))
+	{
+		return Plugin_Handled;
+	}
+
+	for (int i = 0; i < MaxClients; i++)
+	{
+		if(is_valid_client(i))
+		{
+			PrintToConsole(client, "rebel: %N %s", i, rebel[i] ? "true" : "false");
+		}
+	}
+
+	return Plugin_Continue;
+}
+
 
 public Action is_muted_cmd(int client, int args)
 {

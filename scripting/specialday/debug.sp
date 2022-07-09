@@ -10,7 +10,7 @@
 // because we cant have debugging commands without
 // inboxes blowing up sigh...
 
-public Action sd_version(int client, int args)
+public Action sd_info_cmd(int client, int args)
 {
 	if(!is_sudoer(client))
 	{
@@ -18,6 +18,8 @@ public Action sd_version(int client, int args)
 	}
 	
 	PrintToChat(client, "%s SD VERSION: %s",SPECIALDAY_PREFIX, VERSION);
+	PrintToChat(client, "%s SD STATE: %d\n",SPECIALDAY_PREFIX, view_as<int>(sd_state));
+	PrintToChat(client, "%s SD CURRENT: %d\n",SPECIALDAY_PREFIX, view_as<int>(special_day));
 	
 	return Plugin_Continue;
 }
