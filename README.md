@@ -34,6 +34,8 @@ jb_gun_commands - enable ct gun menu (bool)
 jb_armor give ct armor on spawn (bool)
 jb_warden_block - enable warden block commands (bool)
 
+jb_mute - mute t's at round start (bool)
+jb_rebel - print rebels being killed (bool)
 
 
 # setup
