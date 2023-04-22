@@ -430,7 +430,7 @@ public OnPluginStart()
 	if(stuck)
 	{
 		// workaround for csgo wont support this neatly
-		if(SetCollisionGroup == INVALID_HANDLE)
+		if(SetCollisionGroup != INVALID_HANDLE)
 		{
 			RegConsoleCmd("stuck", command_stuck);
 		}

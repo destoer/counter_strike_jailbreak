@@ -38,6 +38,7 @@ jb_mute - mute t's at round start (bool)
 jb_rebel - print rebels being killed (bool)
 
 
+
 # setup
 NOTE: please ensure hosties block setting is the same as jailbreak if used
 also make sure no other no block plugins are active as this may intefere with sd/jb

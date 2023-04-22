@@ -78,41 +78,5 @@ void disable_anti_stuck(int client)
 
 void enable_anti_stuck(int client)
 {
-    SetClientCollision(client, SetCollisionGroup, COLLISION_GROUP_PUSHAWAY);
+    SetClientCollision(client, SetCollisionGroup, COLLISION_GROUP_DEBRIS_TRIGGER);
 }
-
-
-// enable and disables no block temp
-// needs to be updated to use newer collision setting if we roll with this
-
-/*
-// no block
-public Action stuck_callback(client,args)
-{	
-	static int next = 0;
-	
-	if(GetTime() < next)
-	{
-		PrintToChat(client, "%s stuck is on cooldown!", JB_PREFIX);
-		return Plugin_Handled;
-	}
-	
-	if(!noblock_enabled() && IsPlayerAlive(client))
-	{
-		// 3 second usage delay
-		next = GetTime() + 5;
-		
-		
-		PrintToChatAll("%s Player %N unstuck everyone!", JB_PREFIX, client);
-		disable_block_all();
-		
-		CreateTimer(3.0, block_timer_callback);
-	}
-	return Plugin_Handled;
-}
-
-public Action block_timer_callback(Handle timer)
-{
-	enable_block_all();
-}
-*/
