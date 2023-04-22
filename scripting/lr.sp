@@ -144,7 +144,7 @@ bool lr_ready = false;
 // unity build
 #include "lr/debug.sp"
 #include "lr/hook.sp"
-#include "/lr/knife_fight.sp"
+#include "lr/knife_fight.sp"
 #include "lr/dodgeball.sp"
 #include "lr/grenade.sp"
 #include "lr/no_scope.sp"

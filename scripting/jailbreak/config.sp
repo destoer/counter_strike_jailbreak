@@ -60,6 +60,7 @@ void create_jb_convar()
     armor_cvar = CreateConVar("jb_armor","0","give ct armor on spawn");
     warden_block_cvar = CreateConVar("jb_warden_block","1","enable warden block commands");
 
+    // used for hosties replacment
     mute_cvar = CreateConVar("jb_mute","1","mute t's at round start");
     print_rebel_cvar = CreateConVar("jb_rebel","1","print rebels being killed");
 

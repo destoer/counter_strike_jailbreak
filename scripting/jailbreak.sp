@@ -31,6 +31,7 @@ TODO make all names consistent
 #define MEMBER 		ADMFLAG_CUSTOM2
 #define ADMIN		ADMFLAG_BAN
 #define DEBUG
+//#define VOICE_ANNOUNCE_HOOK
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi"
 #define PLUGIN_VERSION "V3.6.3 - Violent Intent Jailbreak"
@@ -40,7 +41,7 @@ TODO make all names consistent
 */
 
 
-#define WARDAY_ROUND_COUNT 5
+#define WARDAY_ROUND_COUNT 8
 int warday_round_counter = 0;
 bool warday_active = false;
 
@@ -133,11 +134,16 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 native bool IsClientSpeaking(int client);
 
+bool sd_enabled()
+{
+	return check_command_exists("sd");
+}
+
 public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon)
 {
 /*
 	// if on a laser day dont allow lasers
-	if(sd_current_day() == laser_day && sd_current_state() != sd_inactive)
+	if(sd_enabled() && sd_current_day() == laser_day && sd_current_state() != sd_inactive)
 	{
 		return Plugin_Continue;
 	}
@@ -229,15 +235,31 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 }
 
 
-// NOTE: SM 1.11 use OnClientSpeaking
-public void OnClientSpeakingEx(int client)
+void voice_internal(int client)
 {
 	if(voice && GetClientTeam(client) == CS_TEAM_CT && IsPlayerAlive(client) && warden_id == WARDEN_INVALID)
 	{
 		set_warden(client);
-	}
+	}	
 }
 
+#if defined VOICE_ANNOUNCE_HOOK
+
+// provided for back compat
+public void OnClientSpeakingEx(int client)
+{
+	voice_internal(client);
+}
+
+#else
+
+// NOTE: requires SM 1.11
+public void OnClientSpeaking(int client)
+{
+	voice_internal(client);
+}
+
+#endif
 
 public OnMapStart()
 {
@@ -520,7 +542,7 @@ public Action print_warden_text_all(Handle timer)
 {
 
 	
-	if(sd_current_state() != sd_inactive)
+	if(sd_enabled() && sd_current_state() != sd_inactive)
 	{
 		return Plugin_Continue;
 	}
@@ -654,8 +676,11 @@ public print_warden_commands(client)
 	PrintToChat(client,"%s!marker  %s- %s+marker, use mouse to adjust size, then -marker",color1,color2,color3);
 
 
-	PrintToChat(client,"%s!wsd           %s- %sstart sd after %d rounds",color1,color2,color3,ROUND_WARDEN_SD);
-	PrintToChat(client,"%s!wsd_ff           %s- %sstart ff sd after %d rounds",color1,color2,color3,ROUND_WARDEN_SD);
+	if(sd_enabled())
+	{
+		PrintToChat(client,"%s!wsd           %s- %sstart sd after %d rounds",color1,color2,color3,ROUND_WARDEN_SD);
+		PrintToChat(client,"%s!wsd_ff           %s- %sstart ff sd after %d rounds",color1,color2,color3,ROUND_WARDEN_SD);
+	}
 	PrintToChat(client,"%s!wd %s- %scall a warday %s",color1,color2,color3, warday_round_counter >= WARDAY_ROUND_COUNT? "ready" : "not ready");
 
 
@@ -675,7 +700,7 @@ public set_warden(int client)
 
 
 	// dont bother doing this on sds
-	if(sd_current_state() == sd_active)
+	if(sd_enabled() && sd_current_state() == sd_active)
 	{
 		return;
 	}
@@ -752,7 +777,7 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 			unmute_client(client);
 		}
 
-		if(sd_current_state() == sd_inactive)
+		if(sd_enabled() && sd_current_state() == sd_inactive)
 		{
 		
 			//taking this information off clients is not functioning reliably
@@ -903,7 +928,7 @@ public void OnClientPutInServer(int client)
 
 public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
 {
-	if(sd_current_state() != sd_inactive)
+	if(sd_enabled() && sd_current_state() != sd_inactive)
 	{
 		return Plugin_Continue;
 	}
@@ -919,7 +944,7 @@ public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damaget
 public Action weapon_equip(int client, int weapon) 
 {
 	// dont care
-	if(GetClientTeam(client) == CS_TEAM_CT || sd_current_state() != sd_inactive)
+	if(GetClientTeam(client) == CS_TEAM_CT || sd_enabled() && sd_current_state() != sd_inactive)
 	{
 		return Plugin_Continue;
 	}
