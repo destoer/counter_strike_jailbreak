@@ -797,7 +797,7 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 			}		
 		}
 				
-		if(GetClientTeam(client) == CS_TEAM_CT && armor)
+		if(GetClientTeam(client) == CS_TEAM_CT)
 		{
 			if(helmet)
 			{
