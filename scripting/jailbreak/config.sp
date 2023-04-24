@@ -18,6 +18,7 @@ ConVar warden_block_cvar;
 ConVar mute_cvar;
 ConVar print_rebel_cvar;
 ConVar guns_cvar;
+ConVar helmet_cvar;
 
 #define PREFIX_SIZE 128
 
@@ -36,6 +37,7 @@ bool warden_block;
 bool mute;
 bool print_rebel;
 bool guns;
+bool helmet;
 
 void create_jb_convar()
 {
@@ -53,18 +55,19 @@ void create_jb_convar()
     // common
     noblock_cvar = CreateConVar("jb_noblock","1","players pass through eachover");
     stuck_cvar = CreateConVar("jb_stuck","1","enable stuck command");
-    laser_cvar = CreateConVar("jb_kill_laser","1","enable kill laser");
-    t_laser_cvar = CreateConVar("jb_t_laser","1","enable t laser");
-    gun_cvar = CreateConVar("jb_gun_commands","1","enable ct gun menu");
+    laser_cvar = CreateConVar("jb_kill_laser","0","enable kill laser");
+    t_laser_cvar = CreateConVar("jb_t_laser","0","enable t laser");
+    gun_cvar = CreateConVar("jb_gun_commands","0","enable ct gun menu");
     voice_cvar = CreateConVar("jb_warden_voice","1","enable getting warden from voice");
-    armor_cvar = CreateConVar("jb_armor","0","give ct armor on spawn");
+    armor_cvar = CreateConVar("jb_armor","1","give ct armor on spawn");
+    helmet_cvar = CreateConVar("jb_helmet","1","give ct helmet+kevlar on spawn");
     warden_block_cvar = CreateConVar("jb_warden_block","1","enable warden block commands");
 
     // used for hosties replacment
-    mute_cvar = CreateConVar("jb_mute","1","mute t's at round start");
-    print_rebel_cvar = CreateConVar("jb_rebel","1","print rebels being killed");
+    mute_cvar = CreateConVar("jb_mute","0","mute t's at round start");
+    print_rebel_cvar = CreateConVar("jb_rebel","0","print rebels being killed");
 
-    guns_cvar = CreateConVar("jb_guns","1","give ct's guns at round start");
+    guns_cvar = CreateConVar("jb_guns","0","give ct's guns at round start");
 }
 
 void setup_jb_convar()
@@ -99,6 +102,7 @@ void setup_jb_convar()
     stuck = GetConVarInt(stuck_cvar) > 0;
     voice = GetConVarInt(voice_cvar) > 0;
     armor = GetConVarInt(armor_cvar) > 0;
+    helmet = GetConVarInt(helmet_cvar) > 0;
     warden_block = GetConVarInt(warden_block_cvar) > 0;
     mute = GetConVarInt(mute_cvar) > 0;
     print_rebel = GetConVarInt(print_rebel_cvar) > 0;

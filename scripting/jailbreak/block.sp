@@ -7,10 +7,20 @@
 #define _BLOCK_INCLUDE_included
 
 
-public disable_block_all()
+bool block_state = false;
+
+public jb_disable_block_all()
 {
+	block_state = false;
 	unblock_all_clients(SetCollisionGroup);
 }
+
+public jb_enable_block_all()
+{
+	block_state = true;
+	block_all_clients(SetCollisionGroup);
+}
+
 
 public Action disable_block_warden_callback(int client, int args)
 {
@@ -21,7 +31,7 @@ public Action disable_block_warden_callback(int client, int args)
 	}
 
 	PrintCenterTextAll("Player Collision: OFF");
-	disable_block_all();
+	jb_disable_block_all();
 	return Plugin_Handled;
 }
 
@@ -30,7 +40,7 @@ public Action disable_block_warden_callback(int client, int args)
 public Action disable_block_admin(int client, int args)
 {
 	PrintCenterTextAll("Player Collision: OFF!");
-	disable_block_all();
+	jb_disable_block_all();
 	return Plugin_Handled;
 }
 
@@ -38,13 +48,8 @@ public Action disable_block_admin(int client, int args)
 public Action enable_block_admin(int client, int args)
 {
 	PrintCenterTextAll("Player Collision: ON");
-	enable_block_all();	
+	jb_enable_block_all();	
 	return Plugin_Handled;
-}
-
-public enable_block_all()
-{
-	block_all_clients(SetCollisionGroup);
 }
 
 public Action enable_block_warden_callback(int client, int args)
@@ -55,6 +60,6 @@ public Action enable_block_warden_callback(int client, int args)
 	}
 
 	PrintCenterTextAll("Player Collision: ON");
-	enable_block_all();
+	jb_enable_block_all();
 	return Plugin_Handled;
 }

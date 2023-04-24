@@ -39,6 +39,8 @@ public Action is_blocked_cmd(int client, int args)
 
 	
 	PrintToChat(client, "%s blocked state: %s",WARDEN_PREFIX, noblock_enabled() ? "no block" : "block");
+	PrintToChat(client, "%s internal blocked state: %s",WARDEN_PREFIX, noblock_enabled() ? "no block" : "block");
+	
 	for (int i = 0; i < MaxClients; i++)
 	{
 		if(is_valid_client(i))

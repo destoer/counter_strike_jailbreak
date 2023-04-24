@@ -79,10 +79,10 @@ Handle client_laser_color_pref;
 
 // split files for this plugin
 #include "jailbreak/config.sp"
+#include "jailbreak/block.sp"
 #include "jailbreak/stuck.sp"
 #include "jailbreak/guns.sp"
 #include "jailbreak/laser.sp"
-#include "jailbreak/block.sp"
 #include "jailbreak/debug.sp"
 #include "jailbreak/cookies.sp"
 #include "jailbreak/color.sp"
@@ -296,12 +296,12 @@ public OnMapStart()
 
 	if(noblock)
 	{
-		disable_block_all();
+		jb_disable_block_all();
 	}
 
 	else
 	{
-		enable_block_all();
+		jb_enable_block_all();
 	}
 }
 
@@ -494,12 +494,12 @@ public OnPluginStart()
 	// if no block is default
 	if(noblock)
 	{
-		disable_block_all();
+		jb_disable_block_all();
 	}
 
 	else
 	{
-		enable_block_all();
+		jb_enable_block_all();
 	}
 	
 	for(int i = 1; i < MaxClients;i++)
@@ -808,9 +808,15 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 				
 		if(GetClientTeam(client) == CS_TEAM_CT && armor)
 		{
-			GivePlayerItem(client, "item_assaultsuit");
-			GivePlayerItem(client, "item_kevlar");
-			SetEntProp(client , Prop_Send, "m_ArmorValue", 50, 1);
+			if(helmet)
+			{
+				GivePlayerItem(client, "item_assaultsuit");
+			}
+
+			else if(armor)
+			{
+				GivePlayerItem(client, "item_kevlar");
+			}
 		}
 	}
 
@@ -843,12 +849,12 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 	// if we are running with block on reset the status on round start
 	if(noblock)
 	{
-		disable_block_all();
+		jb_disable_block_all();
 	}
 
 	else
 	{
-		enable_block_all();
+		jb_enable_block_all();
 	}
 	
 	// there is no warden

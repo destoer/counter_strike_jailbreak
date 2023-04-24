@@ -8,8 +8,6 @@
 
 bool timer_active = false;
 
-int old_group;
-
 public Action command_stuck(int client, int args)
 {
 	static int next = 0;
@@ -23,21 +21,15 @@ public Action command_stuck(int client, int args)
 	
 	if (IsClientInGame(client) && IsPlayerAlive(client) && !timer_active && !noblock_enabled())
 	{
-		old_group = GetEntProp(client, Prop_Data, "m_CollisionGroup");
 		// 5 second usage delay
 		next = GetTime() + 5;
 		
 		PrintToChatAll("%s %N unstuck all players", JB_PREFIX, client);    
 		timer_active = true;
-		CreateTimer(1.0, timer_unblock_player, client);
+		CreateTimer(2.0, timer_end_stuck, client);
 		
-		for (int i = 1; i <= MaxClients; i++)
-		{    
-			if (IsClientInGame(i) && IsPlayerAlive(i))
-			{
-				enable_anti_stuck(i);
-			}
-		}
+		// NOTE: we use the internal function as we want to use the others for state tracking of what block is meant to be
+		unblock_all_clients(SetCollisionGroup);
 	}
 	else if (timer_active)
 	{
@@ -54,29 +46,25 @@ public Action command_stuck(int client, int args)
 
 
 
-public Action timer_unblock_player(Handle timer, int client)
+public Action timer_end_stuck(Handle timer, int client)
 {
+	PrintToChatAll("unstuck over", JB_PREFIX);    
+
   	timer_active = false;
     
-	for (int i = 1; i <= MaxClients; i++)
-    {    
-        if (IsClientInGame(i) && IsPlayerAlive(i))
-        {
-            disable_anti_stuck(i);
-        }
-    }
+	// restore to correct state
+	// NOTE: this may not be the state before stuck was triggered
+	// as wub can change it while active...
+	if(block_state)
+	{
+		block_all_clients(SetCollisionGroup);
+	}
+
+	else
+	{
+		unblock_all_clients(SetCollisionGroup);
+	}
     
 	return Plugin_Continue;
     
-}
-
-void disable_anti_stuck(int client)
-{
-	// should be unrequired to save teh group at this point but ya know
-    SetClientCollision(client, SetCollisionGroup, old_group);
-}
-
-void enable_anti_stuck(int client)
-{
-    SetClientCollision(client, SetCollisionGroup, COLLISION_GROUP_DEBRIS_TRIGGER);
 }
