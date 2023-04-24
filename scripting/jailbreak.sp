@@ -777,7 +777,7 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 			unmute_client(client);
 		}
 
-		if(sd_enabled() && sd_current_state() == sd_inactive)
+		if(!sd_enabled() || sd_enabled() && sd_current_state() == sd_inactive)
 		{
 		
 			//taking this information off clients is not functioning reliably
@@ -786,18 +786,9 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 			// the first round we cant rely on it to be set as there are no players
 			// apparently hoping a empty team join will force a round reset aint good enough
 			
-			int dummy = 0;
-			bool first_round = CS_GetTeamScore(CS_TEAM_CT) + CS_GetTeamScore(CS_TEAM_T) <= 0;
-			bool force_setting = first_round || get_alive_team_count(GetClientTeam(client), dummy) <= 1;
-
-			if(noblock && (noblock_enabled(client) || force_setting))
+			if(block_state)
 			{
-				unblock_client(client, SetCollisionGroup);
-			}
-	
-			else if(!noblock && (!noblock_enabled(client) || force_setting))
-			{
-				block_client(client, SetCollisionGroup);
+				block_client(client,SetCollisionGroup);
 			}
 
 			else
