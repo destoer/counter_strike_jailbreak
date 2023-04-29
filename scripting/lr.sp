@@ -53,6 +53,8 @@ enum lr_type
     headshot_only,
     sumo,
     rebel,
+
+    // this is an invalid entry if we get this we have trouble
     error,
 }
 
@@ -70,7 +72,7 @@ new const String:lr_list[LR_SIZE][] =
     "Russian roulette",
     "Headshot only",
     "Rebel",
-    "Error",
+    "Error"
 /*
     "Sumo",
     "Race",
@@ -134,6 +136,16 @@ enum struct Choice
     // basic menu option
     int option;
 }
+
+enum struct LrTimer
+{
+    Timer timer;
+
+    int uniq;
+
+    int slot;
+}
+
 
 Choice lr_choice[64]
 
@@ -828,7 +840,8 @@ public Menu build_lr_menu()
 {
 	Menu menu = new Menu(lr_handler);
 
-	for (int i = 0; i < LR_SIZE; i++)
+    // Ignore the error choice
+	for (int i = 0; i < LR_SIZE - 1; i++)
 	{
 		menu.AddItem(lr_list[i], lr_list[i]);
 	}

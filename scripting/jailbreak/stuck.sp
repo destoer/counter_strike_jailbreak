@@ -48,7 +48,7 @@ public Action command_stuck(int client, int args)
 
 public Action timer_end_stuck(Handle timer, int client)
 {
-	PrintToChatAll("unstuck over", JB_PREFIX);    
+	PrintToChatAll("%S unstuck over", JB_PREFIX);    
 
   	timer_active = false;
     
