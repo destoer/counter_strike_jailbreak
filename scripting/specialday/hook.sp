@@ -251,7 +251,7 @@ public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 public Action OnPlayerHurt(Handle event, const String:name[], bool dont_broadcast)
 {
 	int hitgroup = GetEventInt(event, "hitgroup");
-	
+
 	if(sd_state == sd_active && special_day == headshot_day)
 	{
 		// if not a headshot cancel out damage
@@ -265,7 +265,7 @@ public Action OnPlayerHurt(Handle event, const String:name[], bool dont_broadcas
 			}
 		}
 	}
-	
+
 	return Plugin_Continue;
 }
 

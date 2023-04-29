@@ -55,25 +55,9 @@ public Action give_no_scope(Handle Timer, int client)
     return Plugin_Continue;
 }
 
-
-public int no_scope_handler(Menu menu, MenuAction action, int client, int choice)
-{
-    if(action == MenuAction_Select)
-    {
-        lr_choice[client].option = choice;
-        pick_partner(client);
-    }
-
-    else if (action == MenuAction_End)
-    {
-        delete menu;
-    }
-}
-
-
 void no_scope_menu(int client)
 {
-    Menu menu = new Menu(no_scope_handler);
+    Menu menu = new Menu(default_choice_handler);
     menu.SetTitle("Pick Gun");
 
     menu.AddItem("Awp","Awp");

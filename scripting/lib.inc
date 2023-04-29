@@ -10,6 +10,7 @@
 #define COLLISION_GROUP_DEBRIS_TRIGGER 2 // noblock
 #define COLLISION_GROUP_PUSHAWAY 17 // antistuck
 
+#define HITGROUP_HEAD 1
 
 stock bool is_muted(int client)
 {

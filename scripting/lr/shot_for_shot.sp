@@ -97,25 +97,9 @@ void start_shot_for_shot(int t_slot, int ct_slot, bool mag)
 }
 
 
-
-public int shot_for_shot_handler(Menu menu, MenuAction action, int client, int choice)
-{
-    if(action == MenuAction_Select)
-    {
-        lr_choice[client].option = choice;
-        pick_partner(client);
-    }
-
-    else if (action == MenuAction_End)
-    {
-        delete menu;
-    }
-}
-
-
 void shot_for_shot_menu(int client)
 {
-    Menu menu = new Menu(no_scope_handler);
+    Menu menu = new Menu(default_choice_handler);
     menu.SetTitle("Pick Gun");
 
     menu.AddItem("Deagle","Deagle");

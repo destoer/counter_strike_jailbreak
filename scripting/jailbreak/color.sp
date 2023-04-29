@@ -120,3 +120,54 @@ public int player_color_handler(Menu menu, MenuAction action, int client, int ch
 	
 	return 0;
 }
+
+/*
+int team_count = 0;
+
+// ideally we would pass the client sight through
+public int player_color_team_handler(Menu menu, MenuAction action, int client, int choice)
+{
+	if(action == MenuAction_Select) 
+	{
+		int teams = choice + 1;
+
+		// Get all players on T into a list
+		
+		// Split into each team
+		int count = 
+
+		int each = count / teams;
+
+		// Color each team
+
+	
+		// Color the odd player in Yellow if any
+	}
+
+	
+	else if (action == MenuAction_Cancel) 
+	{
+		PrintToServer("Client %d's menu was cancelled. Reason: %d", client, choice);
+	}	
+} 
+
+public Action make_teams(int client, int args)
+{
+	if(client != warden_id)
+	{
+		return Plugin_Handled;
+	}
+
+	
+	// ask how many teams
+	Panel lasers = new Panel();
+	lasers.SetTitle("Number of teams");
+	lasers.DrawItem("2");
+	lasers.DrawItem("3");
+	lasers.DrawItem("4");
+	lasers.DrawItem("5");
+
+	lasers.Send(client,player_color_team_handler,20);
+
+}
+*/

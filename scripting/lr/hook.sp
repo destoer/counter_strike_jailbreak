@@ -6,7 +6,10 @@ void purge_state()
     for(int i = 0; i < LR_SLOTS; i++)
     {
         end_lr(slots[i]);
-    }        
+    
+    }
+
+    reset_use_key();        
 }
 
 public Action OnRoundStart(Handle event, const String:name[], bool dontBroadcast)
@@ -164,12 +167,63 @@ public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &
             {
                 return Plugin_Handled;
             }
-        }        
+        }
+    /*
+        case race:
+        {
+            return Plugin_Handled;
+        }
+    */        
     }
     
 
     return Plugin_Continue;
 }
+
+
+public Action OnPlayerHurt(Handle event, const String:name[], bool dont_broadcast)
+{
+    int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+    int victim = GetClientOfUserId(GetEventInt(event, "userid"));
+
+    // both not in lr
+    if(!in_lr(victim) && !in_lr(attacker))
+    {
+        return Plugin_Continue;
+    }
+
+    // not in the same lr
+    else if(!is_pair(attacker,victim))
+    {
+        return Plugin_Handled;
+    }
+
+
+    int hitgroup = GetEventInt(event, "hitgroup");
+
+    int id = get_slot(attacker);
+
+    switch(slots[id].type)
+    {
+        case headshot_only:
+        {
+            // if not a headshot cancel out damage
+            if(hitgroup != HITGROUP_HEAD)
+            {
+                if(is_valid_client(victim))
+                {
+                    // why cant i use setentityhealth here?
+                    SetEntProp(victim,Prop_Send,"m_iHealth",100,4);
+                }
+            }
+        }
+    }
+
+
+    return Plugin_Continue;
+}
+
+
 
 // make team damage the same as cross team damage
 
@@ -218,7 +272,14 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
                 damage = 0.0;
                 return Plugin_Changed;
             }
-        } 
+        }
+    /*
+        case race:
+        {
+            damage = 0.0;
+            return Plugin_Changed;
+        }
+    */
     }
 
 
@@ -368,6 +429,47 @@ public void OnClientPutInServer(int client)
     SDKHook(client, SDKHook_WeaponEquip, OnWeaponEquip); // block weapon pickups
     SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
     SDKHook(client, SDKHook_WeaponDrop, OnWeaponDrop);
+}
+
+
+public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon)
+{
+    bool in_use = (buttons & IN_USE) == IN_USE;
+
+    int id = get_slot(client);
+
+    if(id == INVALID_SLOT)
+    {
+        return Plugin_Continue;
+    }
+
+
+    switch(slots[id].type)
+    {
+        case knife_fight:
+        {
+            if(view_as<knife_choice>(slots[id].option) == knife_fly)
+            {
+                if(in_use && !use_key[client])
+                {
+                    if(GetEntityMoveType(client) == MOVETYPE_FLY)
+                    {
+                        SetEntityMoveType(client, MOVETYPE_WALK);
+                    }
+                    
+                    else
+                    {
+                        SetEntityMoveType(client, MOVETYPE_FLY);
+                    }
+                }
+            }
+        }
+    }
+
+
+    use_key[client] = in_use;
+
+    return Plugin_Continue;
 }
 
 public OnMapStart()

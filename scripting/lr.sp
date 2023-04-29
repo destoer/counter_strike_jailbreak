@@ -15,16 +15,11 @@
 
 
 /*
--Add gravity options for dodgeball and nadewar
--Add more guns in noscope (AWP,Scout,SG550,G3SG1) with knife
--Add more guns in shot4shot and mag4mag (Glock,USP,P228,Fiveseven,Deagle,Elite)
--Add more styles in knife fight (Speed mode, Drunk mode, Low grav mode)
 -Add more gun options in shotgun war, and change name to war
 
 // TODO: later
 -Add back button in LR menu
 -Add sumo lr
--Add headshot only
 -Add chicken fight lr
 -Add hot potato lr
 -Add auto open LR menu to non rebellers when availiable
@@ -55,10 +50,13 @@ enum lr_type
     mag_for_mag,
     shotgun_war,
     russian_roulette,
+    headshot_only,
+    sumo,
     rebel,
+    error,
 }
 
-const int LR_SIZE = 10;
+const int LR_SIZE = 12;
 new const String:lr_list[LR_SIZE][] =
 {	
     "Knife fight",
@@ -70,13 +68,15 @@ new const String:lr_list[LR_SIZE][] =
     "Mag for Mag",
     "Shotgun war",
     "Russian roulette",
+    "Headshot only",
     "Rebel",
+    "Error",
 /*
     "Sumo",
     "Race",
     "Rock paper scissors",
     "Hot potato",
-    "Chicken fight",
+    "Chicken fight", // (Yeah screw this one)
 */
 };
 
@@ -130,6 +130,8 @@ Menu lr_menu;
 enum struct Choice
 {
     lr_type type;
+    
+    // basic menu option
     int option;
 }
 
@@ -141,9 +143,10 @@ bool rebel_lr_active = false;
 
 bool lr_ready = false;
 
+bool use_key[MAXPLAYERS+1] = {false};
+
 // unity build
 #include "lr/debug.sp"
-#include "lr/hook.sp"
 #include "lr/knife_fight.sp"
 #include "lr/dodgeball.sp"
 #include "lr/grenade.sp"
@@ -152,8 +155,11 @@ bool lr_ready = false;
 #include "lr/shot_for_shot.sp"
 #include "lr/shotgun_war.sp"
 #include "lr/russian_roulette.sp"
+#include "lr/headshot_only.sp"
+//#include "lr/race.sp"
 #include "lr/rebel.sp"
 #include "lr/config.sp"
+#include "lr/hook.sp"
 
 // handle for sdkcall
 Handle SetCollisionGroup;
@@ -164,6 +170,15 @@ public Action command_cancel_lr(int client , int args)
     {
         end_lr(slots[i]);
     }        
+}
+
+
+void reset_use_key()
+{
+	for (int i = 0; i < MAXPLAYERS + 1; i++)
+	{
+		use_key[i] = false;
+	}
 }
 
 public OnPluginStart()
@@ -191,6 +206,7 @@ public OnPluginStart()
     
     HookEvent("weapon_zoom",OnWeaponZoom,EventHookMode_Pre);
     HookEvent("weapon_fire",OnWeaponFire,EventHookMode_Post);
+    HookEvent("player_hurt", OnPlayerHurt);
 
     for(int i = 0; i < MaxClients;i++)
     {
@@ -271,7 +287,17 @@ void end_lr(LrSlot slot)
     if(is_valid_client(slot.client) && IsPlayerAlive(slot.client))
     {
         SetEntityHealth(slot.client,100);
-        strip_all_weapons(slot.client);        
+        strip_all_weapons(slot.client);
+        SetEntityGravity(slot.client,1.0);
+        set_client_speed(slot.client,1.0);
+
+        if(GetEntityMoveType(slot.client) == MOVETYPE_FLY)
+        {
+            PrintToChatAll("%s LR finished moving %N back to spawn",LR_PREFIX,slot.client);
+            CS_RespawnPlayer(slot.client);
+        }
+
+        SetEntityMoveType(slot.client, MOVETYPE_WALK);        
 
         if(GetClientTeam(slot.client) == CS_TEAM_CT)
         {
@@ -286,7 +312,7 @@ void end_lr(LrSlot slot)
         }
     }
 
-
+    slot.type = error;
     slot.active = false;
     slot.client = -1;
     slot.option = 0;
@@ -319,6 +345,21 @@ void end_lr(LrSlot slot)
 
     end_line(slot);
 }
+
+public int default_choice_handler(Menu menu, MenuAction action, int client, int choice)
+{
+    if(action == MenuAction_Select)
+    {
+        lr_choice[client].option = choice;
+        pick_partner(client);
+    }
+
+    else if (action == MenuAction_End)
+    {
+        delete menu;
+    }
+}
+
 
 int get_inactive_slot()
 {
@@ -478,9 +519,24 @@ public Action start_lr_callback(Handle timer, int id)
             start_shotgun_war(t_slot,ct_slot);
         }
 
+        case headshot_only:
+        {
+            start_headshot_only(t_slot,ct_slot);
+        }
+
         case russian_roulette:
         {
             start_russian_roulette(t_slot,ct_slot);
+        }
+/*
+        case race:
+        {
+            start_race(t_slot,ct_slot);
+        }
+*/
+        case error:
+        {
+            PrintToConsole(console,"%s An error has occured in picking an lr");
         }
     }
 
@@ -723,6 +779,26 @@ public int lr_select(int client, int lr)
             shot_for_shot_menu(client);
         }
 
+        case grenade:
+        {
+            grenade_menu(client);
+        }
+
+        case dodgeball:
+        {
+            dodgeball_menu(client);
+        }
+
+        case knife_fight:
+        {
+            knife_fight_menu(client);
+        }
+/*
+        case race:
+        {
+            race_menu(client);
+        }
+*/
         default:
         {
             pick_partner(client);            

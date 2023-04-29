@@ -6,8 +6,6 @@
 #endif
 #define HEADSHOT_INCLUDE_included
 
-#define HITGROUP_HEAD 1
-
 void StartHeadshot()
 {
 	
