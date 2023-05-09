@@ -19,6 +19,7 @@ ConVar mute_cvar;
 ConVar print_rebel_cvar;
 ConVar guns_cvar;
 ConVar helmet_cvar;
+ConVar admin_laser_cvar;
 
 #define PREFIX_SIZE 128
 
@@ -38,6 +39,7 @@ bool mute;
 bool print_rebel;
 bool guns;
 bool helmet;
+bool admin_laser;
 
 void create_jb_convar()
 {
@@ -68,6 +70,8 @@ void create_jb_convar()
     print_rebel_cvar = CreateConVar("jb_rebel","0","print rebels being killed");
 
     guns_cvar = CreateConVar("jb_guns","0","give ct's guns at round start");
+
+    admin_laser_cvar = CreateConVar("jb_admin_laser","0","enable admin laser");
 }
 
 void setup_jb_convar()
@@ -107,6 +111,7 @@ void setup_jb_convar()
     mute = GetConVarInt(mute_cvar) > 0;
     print_rebel = GetConVarInt(print_rebel_cvar) > 0;
     guns = guns_cvar.IntValue > 0;
+    admin_laser = GetConVarInt(admin_laser_cvar) > 0;
 
 
     if(game == Engine_CSGO)

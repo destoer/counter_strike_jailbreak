@@ -183,7 +183,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 #endif		
 	}
 	
-	else if(CheckCommandAccess(client, "generic_admin", ADMIN, false))
+	else if(CheckCommandAccess(client, "generic_admin", ADMIN, false) && admin_laser)
 	{
 		type = admin;
 	}
