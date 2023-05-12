@@ -61,6 +61,7 @@ Handle SetCollisionGroup;
 
 bool rebel[64];
 
+bool warden_text[64];
 
 #include <sourcemod>
 #include <sdktools>
@@ -75,6 +76,8 @@ bool rebel[64];
 
 Handle client_laser_draw_pref;
 Handle client_laser_color_pref;
+Handle client_warden_text_pref;
+
 
 
 // split files for this plugin
@@ -275,6 +278,7 @@ public OnMapStart()
 
 
 	PrecacheSound("bot\\what_have_you_done.wav");
+	PrecacheSound("bot\\its_all_up_to_you_sir.wav");
 	
 	// laser draw timer
 	CreateTimer(0.1, laser_draw, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
@@ -289,6 +293,7 @@ public OnMapStart()
 	{
 		laser_use[i] = false;
 		use_draw_laser_settings[i] = false;
+		warden_text[i] = true;
 	}
 	
 	
@@ -321,6 +326,7 @@ public void OnClientConnected(int client)
 	{
 		use_draw_laser_settings[client] = false;
 		laser_color[client] = 0;
+		warden_text[client] = true;
 	}
 
 	mute_client(client);
@@ -332,6 +338,7 @@ public void OnClientDisconnect(int client)
 	use_draw_laser_settings[client] = false;
 	laser_color[client] = 0;
 	rebel[client] = false;
+	warden_text[client] = false;
 	if(client == warden_id)
 	{
 		warden_id = WARDEN_INVALID;
@@ -458,6 +465,7 @@ public OnPluginStart()
 #else
 	RegConsoleCmd("laser", laser_menu);
 #endif
+	RegConsoleCmd("warden_text",warden_text_menu);
 
 
 	if(t_laser)
@@ -537,6 +545,44 @@ public Action force_open_callback (int client, int args)
 	return Plugin_Handled;
 }
 
+public Action warden_text_menu(int client,int args) 
+{
+	Panel options = new Panel();
+	options.SetTitle("Text selection");
+	options.DrawItem("disabled");
+	options.DrawItem("enabled");
+	
+	if(IsClientInGame(client) && GetClientTeam(client) == CS_TEAM_CT || GetClientTeam(client) == CS_TEAM_T )
+	{
+		options.Send(client, warden_text_handler, 20);
+	}
+	
+	delete options;
+	return Plugin_Handled;
+}
+
+public warden_text_handler(Menu menu, MenuAction action, int client, int param2) 
+{
+	if(action == MenuAction_Select) 
+	{
+		switch(param2)
+		{
+			case 1:
+				warden_text[client] = false;
+				
+			case 2:
+				warden_text[client] = true;
+		}
+		
+		set_cookie_int(client,warden_text[client],client_warden_text_pref);
+	}
+	
+	else if (action == MenuAction_Cancel) 
+	{
+		PrintToServer("Client %d's menu was cancelled. Reason: %d",client,param2);
+	}	
+}
+
 // Top Screen Warden Printing
 public Action print_warden_text_all(Handle timer)
 {
@@ -556,13 +602,13 @@ public Action print_warden_text_all(Handle timer)
 		if(warden_id != WARDEN_INVALID)
 		{
 			
-			Format(buf, sizeof(buf), "Current Warden: %N", warden_id);
+			Format(buf, sizeof(buf), "Current Warden:  %N  ", warden_id);
 		}
 
 
 		else
 		{
-			Format(buf, sizeof(buf), "Current Warden: N/A");
+			Format(buf, sizeof(buf), "Current Warden:  N/A  ");
 		}
 	}
 
@@ -588,7 +634,7 @@ public Action print_warden_text_all(Handle timer)
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		// is its a valid client
-		if (IsClientInGame(i) && !IsFakeClient(i))
+		if (IsClientInGame(i) && !IsFakeClient(i) && warden_text[i])
 		{
 			ShowSyncHudText(i, h_hud_text, buf);
 		}
@@ -707,7 +753,6 @@ public set_warden(int client)
 
 	if(is_sudoer(client))
 	{
-
 		EmitSoundToAll("bot\\what_have_you_done.wav");
 	}
 
@@ -753,10 +798,15 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 	
 	int new_warden = 0;
 	// if there is only one ct left alive automatically warden him
-	if(get_alive_team_count(CS_TEAM_CT,new_warden) == 1 && new_warden != 0)
+	if(get_alive_team_count(CS_TEAM_CT,new_warden) == 1 && GetClientTeam(client) == CS_TEAM_CT && new_warden != 0)
 	{
 		if(warden_id == WARDEN_INVALID)
 		{
+			if(!is_sudoer(new_warden))
+			{
+				EmitSoundToAll("bot\\its_all_up_to_you_sir.wav");
+			}
+
 			set_warden(new_warden);
 		}
 	}

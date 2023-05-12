@@ -20,7 +20,7 @@ bool laser_kill = false;
 
 
 // what has the clients picked for laser color
-int laser_color[64];
+int laser_color[MAXPLAYERS+1];
 
 #define LASER_COLOR_SIZE 7
 int laser_colors[LASER_COLOR_SIZE][4] =
@@ -78,12 +78,7 @@ public int color_handler(Menu menu, MenuAction action, int client, int choice)
 	{
 		laser_color[client] = choice - 1;
 		
-
-		char cookie[12];
-		IntToString(laser_color[client], cookie, sizeof(cookie));
-		
-		SetClientCookie(client, client_laser_color_pref, cookie);
-
+		set_cookie_int(client,laser_color[client],client_laser_color_pref);
 	}
 
 	
@@ -196,11 +191,7 @@ public laser_handler(Menu menu, MenuAction action, int client, int param2)
 				use_draw_laser_settings[client] = true;
 		}
 		
-		char cookie[12];
-		IntToString(use_draw_laser_settings[client], cookie, sizeof(cookie));
-		
-		SetClientCookie(client, client_laser_draw_pref, cookie);
-	
+		set_cookie_int(client,use_draw_laser_settings[client],client_laser_draw_pref);
 	}
 	
 	else if (action == MenuAction_Cancel) 
