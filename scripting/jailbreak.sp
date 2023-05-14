@@ -34,7 +34,7 @@ TODO make all names consistent
 //#define VOICE_ANNOUNCE_HOOK
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi"
-#define PLUGIN_VERSION "V3.6.4 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.6.5 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -61,7 +61,7 @@ Handle SetCollisionGroup;
 
 bool rebel[64];
 
-bool warden_text[64];
+bool warden_text[MAXPLAYERS + 1];
 
 #include <sourcemod>
 #include <sdktools>
@@ -349,6 +349,13 @@ public void OnClientDisconnect(int client)
 
 public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs)
 {
+	// hook zombie commands
+	if(StrContains(sArgs,"ztele") != -1 || StrContains(sArgs,"zspawn") != -1)
+	{
+		PrintToChatAll("%s %N just tried to do something very stupid",JB_PREFIX,client);
+		return Plugin_Handled;
+	}
+
 	// hide commands typed by sudoers
 	if(is_sudoer(client) && (sArgs[0] == '/' || sArgs[0] == '!'))
 	{
@@ -399,7 +406,6 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	
 	return Plugin_Continue;
 }
-
 
 // init the plugin
 public OnPluginStart()
