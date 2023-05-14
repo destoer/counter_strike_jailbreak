@@ -58,6 +58,7 @@ int warden_id = WARDEN_INVALID;
 // handle for sdkcall
 Handle SetCollisionGroup;
 
+int z_command_count = 0;
 
 bool rebel[64];
 
@@ -352,7 +353,17 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	// hook zombie commands
 	if(StrContains(sArgs,"ztele") != -1 || StrContains(sArgs,"zspawn") != -1)
 	{
-		PrintToChatAll("%s %N just tried to do something very stupid",JB_PREFIX,client);
+		z_command_count++;
+		if(z_command_count >= 3)
+		{
+			ForcePlayerSuicide(client);
+		}
+
+		else
+		{
+			PrintToChatAll("%s %N just tried to do something very stupid",JB_PREFIX,client);
+		}
+
 		return Plugin_Handled;
 	}
 
@@ -883,6 +894,7 @@ public Action round_end(Handle event, const String:name[], bool dontBroadcast)
 
 public Action round_start(Handle event, const String:name[], bool dontBroadcast) 
 {
+	z_command_count = 0;
 	warday_active = false;
 	warday_round_counter++;
 
