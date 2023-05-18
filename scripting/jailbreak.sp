@@ -703,7 +703,7 @@ public Action become_warden(int client, int args)
 	// already a warden
 	else
 	{
-		PrintToChat(client, "%s There is already a warden.", WARDEN_PREFIX);
+		PrintToChat(client, "%s %N is already a warden.", WARDEN_PREFIX,warden_id);
 	}
 	
 	return Plugin_Handled;
