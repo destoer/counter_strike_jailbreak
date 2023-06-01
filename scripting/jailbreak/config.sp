@@ -56,7 +56,7 @@ void create_jb_convar()
 
     // common
     noblock_cvar = CreateConVar("jb_noblock","0","players pass through eachover");
-    stuck_cvar = CreateConVar("jb_stuck","1","enable stuck command");
+    stuck_cvar = CreateConVar("jb_stuck","0","enable stuck command");
     laser_cvar = CreateConVar("jb_kill_laser","0","enable kill laser");
     t_laser_cvar = CreateConVar("jb_t_laser","0","enable t laser");
     gun_cvar = CreateConVar("jb_gun_commands","0","enable ct gun menu");

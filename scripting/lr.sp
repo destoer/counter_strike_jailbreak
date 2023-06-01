@@ -51,7 +51,6 @@ enum lr_type
     shotgun_war,
     russian_roulette,
     headshot_only,
-    sumo,
     rebel,
 
     // this is an invalid entry if we get this we have trouble
