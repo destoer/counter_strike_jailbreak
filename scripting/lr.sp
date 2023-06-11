@@ -219,7 +219,7 @@ public OnPluginStart()
     HookEvent("weapon_fire",OnWeaponFire,EventHookMode_Post);
     HookEvent("player_hurt", OnPlayerHurt);
 
-    for(int i = 0; i < MaxClients;i++)
+    for(int i = 1; i < MaxClients; i++)
     {
         if(is_valid_client(i))
         {
