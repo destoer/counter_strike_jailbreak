@@ -245,13 +245,27 @@ void do_draw(int client, int color[4])
 	bool initial_draw = prev_pos[client][0] == 0.0 && prev_pos[client][1] == 0.0 
 		&& prev_pos[client][2] == 0.0;
 	
-	// cut off lines that are too long to stop abuse
-	float distance_vec[3];
-	SubtractVectors(cur_pos,prev_pos[client],distance_vec);
 
-	float length = GetVectorLength(distance_vec);
+	// we only want to allow drawing on a wall or fall not lines between
+	// i.e on a 2d plane, as we are in a 3d space all we have to do is simply check
+	// that only all 3 cordinates have not changed
+	// change is set reasonably high to allow a smooth transistion onto a different plane
+	// if drawing is not happening too quickly
+	const float CHANGE_LIM = 3.0;
 
-	if(!initial_draw && length <= 300.0)
+	int change_count = 0;
+
+	for(int i = 0; i < 3; i++)
+	{
+		float change = FloatAbs(cur_pos[i] - prev_pos[client][i]);
+
+		if(change >= CHANGE_LIM)
+		{
+			change_count++;
+		}
+	}
+
+	if(!initial_draw && change_count < 3)
 	{
 		// draw a line from the last laser end to the current one
 		TE_SetupBeamPoints(prev_pos[client], cur_pos, g_lbeam, 0, 0, 0, 25.0, 2.0, 2.0, 10, 0.0, color, 0);
