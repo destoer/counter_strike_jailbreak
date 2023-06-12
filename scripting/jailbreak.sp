@@ -34,7 +34,7 @@ TODO make all names consistent
 //#define VOICE_ANNOUNCE_HOOK
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi"
-#define PLUGIN_VERSION "V3.6.5 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.6.6 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -282,7 +282,7 @@ public OnMapStart()
 	PrecacheSound("bot\\its_all_up_to_you_sir.wav");
 	
 	// laser draw timer
-	CreateTimer(0.1, laser_draw, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+	CreateTimer(0.01, laser_draw, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 
 
 	CreateTimer(RING_LIFTEIME,beacon_callback , _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);

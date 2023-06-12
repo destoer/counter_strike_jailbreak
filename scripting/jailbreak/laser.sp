@@ -246,18 +246,20 @@ void do_draw(int client, int color[4])
 		&& prev_pos[client][2] == 0.0;
 	
 
-	// we only want to allow drawing on a wall or fall not lines between
+	// we only want to allow drawing on a wall or floor not lines between
 	// i.e on a 2d plane, as we are in a 3d space all we have to do is simply check
-	// that only all 3 cordinates have not changed
+	// that less than 3 cordinates changed
 	// change is set reasonably high to allow a smooth transistion onto a different plane
-	// if drawing is not happening too quickly
-	const float CHANGE_LIM = 3.0;
+	// if drawing is not happening too quickly i.e when drawing up ramps or slopes
+	const float CHANGE_LIM = 20.0;
 
 	int change_count = 0;
 
 	for(int i = 0; i < 3; i++)
 	{
 		float change = FloatAbs(cur_pos[i] - prev_pos[client][i]);
+
+		//PrintToChatAll("change %d : %f",i,change);
 
 		if(change >= CHANGE_LIM)
 		{
