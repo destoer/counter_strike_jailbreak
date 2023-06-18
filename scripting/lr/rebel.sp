@@ -1,4 +1,4 @@
-int rebel_player_init(int client)
+void rebel_player_init(int client)
 {
     rebel_lr_active = true;
 

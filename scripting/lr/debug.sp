@@ -48,7 +48,9 @@ public Action dump_slots(int client, int args)
         {
             print_slot(i);
         }
-    }    
+    }
+
+    return Plugin_Continue;    
 }
 
 public Action force_lr(int client, int args)

@@ -15,11 +15,13 @@ void purge_state()
 public Action OnRoundStart(Handle event, const String:name[], bool dontBroadcast)
 {
     purge_state();
+    return Plugin_Continue;
 }
 
 public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 {
     purge_state();
+    return Plugin_Continue;
 }
 
 public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcast)
@@ -52,6 +54,8 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
         lr_ready = true;
         PrintToChatAll("%s Last request is now ready type !lr",LR_PREFIX);
     }
+
+    return Plugin_Continue;
 
 }
 
@@ -138,6 +142,8 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
         int partner = slots[id].partner;
         end_lr_pair(id,partner);
     }
+
+    return Plugin_Continue;
 }
 
 //remove damage and aimpunch
@@ -297,10 +303,7 @@ public Action OnWeaponEquip(int client, int weapon)
         return Plugin_Continue;
     }
 
-    LrSlot slot;
-    slot = slots[id];
-
-    //print_slot(client,slot);
+    //print_slot(client,slot[id]);
 
     char weapon_string[32];
     GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
@@ -333,7 +336,7 @@ public Action OnEntitySpawn(int entity)
 
     if(id == INVALID_SLOT)
     {
-        return;
+        return Plugin_Continue;
     }
 
     switch(slots[id].type)
@@ -354,6 +357,8 @@ public Action OnEntitySpawn(int entity)
             }
 		}
     }
+
+    return Plugin_Continue;
 }
 
 public OnEntityCreated(int entity, const String:classname[])

@@ -1,4 +1,4 @@
-int shotgun_war_player_init(int id)
+void shotgun_war_player_init(int id)
 {
     int client = slots[id].client;
 

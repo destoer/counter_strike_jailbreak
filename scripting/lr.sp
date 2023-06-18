@@ -7,7 +7,7 @@
 #include "lib.inc"
 
 #define PLUGIN_AUTHOR "destoer(organ harvester)"
-#define PLUGIN_VERSION "V0.3.3 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V0.3.4 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -54,7 +54,7 @@ enum lr_type
     rebel,
 
     // this is an invalid entry if we get this we have trouble
-    error,
+    slot_error,
 }
 
 const int LR_SIZE = 12;
@@ -180,7 +180,9 @@ public Action command_cancel_lr(int client , int args)
     for(int i = 0; i < LR_SLOTS; i++)
     {
         end_lr(slots[i]);
-    }        
+    }
+
+    return Plugin_Continue;        
 }
 
 
@@ -323,7 +325,7 @@ void end_lr(LrSlot slot)
         }
     }
 
-    slot.type = error;
+    slot.type = slot_error;
     slot.active = false;
     slot.client = -1;
     slot.option = 0;
@@ -369,6 +371,8 @@ public int default_choice_handler(Menu menu, MenuAction action, int client, int 
     {
         delete menu;
     }
+
+    return 0;
 }
 
 
@@ -545,7 +549,7 @@ public Action start_lr_callback(Handle timer, int id)
             start_race(t_slot,ct_slot);
         }
 */
-        case error:
+        case slot_error:
         {
             PrintToConsole(console,"%s An error has occured in picking an lr");
         }
@@ -706,6 +710,7 @@ public int partner_handler(Menu menu, MenuAction action, int t, int param2)
         delete menu;
     }
   
+    return 0;
 }
 
 void pick_partner(int client)

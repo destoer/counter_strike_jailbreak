@@ -1,4 +1,4 @@
-int headshot_only_player_init(int id)
+void headshot_only_player_init(int id)
 {
     int client = slots[id].client;
 
