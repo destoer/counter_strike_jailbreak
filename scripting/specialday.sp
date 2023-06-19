@@ -355,6 +355,7 @@ public OnPluginStart()
 	}
 
 	RegConsoleCmd("sdspawn", sd_spawn); // spawn during zombie if late joiner
+	RegConsoleCmd("sd_spawn", sd_spawn);
 	RegConsoleCmd("sd_list", sd_list_callback); // list sds
 	
 	RegConsoleCmd("sm_samira", samira_EE);
@@ -388,8 +389,8 @@ public OnPluginStart()
 	HookEvent("round_end", OnRoundEnd);
 	
 	RegConsoleCmd("sd_info", sd_info_cmd);
-	RegConsoleCmd("enable_wsd",enable_wsd);
-	RegConsoleCmd("rig", rig_client);
+	RegAdminCmd("enable_wsd",enable_wsd,ADMFLAG_CUSTOM6);
+	RegAdminCmd("rig", rig_client,ADMFLAG_CUSTOM6);
 	
 	if(standalone)
 	{

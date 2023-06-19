@@ -13,18 +13,17 @@ void mute_t()
         }
     }
 
-    PrintToChatAll("%s T's are muted for the first 30 seconds",JB_PREFIX);
+    PrintToChatAll("%s Terrorists are muted for the first 30 seconds of the round!",JB_PREFIX);
 
     mute_timer = CreateTimer(30.0,unmute_t);
 }
-
 
 
 void unmute_all()
 {
     for(int i = 1; i < 64; i++)
     {
-        if(is_valid_client(i) & is_muted(i))
+        if(is_valid_client(i) & is_muted(i) && is_on_team(i))
         {
             unmute_client(i);
         }
@@ -37,5 +36,7 @@ public Action unmute_t(Handle timer)
 
     unmute_all();
 
-    PrintToChatAll("%s T's can now speak",JB_PREFIX);
+    PrintToChatAll("%s Terrorists may now speak... quietly...",JB_PREFIX);
+
+    return Plugin_Continue;
 }    

@@ -330,7 +330,11 @@ public void OnClientConnected(int client)
 		warden_text[client] = true;
 	}
 
-	mute_client(client);
+	// everyone else is currently muted mute on connect
+	if(mute && mute_timer != null && !is_admin(client))
+	{
+		mute_client(client);
+	}
 }
 
 public void OnClientDisconnect(int client)
@@ -504,7 +508,9 @@ public OnPluginStart()
 	RegConsoleCmd("is_muted", is_muted_cmd);
 	RegConsoleCmd("is_rebel", is_rebel_cmd);
 	RegConsoleCmd("wd_rounds",wd_rounds);
-	RegConsoleCmd("enable_wd",enable_wd);
+	RegAdminCmd("enable_wd",enable_wd,ADMFLAG_CUSTOM6);
+
+	RegConsoleCmd("wcommands",warden_commands);
 	
 	// hooks
 	HookEvent("round_start", round_start); // For the round start
@@ -709,9 +715,16 @@ public Action become_warden(int client, int args)
 	return Plugin_Handled;
 }
 
+public Action warden_commands(int client, int args) 
+{
+	print_warden_commands(client);
+
+	return Plugin_Continue;
+}
+
 // \n doesent work apparently...
 // \n doesent work apparently...
-public print_warden_commands(client)
+public print_warden_commands(int client)
 {
 	char color1[] = "\x07FF0000";
 	char color2[] = "\x07800080";
@@ -760,8 +773,6 @@ public print_warden_commands(client)
 
 public set_warden(int client)
 {
-
-
 	// dont bother doing this on sds
 	if(sd_enabled() && sd_current_state() == sd_active)
 	{
@@ -782,7 +793,7 @@ public set_warden(int client)
 	// set the actual warden
 	warden_id = client;
 	
-	print_warden_commands(warden_id);
+	PrintToChat(client,"%s Type !wcommands for a full list of commands",JB_PREFIX);
 	
 	// set the warden with special color
 	SetEntityRenderColor(warden_id, 0, 191, 0, 255);
@@ -940,7 +951,7 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 		// give ct's guns
 		if(guns && GetClientTeam(i) == CS_TEAM_CT)
 		{
-			GivePlayerItem(i,"weapon_deagle");
+			GivePlayerItem(i,"weapon_usp");
 			GivePlayerItem(i,"weapon_m4a1");
 		}
 

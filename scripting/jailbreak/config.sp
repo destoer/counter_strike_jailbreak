@@ -66,8 +66,8 @@ void create_jb_convar()
     warden_block_cvar = CreateConVar("jb_warden_block","1","enable warden block commands");
 
     // used for hosties replacment
-    mute_cvar = CreateConVar("jb_mute","0","mute t's at round start");
-    print_rebel_cvar = CreateConVar("jb_rebel","0","print rebels being killed");
+    mute_cvar = CreateConVar("jb_mute","1","mute t's at round start");
+    print_rebel_cvar = CreateConVar("jb_rebel","1","print rebels being killed");
 
     guns_cvar = CreateConVar("jb_guns","0","give ct's guns at round start");
 

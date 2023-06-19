@@ -3,10 +3,18 @@ void purge_state()
     rebel_lr_active = false;
     lr_ready = false;
 
+    for(int i = 0; i < MaxClients; i++)
+    {
+        if(is_valid_client(i))
+        {
+            SetEntityGravity(i,1.0);
+            set_client_speed(i,1.0);
+        }
+    }
+
     for(int i = 0; i < LR_SLOTS; i++)
     {
         end_lr(slots[i]);
-    
     }
 
     reset_use_key();        
@@ -53,6 +61,8 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
     {
         lr_ready = true;
         PrintToChatAll("%s Last request is now ready type !lr",LR_PREFIX);
+
+        EmitSoundToAll("lr/lr_enabled.mp3");
     }
 
     return Plugin_Continue;
@@ -484,6 +494,9 @@ public OnMapStart()
     g_lbeam = PrecacheModel("materials/sprites/laserbeam.vmt");
 
     purge_state();
+
+    AddFileToDownloadsTable("sound/lr/lr_enabled.mp3");
+    PrecacheSound("lr/lr_enabled.mp3");
 }
 
 public OnMapEnd()
