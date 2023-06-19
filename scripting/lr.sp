@@ -585,6 +585,12 @@ void start_lr_internal(int t, int ct, lr_type type)
 
 void start_lr(int t, int ct, lr_type type)
 {
+    // can't lr
+    if(!lr_ready)
+    {
+        return;
+    }
+
     if(!is_valid_t(t) || !is_valid_partner(ct))
     {
         return;
