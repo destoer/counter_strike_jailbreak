@@ -316,10 +316,10 @@ public OnMapEnd()
 	delete gun_menu;
 }
 
-// If the Warden leaves
 
-
-public void OnClientConnected(int client)
+// need to use this to be able to call client funcs
+// thanks tring
+public void OnClientPutInServer(int client)
 {
 	laser_use[client] = false;
 	rebel[client] = false;
@@ -337,6 +337,7 @@ public void OnClientConnected(int client)
 	}
 }
 
+// If the Warden leaves
 public void OnClientDisconnect(int client)
 {
 	laser_use[client] = false;
@@ -817,11 +818,8 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 		remove_warden();
 	}
 
-	if(!is_admin(client))
-	{
-		PrintToChat(client,"%s You are muted until the start of the round\n",client);
-		mute_client(client);
-	}
+	// Let them whine for a bit when they die
+	CreateTimer(3.0,mute_death,client);
 
 	
 	int new_warden = 0;

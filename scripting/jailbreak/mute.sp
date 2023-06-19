@@ -18,6 +18,15 @@ void mute_t()
     mute_timer = CreateTimer(30.0,unmute_t);
 }
 
+public Action mute_death(Handle timer, int client)
+{
+    if(is_valid_client(client) && !is_admin(client))
+    {
+        PrintToChat(client,"%s You are muted until the start of the round\n",client);
+		mute_client(client);
+    }
+}
+
 
 void unmute_all()
 {
