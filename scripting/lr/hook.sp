@@ -57,7 +57,7 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
     int unused;
     int alive_t = get_alive_team_count(CS_TEAM_T,unused);
 
-    if(alive_t == (LR_SLOTS / 2) && !lr_ready)
+    if(alive_t == (LR_SLOTS / 2) && !lr_ready && GetClientTeam(victim) == CS_TEAM_T)
     {
         lr_ready = true;
         PrintToChatAll("%s Last request is now ready type !lr",LR_PREFIX);
@@ -289,6 +289,24 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
                 return Plugin_Changed;
             }
         }
+
+        case sumo:
+        {
+            if(!slots[id].failsafe)
+            {
+                SlapPlayer(victim,0,true);
+                damage = 0.0;
+                return Plugin_Changed
+            }
+
+            // this has gone on too long start inflicting damage
+            else
+            {
+                SlapPlayer(victim,15,true);
+            }
+
+            return Plugin_Continue;
+        }
     /*
         case race:
         {
@@ -447,6 +465,25 @@ public void OnClientPutInServer(int client)
 }
 
 
+bool intersects_circle_origin(float origin[3], float radius, float pos[3])
+{
+    float v2[3]
+    float v1[3]
+
+    for(int i = 0; i < 2 ;i++)
+    {
+        v1[i] = origin[i];
+        v2[i] = pos[i];
+    }
+
+    // ignore z
+    v2[2] = 0.0;
+    v1[2] = 0.0;
+
+    // why is this / 2!?
+    return GetVectorDistance(v1, v2,false) <= radius / 2;
+}
+
 public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon)
 {
     bool in_use = (buttons & IN_USE) == IN_USE;
@@ -479,6 +516,18 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
                 }
             }
         }
+
+        case sumo:
+        {
+            float vec[3];
+            GetClientAbsOrigin(slots[id].client,vec);
+
+            // player is outside of ring kill them
+            if(!intersects_circle_origin(slots[id].pos,SUMO_RADIUS,vec))
+            {
+                ForcePlayerSuicide(slots[id].client);
+            }
+        }
     }
 
 
@@ -492,6 +541,7 @@ public OnMapStart()
     lr_menu = build_lr_menu();
 
     g_lbeam = PrecacheModel("materials/sprites/laserbeam.vmt");
+    g_lhalo = PrecacheModel("materials/sprites/halo01.vmt");
 
     purge_state();
 

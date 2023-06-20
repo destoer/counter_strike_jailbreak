@@ -7,7 +7,7 @@
 #include "lib.inc"
 
 #define PLUGIN_AUTHOR "destoer(organ harvester)"
-#define PLUGIN_VERSION "V0.3.4 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V0.3.5 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -19,7 +19,6 @@
 
 // TODO: later
 -Add back button in LR menu
--Add sumo lr
 -Add chicken fight lr
 -Add hot potato lr
 -Add auto open LR menu to non rebellers when availiable
@@ -51,13 +50,14 @@ enum lr_type
     shotgun_war,
     russian_roulette,
     headshot_only,
+    sumo,
     rebel,
 
     // this is an invalid entry if we get this we have trouble
     slot_error,
 }
 
-const int LR_SIZE = 12;
+const int LR_SIZE = 13;
 new const String:lr_list[LR_SIZE][] =
 {	
     "Knife fight",
@@ -70,10 +70,10 @@ new const String:lr_list[LR_SIZE][] =
     "Shotgun war",
     "Russian roulette",
     "Headshot only",
+    "Sumo",
     "Rebel",
     "Error"
 /*
-    "Sumo",
     "Race",
     "Rock paper scissors",
     "Hot potato",
@@ -105,6 +105,8 @@ enum struct LrSlot
     int bullet_chamber;
 
     bool restrict_drop;
+
+    bool failsafe;
 
     // this is the slot to our partner
     int partner;
@@ -149,12 +151,16 @@ enum struct LrTimer
 Choice lr_choice[64]
 
 int g_lbeam;
+int g_lhalo;
 
 bool rebel_lr_active = false;
 
 bool lr_ready = false;
 
 bool use_key[MAXPLAYERS+1] = {false};
+
+// handle for sdkcall
+Handle SetCollisionGroup;
 
 // unity build
 #include "lr/debug.sp"
@@ -168,12 +174,12 @@ bool use_key[MAXPLAYERS+1] = {false};
 #include "lr/russian_roulette.sp"
 #include "lr/headshot_only.sp"
 //#include "lr/race.sp"
+#include "lr/sumo.sp"
 #include "lr/rebel.sp"
 #include "lr/config.sp"
 #include "lr/hook.sp"
 
-// handle for sdkcall
-Handle SetCollisionGroup;
+
 
 public Action command_cancel_lr(int client , int args)
 {
@@ -327,6 +333,7 @@ void end_lr(LrSlot slot)
 
     slot.type = slot_error;
     slot.active = false;
+    slot.failsafe = false;
     slot.client = -1;
     slot.option = 0;
 
@@ -451,6 +458,7 @@ void end_line(LrSlot slot)
 
 void init_slot(int id, int client, int partner, lr_type type, int option)
 {
+    
     slots[id].client = client;
     slots[id].type = type;
     slots[id].active = true;
@@ -459,6 +467,7 @@ void init_slot(int id, int client, int partner, lr_type type, int option)
 
     print_slot(id);
 
+    
     start_beacon(id);
 }
 
@@ -543,6 +552,11 @@ public Action start_lr_callback(Handle timer, int id)
         {
             start_russian_roulette(t_slot,ct_slot);
         }
+
+        case sumo:
+        {
+            start_sumo(t_slot,ct_slot);
+        }
 /*
         case race:
         {
@@ -577,6 +591,14 @@ void start_lr_internal(int t, int ct, lr_type type)
     strip_all_weapons(t);
     strip_all_weapons(ct);
 
+    // do some initial setup before the timer starts
+    switch(type)
+    {
+        case sumo:
+        {
+            sumo_startup(t_slot,ct_slot);
+        }        
+    }
 
 
     slots[t_slot].timer = CreateTimer(1.0,start_lr_callback,t_slot,TIMER_FLAG_NO_MAPCHANGE);
@@ -585,8 +607,9 @@ void start_lr_internal(int t, int ct, lr_type type)
 
 void start_lr(int t, int ct, lr_type type)
 {
-    // can't lr
-    if(!lr_ready)
+    int unused;
+    int alive_t = get_alive_team_count(CS_TEAM_T,unused);
+    if(alive_t > LR_SLOTS / 2)
     {
         return;
     }
