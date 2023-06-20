@@ -455,8 +455,6 @@ public OnPluginStart()
 		RegConsoleCmd("guns", weapon_menu);
 	}
 
-	
-
 	// command_stuck is push out callback
 	// we currently use the noblock toggle callback
 	if(stuck)
@@ -887,6 +885,12 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 			{
 				GivePlayerItem(client, "item_kevlar");
 			}
+		}
+
+		else if(GetClientTeam(client) == CS_TEAM_T)
+		{
+			strip_all_weapons(client);
+			GivePlayerItem(client,"weapon_knife");
 		}
 	}
 
