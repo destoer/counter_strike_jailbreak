@@ -335,6 +335,9 @@ public void OnClientPutInServer(int client)
 	{
 		mute_client(client);
 	}
+
+	SDKHook(client, SDKHook_OnTakeDamage, take_damage);
+	SDKHook(client, SDKHook_WeaponEquip, weapon_equip); 
 }
 
 // If the Warden leaves
@@ -991,13 +994,6 @@ public remove_warden()
 	
 	// deregister the warden
 	warden_id = WARDEN_INVALID;
-}
-
-
-public void OnClientPutInServer(int client)
-{
-	SDKHook(client, SDKHook_OnTakeDamage, take_damage);
-	SDKHook(client, SDKHook_WeaponEquip, weapon_equip); 
 }
 
 public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damagetype)

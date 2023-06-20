@@ -51,13 +51,14 @@ enum lr_type
     russian_roulette,
     headshot_only,
     sumo,
+    custom,
     rebel,
 
     // this is an invalid entry if we get this we have trouble
     slot_error,
 }
 
-const int LR_SIZE = 13;
+const int LR_SIZE = 14;
 new const String:lr_list[LR_SIZE][] =
 {	
     "Knife fight",
@@ -71,6 +72,7 @@ new const String:lr_list[LR_SIZE][] =
     "Russian roulette",
     "Headshot only",
     "Sumo",
+    "Custom",
     "Rebel",
     "Error"
 /*
@@ -176,6 +178,7 @@ Handle SetCollisionGroup;
 //#include "lr/race.sp"
 #include "lr/sumo.sp"
 #include "lr/rebel.sp"
+#include "lr/custom.sp"
 #include "lr/config.sp"
 #include "lr/hook.sp"
 
@@ -551,6 +554,11 @@ public Action start_lr_callback(Handle timer, int id)
         case russian_roulette:
         {
             start_russian_roulette(t_slot,ct_slot);
+        }
+
+        case custom:
+        {
+            start_custom(t_slot,ct_slot);
         }
 
         case sumo:
