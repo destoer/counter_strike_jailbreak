@@ -55,6 +55,11 @@ public Action get_gun_end(Handle timer, int id)
         return Plugin_Stop;
     }
 
+    if(!slots[id].gun_dropped)
+    {
+        return Plugin_Stop;
+    }
+
 
     float pos[3]
     GetEntPropVector(slots[id].weapon, Prop_Send, "m_vecOrigin", pos);
@@ -62,9 +67,21 @@ public Action get_gun_end(Handle timer, int id)
     // vel has hit zero (draw the line and print the display result)
     if(cmp_vec(pos,slots[id].gun_pos))
     {
-        float distance = GetVectorDistance(slots[id].pos,pos);
+        float start[3]; 
+        float end[3];
+
+        start = slots[id].pos;
+        end = pos;
+    
+        start[2] = 0.0;
+        end[2] = 0.0;
+
+        float distance = GetVectorDistance(start,end);
         PrintToChatAll("%s %N distance %f",LR_PREFIX,slots[id].client,distance);
         KillTimer(timer);
+
+        // same z cord
+        slots[id].pos[2] = pos[2] + 8.0;
 
         slots[id].timer = CreateTimer(GUNTOSS_TIMER,draw_toss_timer,id,TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
     }

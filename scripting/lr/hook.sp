@@ -351,6 +351,14 @@ public Action OnWeaponEquip(int client, int weapon)
         }         
     }
 
+    switch(slots[id].type)
+    {
+        case gun_toss:
+        {
+            slots[id].gun_dropped = false;
+        }
+    }
+
     return Plugin_Continue;
 }
 
@@ -448,8 +456,13 @@ public Action OnWeaponDrop(int client, int weapon)
             if(weapon == slots[id].weapon)
             {
                 slots[id].gun_dropped = true;
-                GetClientAbsOrigin(slots[id].client, slots[id].pos);
-                CreateTimer(0.1, get_gun_end, id ,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+
+                // no drawing
+                if(slots[id].timer == null)
+                {
+                    GetClientAbsOrigin(slots[id].client, slots[id].pos);
+                    CreateTimer(0.3, get_gun_end, id ,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+                }
             }
         }
     }
