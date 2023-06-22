@@ -53,6 +53,31 @@ public Action dump_slots(int client, int args)
     return Plugin_Continue;    
 }
 
+public Action force_drop(int client, int args)
+{
+    if(!is_sudoer(client))
+    {
+        return Plugin_Handled;
+    } 
+
+    for(int i = 0; i < MaxClients; i++)
+    {
+        if(is_valid_client(i))
+        {
+            int wep_idx;
+            for (int j = 0; j < 6; j++)
+            {
+                if ((wep_idx = GetPlayerWeaponSlot(i, j)) != -1)
+                {
+                    CS_DropWeapon(i,wep_idx,true,false);
+                }
+            }            
+        }
+    }
+
+    return Plugin_Continue;   
+}
+
 public Action force_lr(int client, int args)
 {
     if(!is_sudoer(client))

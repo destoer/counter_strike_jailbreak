@@ -1,3 +1,6 @@
+// this seems overkill put the m_owner members aernt working..
+int weapon_owner[2048];
+
 void purge_state()
 {
     rebel_lr_active = false;
@@ -17,8 +20,15 @@ void purge_state()
         end_lr(slots[i]);
     }
 
+    for(int i = 0; i < 2048; i++)
+    {
+        weapon_owner[i] = 0;
+    }
+
     reset_use_key();        
 }
+
+
 
 public Action OnRoundStart(Handle event, const String:name[], bool dontBroadcast)
 {
@@ -321,10 +331,37 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 }
 
 
-
-public Action OnWeaponEquip(int client, int weapon) 
+public Action OnWeaponCanUse(int client, int weapon) 
 {
     int id = get_slot(client);
+
+    int prev_owner = -1;
+
+    if(is_valid_ent(weapon))
+    {
+        prev_owner = weapon_owner[weapon]; 
+    }
+
+    int owner_slot = get_slot(prev_owner);
+
+    // if prev owner aint in lr this is fine
+    if(owner_slot != INVALID_SLOT)
+    {
+        switch(slots[owner_slot].type)
+        {
+            case gun_toss:
+            {
+                // only prev owner can pick up dropped gun
+                // unless its map spawned
+                if(prev_owner != client && prev_owner != 0)
+                {
+                    return Plugin_Handled;
+                }
+            }
+        }
+
+        return Plugin_Continue;
+    }
 
     if(id == INVALID_SLOT)
     {
@@ -435,6 +472,11 @@ public Action OnWeaponDrop(int client, int weapon)
 
     if(id == INVALID_SLOT)
     {
+        if(is_valid_ent(weapon))
+        {
+            weapon_owner[weapon] = client;
+        }
+
         return Plugin_Continue;
     }
 
@@ -458,7 +500,7 @@ public Action OnWeaponDrop(int client, int weapon)
                 slots[id].gun_dropped = true;
                 slots[id].dropped_once = true;
 
-                // no drawing
+                // no drawing if dropped once
                 if(slots[id].timer == null)
                 {
                     GetClientAbsOrigin(slots[id].client, slots[id].pos);
@@ -467,13 +509,19 @@ public Action OnWeaponDrop(int client, int weapon)
             }
         }
     }
+
+    if(is_valid_ent(weapon))
+    {
+        weapon_owner[weapon] = client;
+    }
+
     return Plugin_Continue;
 }
 
 public void OnClientPutInServer(int client)
 {
     SDKHook(client, SDKHook_TraceAttack, HookTraceAttack); // block damage
-    SDKHook(client, SDKHook_WeaponEquip, OnWeaponEquip); // block weapon pickups
+    SDKHook(client, SDKHook_WeaponCanUse, OnWeaponCanUse); // block weapon pickups
     SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
     SDKHook(client, SDKHook_WeaponDrop, OnWeaponDrop);
 }

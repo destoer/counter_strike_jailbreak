@@ -1012,6 +1012,18 @@ public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damaget
 		rebel[attacker] = true;
 	}
 
+	// print ct damage to console
+	if(is_valid_client(attacker) && GetClientTeam(attacker) == CS_TEAM_CT)
+	{
+		for(int i = 0; i < 64; i++)
+		{
+			if(is_valid_client(i))
+			{
+				PrintToConsole(i,"CT %N hit %N for %f",attacker,victim,damage);
+			}
+		}
+	}
+
 	return Plugin_Continue;
 }
 

@@ -12,6 +12,11 @@
 
 #define HITGROUP_HEAD 1
 
+stock bool is_valid_ent(int entity)
+{
+	return entity >= 0 && entity < 2048;
+}
+
 stock bool is_muted(int client)
 {
 	if(!is_valid_client(client))
