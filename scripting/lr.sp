@@ -97,6 +97,7 @@ enum struct LrSlot
     float gun_pos[3];
     Handle timer;
     bool gun_dropped;
+    bool dropped_once;
 
     int bullet_count;
     int bullet_max;
@@ -365,6 +366,7 @@ void end_lr(LrSlot slot)
     kill_handle(slot.timer);
 
     slot.gun_dropped = false;
+    slot.dropped_once = false;
 
     end_line(slot);
 }

@@ -179,7 +179,7 @@ public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &
         case gun_toss:
         {
             // cant do damange until gun has been dropped
-            if(!slots[partner].gun_dropped  && !slots[id].gun_dropped)
+            if(!slots[partner].dropped_once  && !slots[id].dropped_once)
             {
                 return Plugin_Handled;
             }
@@ -283,7 +283,7 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
         case gun_toss:
         {
             // cant do damange until a gun has been dropped
-            if(!slots[partner].gun_dropped && !slots[id].gun_dropped)
+            if(!slots[partner].dropped_once && !slots[id].dropped_once)
             {
                 damage = 0.0;
                 return Plugin_Changed;
@@ -456,6 +456,7 @@ public Action OnWeaponDrop(int client, int weapon)
             if(weapon == slots[id].weapon)
             {
                 slots[id].gun_dropped = true;
+                slots[id].dropped_once = true;
 
                 // no drawing
                 if(slots[id].timer == null)
