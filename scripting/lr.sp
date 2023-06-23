@@ -231,6 +231,7 @@ public OnPluginStart()
     HookEvent("weapon_zoom",OnWeaponZoom,EventHookMode_Pre);
     HookEvent("weapon_fire",OnWeaponFire,EventHookMode_Post);
     HookEvent("player_hurt", OnPlayerHurt);
+    HookEvent("player_team", player_team);
 
     for(int i = 1; i < MaxClients; i++)
     {

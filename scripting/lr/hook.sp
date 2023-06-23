@@ -331,6 +331,22 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 }
 
 
+// prevent lr team swaps
+public Action player_team(Event event, const char[] name, bool dontBroadcast)
+{
+    int client = GetClientOfUserId(GetEventInt(event, "userid")); 
+
+    int id = get_slot(client);
+
+    if(id != INVALID_SLOT)
+    {
+        end_lr_pair(id,slots[id].partner);
+    }
+
+    return Plugin_Continue;
+}
+
+
 public Action OnWeaponCanUse(int client, int weapon) 
 {
     int id = get_slot(client);
