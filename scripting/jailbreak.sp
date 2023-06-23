@@ -436,8 +436,8 @@ public OnPluginStart()
 	SetCollisionGroup = init_set_collision();
 	
 	// user commands
-	
 	RegConsoleCmd("wd", warday_callback);
+	RegConsoleCmd("warday", warday_callback);
 
 
 	if(warden_block)
