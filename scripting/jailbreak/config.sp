@@ -69,7 +69,7 @@ void create_jb_convar()
     mute_cvar = CreateConVar("jb_mute","1","mute t's at round start");
     print_rebel_cvar = CreateConVar("jb_rebel","1","print rebels being killed");
 
-    guns_cvar = CreateConVar("jb_guns","0","give ct's guns at round start");
+    guns_cvar = CreateConVar("jb_guns","1","give ct's guns at round start");
 
     admin_laser_cvar = CreateConVar("jb_admin_laser","0","enable admin laser");
 }
