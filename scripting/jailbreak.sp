@@ -330,8 +330,9 @@ public void OnClientPutInServer(int client)
 		warden_text[client] = true;
 	}
 
-	// everyone else is currently muted mute on connect
-	if(mute && mute_timer != null && !is_admin(client))
+	// on any connection player cannot talk, they must be on a team
+	// unless they are an admin
+	if(mute && !is_admin(client))
 	{
 		mute_client(client);
 	}
