@@ -40,5 +40,5 @@ native SpecialDay sd_current_day();
 
 
 #define ROUND_WARDEN_SD 50
-#define ROUND_STACK_LIM 2
+#define ROUND_STACK_LIM 1
 #define ROUND_PLAYER_REQ 3
