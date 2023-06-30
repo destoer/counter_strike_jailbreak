@@ -22,9 +22,10 @@ float SUMO_RADIUS = 215.0;
 public Action draw_circle(Handle timer, int id)
 {
 
-    if(!slots[id].active || !is_valid_client(slots[id].client))
+    if(!slots[id].active || !is_valid_client(slots[id].client) || slots[id].type != sumo)
     {
-        return Plugin_Continue;
+        slots[id].timer = null;
+        return Plugin_Stop;
     }
 
     TE_SetupBeamRingPoint(slots[id].pos, SUMO_RADIUS, SUMO_RADIUS + 0.1, g_lbeam, g_lhalo, 0, 5, CIRCLE_TIMER, 5.2, 0.0, { 1, 153, 255, 255 }, 1000, 0);
