@@ -267,7 +267,13 @@ void do_draw(int client, int color[4])
 		}
 	}
 
-	if(!initial_draw && change_count < 3)
+	// additonally cut off lines that are too long
+	float distance_vec[3];
+	SubtractVectors(cur_pos,prev_pos[client],distance_vec);
+
+	float length = GetVectorLength(distance_vec);
+
+	if(!initial_draw && change_count < 3 && length <= 1000.0)
 	{
 		// draw a line from the last laser end to the current one
 		TE_SetupBeamPoints(prev_pos[client], cur_pos, g_lbeam, 0, 0, 0, 25.0, 2.0, 2.0, 10, 0.0, color, 0);
