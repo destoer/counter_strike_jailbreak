@@ -37,7 +37,8 @@ stock void mute_client(int client)
 
 stock void unmute_client(int client)
 {
-	if(is_valid_client(client))
+	// only unmute if the client doesn't have a server mute
+	if(is_valid_client(client) && !BaseComm_IsClientMuted(client))
 	{
 		SetClientListeningFlags(client, VOICE_NORMAL);
 	}
