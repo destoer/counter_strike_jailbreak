@@ -408,17 +408,58 @@ stock void get_client_sight_end(int client, float out[3],bool use_kill_laser=fal
 }
 
 
+// new laser draw adapted from https://forums.alliedmods.net/showthread.php?t=283011
+// as TE_SetupBeamPoints only allows for a max life of 25 seconds...
+
+stock kill_ent(int ent, float delay)
+{
+	char addoutput[64];
+	Format(addoutput, sizeof(addoutput), "OnUser1 !self:kill::%f:1", delay);
+	SetVariantString(addoutput);
+	AcceptEntityInput(ent, "AddOutput");
+	AcceptEntityInput(ent, "FireUser1");
+}
+
+stock draw_beam(float start[3], float end[3],float life, float width, int color[4], int beam_model)
+{
+	// entity limit protection
+	if(GetEntityCount() < (GetMaxEntities() - 200))
+	{
+#if 1
+	// set pos
+	int beam = CreateEntityByName("env_beam");
+	TeleportEntity(beam,start, NULL_VECTOR, NULL_VECTOR);
+	SetEntPropVector(beam, Prop_Data, "m_vecEndPos", end); 
+
+	// set rendering
+	SetEntityModel(beam,"materials/sprites/laserbeam.vmt");
+	SetEntityRenderColor(beam,color[0],color[1],color[2],color[3]);
+	SetEntPropFloat(beam, Prop_Data, "m_fWidth", width);
+	SetEntPropFloat(beam, Prop_Data, "m_fEndWidth", width); 
+
+	// spawn in the beam
+	DispatchSpawn(beam);
+	ActivateEntity(beam);
+	AcceptEntityInput(beam,"TurnOn");
+
+	// setup death as life aint working?
+	kill_ent(beam,life);
+#else 
+	TE_SetupBeamPoints(start, end, beam_model, 0, 0, 0, life, width, width, 2, 0.0,color, 0);
+	TE_SendToAll();
+#endif
+	}
+}
+
 stock setup_laser(int client,int color[4],int beam_model, int point_model, bool use_kill_laser=false)
 {
 	// setup laser
 	float m_fOrigin[3];
 	float m_fImpact[3];
 	GetClientEyePosition(client, m_fOrigin);
-	get_client_sight_end(client, m_fImpact,use_kill_laser);	
-	TE_SetupBeamPoints(m_fOrigin, m_fImpact, beam_model, 0, 0, 0, 0.1, 0.8, 0.8, 2, 0.0,color , 0);
-	TE_SendToAll();
-	
-	
+	get_client_sight_end(client, m_fImpact,use_kill_laser);
+
+	draw_beam(m_fOrigin,m_fImpact,0.1,0.8,color,beam_model);
 	
 	// setup laser end "glow"
 	TE_SetupGlowSprite(m_fImpact, point_model, 0.1, 0.2, 255);

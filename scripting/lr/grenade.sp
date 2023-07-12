@@ -36,7 +36,7 @@ void grenade_player_init(int id)
 	strip_all_weapons(client); // remove all the players weapons
 	GivePlayerItem(client, "weapon_hegrenade");
 	SetEntProp(client, Prop_Data, "m_ArmorValue", 0.0);  
-	SetEntityHealth(client,200);
+	SetEntityHealth(client,125);
 
 	grenade_choice choice = view_as<grenade_choice>(slots[id].option);
 

@@ -236,6 +236,10 @@ public Action laser_draw(Handle timer)
 }
 
 
+float DRAW_REFRESH = 45.0;
+
+
+
 void do_draw(int client, int color[4])
 {
 	float cur_pos[3];
@@ -275,9 +279,7 @@ void do_draw(int client, int color[4])
 
 	if(!initial_draw && change_count < 3 && length <= 1000.0)
 	{
-		// draw a line from the last laser end to the current one
-		TE_SetupBeamPoints(prev_pos[client], cur_pos, g_lbeam, 0, 0, 0, 25.0, 2.0, 2.0, 10, 0.0, color, 0);
-		TE_SendToAll();
+		draw_beam(prev_pos[client],cur_pos,DRAW_REFRESH,2.0,color,g_lbeam);
 	}
 	prev_pos[client] = cur_pos;		
 }
