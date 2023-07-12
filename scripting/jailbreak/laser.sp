@@ -215,7 +215,7 @@ public Action laser_draw(Handle timer)
 {
 	if(warden_id != WARDEN_INVALID && use_draw_laser_settings[warden_id] && laser_use[warden_id])
 	{
-		do_draw(warden_id, {0,191,0,255} );
+		do_draw(warden_id, {1, 153, 255, 255} );
 	}
 	
 	// now check if any of our t's happen to be drawing
