@@ -6,7 +6,7 @@ void purge_state()
     rebel_lr_active = false;
     lr_ready = false;
 
-    for(int i = 0; i < MaxClients; i++)
+    for(int i = 1; i <= MaxClients; i++)
     {
         if(is_valid_client(i))
         {

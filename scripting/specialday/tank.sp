@@ -70,7 +70,7 @@ public void StartTank()
 {	
 	// swap everyone other than the tank to the t side
 	// if they were allready in ct or t
-	for(int i = 1; i < MaxClients; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i))
 		{
@@ -88,7 +88,7 @@ public void StartTank()
 void tank_discon_active(int client)
 {
 	// restore the hp
-	for(int i = 1; i < MaxClients; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i) && IsPlayerAlive(i))
 		{

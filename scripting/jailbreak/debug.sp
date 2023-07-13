@@ -41,7 +41,7 @@ public Action is_blocked_cmd(int client, int args)
 	PrintToChat(client, "%s blocked state: %s",WARDEN_PREFIX, noblock_enabled() ? "no block" : "block");
 	PrintToChat(client, "%s internal blocked state: %s",WARDEN_PREFIX, noblock_enabled() ? "no block" : "block");
 	
-	for (int i = 0; i < MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
 		if(is_valid_client(i))
 		{
@@ -60,7 +60,7 @@ public Action is_rebel_cmd(int client, int args)
 		return Plugin_Handled;
 	}
 
-	for (int i = 0; i < MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
 		if(is_valid_client(i))
 		{
@@ -80,7 +80,7 @@ public Action is_muted_cmd(int client, int args)
 		return Plugin_Handled;
 	}
 
-	for (int i = 0; i < MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
 		if(is_valid_client(i))
 		{

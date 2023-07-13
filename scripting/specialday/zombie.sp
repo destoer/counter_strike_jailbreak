@@ -212,7 +212,7 @@ public void StartZombie()
 
 	// swap everyone other than the patient zero to the t side
 	// if they were allready in ct or t
-	for(int i = 1; i < MaxClients; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i))
 		{
@@ -254,7 +254,7 @@ public void zombie_discon_started(int client)
 void zombie_discon_active(int client)
 {
 	// restore the hp
-	for(int i = 1; i < MaxClients; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == CS_TEAM_CT) // check the client is in the game
 		{

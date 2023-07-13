@@ -60,7 +60,7 @@ Handle SetCollisionGroup;
 
 int z_command_count = 0;
 
-bool rebel[64];
+bool rebel[MAXPLAYERS+1];
 
 bool warden_text[MAXPLAYERS + 1];
 
@@ -290,7 +290,7 @@ public OnMapStart()
 
 	
 	// reset laser settings
-	for (int i = 0; i < MAXPLAYERS + 1; i++)
+	for (int i = 1; i <= MAXPLAYERS; i++)
 	{
 		laser_use[i] = false;
 		use_draw_laser_settings[i] = false;
@@ -536,7 +536,7 @@ public OnPluginStart()
 		jb_enable_block_all();
 	}
 	
-	for(int i = 1; i < MaxClients;i++)
+	for(int i = 1; i <= MaxClients;i++)
 	{
 		if(is_valid_client(i))
 		{
@@ -945,7 +945,7 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 		set_warden(client);
 	}
 	
-	for(int i = 0; i < 64; i++)
+	for(int i = 0; i <= MAXPLAYERS; i++)
 	{
 		rebel[i] = false;
 
@@ -1016,7 +1016,7 @@ public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damaget
 	// print ct damage to console
 	if(is_valid_client(attacker) && GetClientTeam(attacker) == CS_TEAM_CT)
 	{
-		for(int i = 0; i < 64; i++)
+		for(int i = 0; i <= MAXPLAYERS; i++)
 		{
 			if(is_valid_client(i))
 			{

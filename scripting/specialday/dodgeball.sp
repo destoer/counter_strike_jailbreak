@@ -41,7 +41,7 @@ public void StartDodgeball()
 	
 	
 	// give an initial flashbang
-	for(new i = 1; i < MaxClients; i++)
+	for(new i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i)) // check the client is in the game
 		{

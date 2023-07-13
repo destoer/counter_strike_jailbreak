@@ -40,7 +40,7 @@ void init_hide()
 public void StartHide()
 {
 	// renable movement
-	for(new i = 1; i < MaxClients; i++)
+	for(new i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i) && GetClientTeam(i) == CS_TEAM_CT) // check the client is in the game
 		{
@@ -56,7 +56,7 @@ public void StartHide()
 
 public void make_invis_t()
 {
-	for(int i = 1; i < MaxClients; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(is_valid_client(i) && IsPlayerAlive(i))
 		{

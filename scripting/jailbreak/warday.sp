@@ -48,7 +48,7 @@ void warday_start()
 
 
     // give every ct a gun
-    for(int i = 0; i < 64; i++)
+    for(int i = 0; i <= MAXPLAYERS; i++)
     {
         if(is_valid_client(i) && IsPlayerAlive(i) && GetClientTeam(i) == CS_TEAM_CT)
         {
@@ -63,7 +63,7 @@ void warday_start()
 public Action start_warday(Handle timer)
 {
     // give every t a gun
-    for(int i = 0; i < 64; i++)
+    for(int i = 0; i <= MAXPLAYERS; i++)
     {
         if(is_valid_client(i) && IsPlayerAlive(i) && GetClientTeam(i) == CS_TEAM_T)
         {

@@ -198,7 +198,7 @@ public Action command_cancel_lr(int client , int args)
 
 void reset_use_key()
 {
-	for (int i = 0; i < MAXPLAYERS + 1; i++)
+	for (int i = 0; i <= MAXPLAYERS; i++)
 	{
 		use_key[i] = false;
 	}
@@ -233,7 +233,7 @@ public OnPluginStart()
     HookEvent("player_hurt", OnPlayerHurt);
     HookEvent("player_team", player_team);
 
-    for(int i = 1; i < MaxClients; i++)
+    for(int i = 1; i <= MaxClients; i++)
     {
         if(is_valid_client(i))
         {
@@ -762,7 +762,7 @@ void pick_partner(int client)
     int valid_players = 0;
 
     // Build a list of valid players
-    for(int i = 0; i < MaxClients; i++)
+    for(int i = 1; i <= MaxClients; i++)
     {
         if(is_valid_partner(i))
         {

@@ -5,7 +5,7 @@ Handle mute_timer = null;
 
 void mute_t()
 {
-    for(int i = 1; i < 64; i++)
+    for(int i = 1; i <= MAXPLAYERS; i++)
     {
         if(is_valid_client(i) && GetClientTeam(i) != CS_TEAM_CT && !is_muted(i) && !is_admin(i))
         {
@@ -32,7 +32,7 @@ public Action mute_death(Handle timer, int client)
 
 void unmute_all()
 {
-    for(int i = 1; i < 64; i++)
+    for(int i = 1; i <= MAXPLAYERS; i++)
     {
         if(is_valid_client(i) & is_muted(i) && is_on_team(i))
         {

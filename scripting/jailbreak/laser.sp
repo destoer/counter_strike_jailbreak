@@ -106,7 +106,7 @@ public void SetupLaser(int client,int color[4])
 	setup_laser(client, color, g_lbeam, g_lpoint, laser_kill);
 }
 
-int t_client_list[64] = {0};
+int t_client_list[MAXPLAYERS+1] = {0};
 
 
 public Action t_laser_menu(int client,int args)
@@ -120,7 +120,7 @@ public Action t_laser_menu(int client,int args)
 	Menu menu = new Menu(t_laser_handler);
 	
 	int idx = 0;
-	for (int i = 1; i < MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
 		if(is_valid_client(i) && GetClientTeam(i) == CS_TEAM_T)
 		{
@@ -204,7 +204,7 @@ public laser_handler(Menu menu, MenuAction action, int client, int param2)
 // reset the laser draw for t's
 void reset_laser_setting()
 {
-	for (int i = 1; i < MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
 		t_use_draw_laser[i] = false;	
 	}
@@ -219,7 +219,7 @@ public Action laser_draw(Handle timer)
 	}
 	
 	// now check if any of our t's happen to be drawing
-	for (int i = 1; i < MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
 		if(!is_valid_client(i) || GetClientTeam(i) != CS_TEAM_T)
 		{

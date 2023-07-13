@@ -11,7 +11,7 @@
 int gungame_gun_idx[GUNS_SIZE] = {0};
 
 // level of progression the player is on
-int gungame_level[64] =  { 0 };
+int gungame_level[MAXPLAYERS+1] =  { 0 };
 
 
 // gun game
@@ -39,7 +39,7 @@ void init_gungame()
 	special_day = gungame_day;
 	
 	// reset the gun counter
-	for (int i = 0; i < MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
 		gungame_level[i] = 0;
 	}

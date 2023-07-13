@@ -44,7 +44,7 @@ void scoutknife_init()
 	sd_player_init_fptr = scout_player_init;
 	
 	// reset player kill
-	for (int i = 0; i < 64; i++)
+	for (int i = 0; i <= MAXPLAYERS; i++)
 	{
 		player_kills[i] = 0;
 	}

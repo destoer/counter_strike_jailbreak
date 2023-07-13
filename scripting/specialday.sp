@@ -127,14 +127,14 @@ int sdtimer = SD_DELAY; // timer for sd
 
 // team saves
 int validclients = 0; // number of clients able to partake in sd
-int game_clients[64];
-int teams[64]; // should store in a C struct but cant
+int game_clients[MAXPLAYERS+1];
+int teams[MAXPLAYERS+1]; // should store in a C struct but cant
 
 // for scoutknifes
-int player_kills[64] =  { 0 };
+int player_kills[MAXPLAYERS+1] =  { 0 };
 
 // for zombies
-float death_cords[64][3];
+float death_cords[MAXPLAYERS+1][3];
 
 
 int sd_winner = -1;
@@ -232,7 +232,7 @@ public Action round_delay_tick(Handle Timer)
 		
 		else
 		{
-			for (int i = 0; i < MaxClients; i++)
+			for (int i = 1; i <= MaxClients; i++)
 			{
 				if(is_valid_client(i))
 				{
@@ -397,7 +397,7 @@ public OnPluginStart()
 		RegConsoleCmd("guns", weapon_menu);
 	}
 
-	for(int i = 1; i < MaxClients;i++)
+	for(int i = 1; i <= MaxClients;i++)
 	{
 		if(is_valid_client(i))
 		{
@@ -661,7 +661,7 @@ public Action Freeze(client,args)
 	} // dont allow freezes during an sd
 
 	fr = true;
-	for(int i = 1; i < MaxClients; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{ 
 		if(IsClientInGame(i))
 		{
@@ -687,7 +687,7 @@ public Action UnFreeze(client,args)
 		return Plugin_Handled; 
 	} // can only unfreeze if frozen
 	fr = false;
-	for(int i = 1; i < MaxClients; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i))
 		{
@@ -737,7 +737,7 @@ int get_client_max_kills()
 {
 	int max = 0;
 	int cli = 1;
-	for (int i = 1; i < MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
 		if(player_kills[i] > max)
 		{
@@ -835,7 +835,11 @@ void EndSd(bool forced=false)
 	if(standalone)
 	{
 		ConVar nade_var = FindConVar("sm_noblock_nades");
-		SetConVarBool(nade_var,true);
+
+		if(nade_var)
+		{
+			SetConVarBool(nade_var,true);
+		}
 	}
 
 
@@ -1028,7 +1032,7 @@ public Action WeaponMenuAll()
 
 	// send the weapon panel to all clients
 	//PrintToChatAll("MaxClient = %d", MaxClients);
-	for(int i = 1; i < MaxClients; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i))
 		{
@@ -1153,7 +1157,7 @@ public BalTeams()
     SaveTeams(false);
     
     // switch for one team until we have a roughly even split
-    for (int i = 0; i < MaxClients; i++)
+    for (int i = 1; i <= MaxClients; i++)
     {
         if(ct == t || ct == (t - 1))
         {
@@ -1205,7 +1209,7 @@ public SaveTeams(bool onlyct)
 	validclients = 0;
 
 	
-	for(int i = 1; i < MaxClients; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i))
 		{
@@ -1340,7 +1344,7 @@ public int sd_select(int client, int sd)
 
 	force_open();
 	// re-spawn all players
-	for(int i = 1; i < MaxClients; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i)) // check the client is in the game
 		{
@@ -1382,7 +1386,7 @@ public int sd_select(int client, int sd)
 	}
 
 	// call the initial init for all players on the function pointers we just set
-	for (int i = 1; i < MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
 		sd_player_init(i);
 	}
@@ -1423,7 +1427,7 @@ public Action MoreTimers(Handle timer)
 		
 		
 		// disable kill protection
-		for(new i = 1; i < MaxClients; i++)
+		for(new i = 1; i <= MaxClients; i++)
 		{
 			if(IsClientInGame(i)) // check the client is in the game
 			{
@@ -1453,7 +1457,10 @@ public StartSD()
 	if(standalone)
 	{
 		ConVar nade_var = FindConVar("sm_noblock_nades");
-		SetConVarBool(nade_var,false);
+		if(nade_var)
+		{
+			SetConVarBool(nade_var,false);
+		}
 	}
 
 

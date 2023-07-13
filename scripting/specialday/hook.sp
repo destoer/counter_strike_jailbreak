@@ -340,8 +340,8 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 }
 
 
-//float death_cords[64][3];
-// int player_kills[64] =  { 0 }; ^ defined above
+//float death_cords[MAXPLAYERS+1][3];
+// int player_kills[MAXPLAYERS+1] =  { 0 }; ^ defined above
 public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcast)
 {
 
@@ -548,7 +548,7 @@ public Action OnWeaponEquip(int client, int weapon)
 
 // handles movement changes off a ladder so they are what they should be for an sd
 
-MoveType player_last_movement_type[64] = {MOVETYPE_WALK};
+MoveType player_last_movement_type[MAXPLAYERS+1] = {MOVETYPE_WALK};
 
 
 public Action check_movement(Handle Timer)
@@ -624,7 +624,7 @@ bool use_key[MAXPLAYERS+1] = {false};
 
 void reset_use_key()
 {
-	for (int i = 0; i < MAXPLAYERS + 1; i++)
+	for (int i = 0; i <= MAXPLAYERS; i++)
 	{
 		use_key[i] = false;
 	}

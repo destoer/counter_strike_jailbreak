@@ -57,7 +57,7 @@ public Action warden_reset_color(int client, int args)
 		return Plugin_Handled;
 	}	
 	
-	for(int i = 1; i < MaxClients; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(is_valid_client(i) && IsPlayerAlive(i))
 		{

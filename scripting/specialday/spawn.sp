@@ -14,7 +14,7 @@ int cord_size = 0;
 
 void sample_cords()
 {
-	for (int i = 0; i < 64; i++)
+	for (int i = 0; i <= MAXPLAYERS; i++)
 	{
 		if(is_valid_client(i) && is_on_team(i))
 		{
