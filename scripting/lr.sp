@@ -51,6 +51,7 @@ enum lr_type
     russian_roulette,
     headshot_only,
     sumo,
+    scout_knife,
     custom,
     rebel,
 
@@ -58,7 +59,7 @@ enum lr_type
     slot_error,
 }
 
-const int LR_SIZE = 14;
+const int LR_SIZE = 15;
 new const String:lr_list[LR_SIZE][] =
 {	
     "Knife fight",
@@ -72,6 +73,7 @@ new const String:lr_list[LR_SIZE][] =
     "Russian roulette",
     "Headshot only",
     "Sumo",
+    "Scout knife",
     "Custom",
     "Rebel",
     "Error"
@@ -176,6 +178,7 @@ Handle SetCollisionGroup;
 #include "lr/shotgun_war.sp"
 #include "lr/russian_roulette.sp"
 #include "lr/headshot_only.sp"
+#include "lr/scout_knife.sp"
 //#include "lr/race.sp"
 #include "lr/sumo.sp"
 #include "lr/rebel.sp"
@@ -568,6 +571,11 @@ public Action start_lr_callback(Handle timer, int id)
         case sumo:
         {
             start_sumo(t_slot,ct_slot);
+        }
+
+        case scout_knife:
+        {
+            start_scout_knife(t_slot,ct_slot);
         }
 /*
         case race:

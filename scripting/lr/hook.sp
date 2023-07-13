@@ -415,6 +415,12 @@ public Action OnWeaponCanUse(int client, int weapon)
     {
         if(!StrEqual(weapon_string,slots[id].weapon_string))
         {
+            // two weapons fine in scout  knife
+            if(StrEqual(weapon_string,"weapon_knife") && slots[id].type == scout_knife)
+            {
+                return Plugin_Continue;
+            }
+
             if(console != -1)
             {
                 PrintToConsole(console,"%s restrict '%s' : '%s'",LR_PREFIX,weapon_string,slots[id].weapon_string);
