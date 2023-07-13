@@ -347,6 +347,26 @@ public Action player_team(Event event, const char[] name, bool dontBroadcast)
 }
 
 
+public Action OnWeaponEquip(int client, int weapon) 
+{
+    int id = get_slot(client);
+
+    if(id == INVALID_SLOT)
+    {
+        return Plugin_Continue;
+    }
+
+    switch(slots[id].type)
+    {
+        case gun_toss:
+        {
+            slots[id].gun_dropped = false;    
+        }
+    }
+
+    return Plugin_Continue;    
+}
+
 public Action OnWeaponCanUse(int client, int weapon) 
 {
     int id = get_slot(client);
@@ -402,14 +422,6 @@ public Action OnWeaponCanUse(int client, int weapon)
 
             return Plugin_Handled;
         }         
-    }
-
-    switch(slots[id].type)
-    {
-        case gun_toss:
-        {
-            slots[id].gun_dropped = false;
-        }
     }
 
     return Plugin_Continue;
@@ -538,6 +550,7 @@ public void OnClientPutInServer(int client)
 {
     SDKHook(client, SDKHook_TraceAttack, HookTraceAttack); // block damage
     SDKHook(client, SDKHook_WeaponCanUse, OnWeaponCanUse); // block weapon pickups
+    SDKHook(client, SDKHook_WeaponEquip, OnWeaponEquip); // block weapon pickups
     SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
     SDKHook(client, SDKHook_WeaponDrop, OnWeaponDrop);
 }
