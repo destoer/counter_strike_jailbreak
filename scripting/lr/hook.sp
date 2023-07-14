@@ -387,9 +387,9 @@ public Action OnWeaponCanUse(int client, int weapon)
         {
             case gun_toss:
             {
-                // only prev owner can pick up dropped gun
+                // only prev owner can pick up dropped gun if alive
                 // unless its map spawned
-                if(prev_owner != client && prev_owner != 0)
+                if(prev_owner != client && prev_owner != 0 && IsPlayerAlive(prev_owner))
                 {
                     return Plugin_Handled;
                 }
