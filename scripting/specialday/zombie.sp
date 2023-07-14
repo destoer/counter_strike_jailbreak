@@ -317,12 +317,9 @@ void zombie_death(int victim)
 		}			
 	}
 
-#if defined ZOMBIE_TIMER_OVERRIDE
 	if(get_alive_team_count(team,last_man) == 0)
 	{
 		enable_round_end();
 		slay_all();		
 	}
-#endif
-
 }
