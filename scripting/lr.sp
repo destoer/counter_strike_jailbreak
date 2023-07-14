@@ -153,7 +153,7 @@ enum struct LrTimer
 }
 
 
-Choice lr_choice[64]
+Choice lr_choice[MAXPLAYERS + 1]
 
 int g_lbeam;
 int g_lhalo;
