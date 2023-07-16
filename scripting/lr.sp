@@ -491,10 +491,13 @@ public Action start_lr_callback(Handle timer, int id)
     int t = slots[t_slot].client;
     int ct = slots[ct_slot].client;
 
+    int type = slots[t_slot].type;
+
     if(slots[t_slot].delay)
     {
-        PrintCenterText(t,"Lr starting in %d seconds against %N!",slots[id].delay,ct);
-        PrintCenterText(ct,"Lr starting in %d seconds against %N!",slots[id].delay,t);
+        // Suggestion: fearless print lr in countdown
+        PrintCenterText(t,"lr %s starting in %d seconds against %N!",lr_list[type],slots[id].delay,ct);
+        PrintCenterText(ct,"lr %s starting in %d seconds against %N!",lr_list[type],slots[id].delay,t);
 
         slots[id].timer = CreateTimer(1.0,start_lr_callback,id,TIMER_FLAG_NO_MAPCHANGE);
         slots[id].delay -= 1;
