@@ -150,7 +150,7 @@ public OnMapStart()
 	tank = -1;
 	patient_zero = -1;
 	
-	gun_menu = build_gun_menu(WeaponHandler);
+	gun_menu = build_gun_menu(WeaponHandler,false);
 	sd_menu = build_sd_menu(SdHandler); // real sd select
 	sd_list_menu = build_sd_menu(SdListHandler); // dummy sd menu for people to see sds
 	

@@ -55,7 +55,7 @@ void create_jb_convar()
     warden_player_prefix_csgo = CreateConVar("warden_player_prefix_csgo","\x07[Warden]\x07","prefix for warden typing in chat");
 
     // common
-    noblock_cvar = CreateConVar("jb_noblock","1","players pass through eachover");
+    noblock_cvar = CreateConVar("jb_noblock","0","players pass through eachover");
     stuck_cvar = CreateConVar("jb_stuck","0","enable stuck command");
     laser_cvar = CreateConVar("jb_kill_laser","0","enable kill laser");
     t_laser_cvar = CreateConVar("jb_t_laser","0","enable t laser");

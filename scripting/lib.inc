@@ -300,6 +300,22 @@ stock bool is_client_blocked(int client)
 	return (GetEntProp(client, Prop_Data, "m_CollisionGroup") != COLLISION_GROUP_DEBRIS_TRIGGER);	
 }
 
+stock int spawn_count(int team)
+{
+	int count = 0;
+
+	int ent = -1;
+	while((ent = FindEntityByClassname(ent, team == CS_TEAM_T? "info_player_terrorist" : "info_player_counterterrorist")) != -1) 
+	{
+		if(IsValidEntity(ent))
+		{
+			count++;
+		}
+	}
+
+	return count; 	
+}
+
 // not even gonna bother assuming things will go thru the above functions
 stock bool noblock_enabled(int client = -1)
 {
@@ -609,38 +625,65 @@ const int GUNS_SIZE = 14;
 
 new const String:gun_list[GUNS_SIZE][] =
 {	
-	"AK47", "M4A1", "AWP","M3",
-	"P90", "M249", "SCOUT", "MP5", 
+	"AK47", "M4A1","M3",
+	"P90", "M249", "MP5", 
 	"GALIL","SG", "TMP", "AUG",
-	"FAMAS", "XM"
+	"FAMAS", "XM","SCOUT", "AWP"
 };
 
 new const String:gun_give_list_css[GUNS_SIZE][] =
 {	
-	"weapon_ak47", "weapon_m4a1", "weapon_awp","weapon_m3",
-	"weapon_p90", "weapon_m249", "weapon_scout", "weapon_mp5navy",
+	"weapon_ak47", "weapon_m4a1","weapon_m3",
+	"weapon_p90", "weapon_m249", "weapon_mp5navy",
 	"weapon_galil", "weapon_sg552","weapon_tmp", "weapon_aug",
-	"weapon_famas", "weapon_xm1014"
+	"weapon_famas", "weapon_xm1014","weapon_scout","weapon_awp"
 	
 };
 
 new const String:gun_give_list_csgo[GUNS_SIZE][] =
 {	
-	"weapon_ak47", "weapon_m4a1_silencer", "weapon_awp","weapon_nova",
-	"weapon_p90", "weapon_m249", "weapon_ssg08", "weapon_mp5sd",
+	"weapon_ak47", "weapon_m4a1_silencer","weapon_nova",
+	"weapon_p90", "weapon_m249", "weapon_mp5sd",
 	"weapon_galilar", "weapon_sg556","weapon_bizon", "weapon_aug",
-	"weapon_famas", "weapon_xm1014"
+	"weapon_famas", "weapon_xm1014","weapon_ssg08","weapon_awp"
 	
 };
 
 
-stock Menu build_gun_menu(MenuHandler menu_handler)
+stock Menu build_gun_menu(MenuHandler menu_handler, bool restrict_scope)
 {
+	int size = GUNS_SIZE;
+
+	if(restrict_scope)
+	{
+		size -= 2;
+	}
+
 	Menu menu = new Menu(menu_handler);
-	for (int i = 0; i < GUNS_SIZE; i++)
+	for (int i = 0; i < size; i++)
 	{
 		menu.AddItem(gun_list[i], gun_list[i]);
 	}
 	menu.SetTitle("Weapon Selection");
 	return menu;
+}
+
+stock bool trace_hit_player(int hit, int mask, int client) 
+{
+    return client != hit && is_valid_client(hit);
+}
+
+stock bool is_stuck_in_player(int client)
+{
+	float min[3]; 
+	float max[3]; 
+	float origin[3];
+
+	GetClientMins(client, min);
+	GetClientMaxs(client, max);
+
+	GetClientAbsOrigin(client, origin);
+
+	TR_TraceHullFilter(origin, origin,min, max, MASK_ALL, trace_hit_player, client);
+	return TR_DidHit();
 }

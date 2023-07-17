@@ -104,6 +104,19 @@ public Action wd_rounds(int client, int args)
 	return Plugin_Continue;
 }
 
+public Action spawn_count_cmd(int client, int args)
+{
+	if(!is_sudoer(client))
+	{
+		return Plugin_Handled;
+	}
+	
+	PrintToChat(client,"%s spawn count %d : %d\n",JB_PREFIX,spawn_count(CS_TEAM_T),spawn_count(CS_TEAM_CT));
+	
+	return Plugin_Continue;	
+}
+
+
 public Action enable_wd(int client, int args)
 {
 	// debugging command

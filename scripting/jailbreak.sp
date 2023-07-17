@@ -64,6 +64,8 @@ bool rebel[MAXPLAYERS+1];
 
 bool warden_text[MAXPLAYERS + 1];
 
+bool spawn_block_override = false;
+
 #include <sourcemod>
 #include <sdktools>
 #include <sdkhooks>
@@ -271,8 +273,7 @@ public OnMapStart()
 	g_BeamSprite = PrecacheModel("materials/sprites/laser.vmt");
 	g_HaloSprite = PrecacheModel("materials/sprites/halo01.vmt");
 	
-	
-	
+
 	// precache laser sprites
 	g_lbeam = PrecacheModel("materials/sprites/laserbeam.vmt");
 	g_lpoint = PrecacheModel("materials/sprites/glow07.vmt");
@@ -298,7 +299,7 @@ public OnMapStart()
 	}
 	
 	
-	gun_menu = build_gun_menu(WeaponHandler);
+	gun_menu = build_gun_menu(WeaponHandler,true);
 
 	if(noblock)
 	{
@@ -512,6 +513,7 @@ public OnPluginStart()
 	RegConsoleCmd("is_rebel", is_rebel_cmd);
 	RegConsoleCmd("wd_rounds",wd_rounds);
 	RegAdminCmd("enable_wd",enable_wd,ADMFLAG_CUSTOM6);
+	RegConsoleCmd("spawn_count",spawn_count_cmd);
 
 	RegConsoleCmd("wcommands",warden_commands);
 	
@@ -842,13 +844,33 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 	return Plugin_Continue;
 }
 
+void override_spawn_block(int client)
+{
+	// if player numbers exceed spawns in block trip no block
+	if(!noblock && !spawn_block_override)
+	{
+		if(is_stuck_in_player(client))
+		{
+			jb_disable_block_all();
+			spawn_block_override = true;
+			PrintToChatAll("%s Player stuck on spawn unblocking",JB_PREFIX);
+		}
+	}
+}
+
 // give ct equitment on spawn & set block
 public Action player_spawn(Handle event, const String:name[], bool dontBroadcast)
 {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	
+	
+
 	if(is_valid_client(client))
 	{
+		int team = GetClientTeam(client);
+
+		override_spawn_block(client);
+
 		// spawned in and there is not a current mute
 		if(!mute_timer)
 		{
@@ -875,7 +897,7 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 			}		
 		}
 				
-		if(GetClientTeam(client) == CS_TEAM_CT)
+		if(team == CS_TEAM_CT)
 		{
 			if(helmet)
 			{
@@ -888,7 +910,7 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 			}
 		}
 
-		else if(GetClientTeam(client) == CS_TEAM_T)
+		else if(team == CS_TEAM_T)
 		{
 			strip_all_weapons(client);
 			GivePlayerItem(client,"weapon_knife");
@@ -906,6 +928,8 @@ public Action round_end(Handle event, const String:name[], bool dontBroadcast)
 		unmute_all();
 	}
 
+	spawn_block_override = false;
+
 	return Plugin_Continue;
 }
 
@@ -922,17 +946,20 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 
 	reset_laser_setting();
 	
-	// if we are running with block on reset the status on round start
-	if(noblock)
+	if(!spawn_block_override)
 	{
-		jb_disable_block_all();
+		// if we are running with block on reset the status on round start
+		if(noblock)
+		{
+			jb_disable_block_all();
+		}
+
+		else
+		{
+			jb_enable_block_all();
+		}
 	}
 
-	else
-	{
-		jb_enable_block_all();
-	}
-	
 	// there is no warden
 	warden_id = -1;
 	
