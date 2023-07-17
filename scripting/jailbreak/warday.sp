@@ -15,7 +15,7 @@ public Action warday_callback(client, args)
 
     if(warday_round_counter < WARDAY_ROUND_COUNT)
     {
-        PrintToChat(client,"%s please wait %d",WARDEN_PREFIX,WARDAY_ROUND_COUNT - warday_round_counter);
+        PrintToChat(client,"%s please wait %d rounds",WARDEN_PREFIX,WARDAY_ROUND_COUNT - warday_round_counter);
         return Plugin_Handled;
     }
 
