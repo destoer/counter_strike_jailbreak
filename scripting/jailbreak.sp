@@ -41,7 +41,7 @@ TODO make all names consistent
 */
 
 
-#define WARDAY_ROUND_COUNT 8
+#define WARDAY_ROUND_COUNT 3
 int warday_round_counter = 0;
 bool warday_active = false;
 
