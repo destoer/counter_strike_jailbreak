@@ -687,3 +687,39 @@ stock bool is_stuck_in_player(int client)
 	TR_TraceHullFilter(origin, origin,min, max, MASK_ALL, trace_hit_player, client);
 	return TR_DidHit();
 }
+
+stock void enable_lr()
+{
+	ConVar hosties_enabled = FindConVar("sm_hosties_lr");
+
+	if(hosties_enabled)
+	{
+		SetConVarBool(hosties_enabled, true); 
+	}
+
+	// see if if replacement is active
+	ConVar lr_enabled = FindConVar("destoer_lr");
+
+	if(lr_enabled)
+	{
+		lr_enabled.IntValue = 1;
+	}	
+}
+
+stock void disable_lr()
+{
+	ConVar hosties_enabled = FindConVar("sm_hosties_lr");
+
+	if(hosties_enabled)
+	{
+		SetConVarBool(hosties_enabled, false); 
+	}
+
+	// see if if replacement is active
+	ConVar lr_enabled = FindConVar("destoer_lr");
+
+	if(lr_enabled)
+	{
+		lr_enabled.IntValue = 0; 
+	}		
+}

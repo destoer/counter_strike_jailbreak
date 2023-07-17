@@ -207,6 +207,21 @@ void reset_use_key()
 	}
 }
 
+public int native_in_lr(Handle plugin, int num_param)
+{
+    int client = GetNativeCell(1);
+    return in_lr(client);
+}
+
+
+// register our call
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
+{
+    CreateNative("in_lr", native_in_lr);
+
+    return APLRes_Success;
+}
+
 public OnPluginStart()
 {
     create_lr_convar();
@@ -688,6 +703,7 @@ Action command_lr (int client, int args)
     // lr is not enabled
     if(lr_cvar.IntValue == 0)
     {
+        PrintToChat(client,"%s Lr is currently disabled!",LR_PREFIX);
         return Plugin_Continue;
     }
 

@@ -73,6 +73,7 @@ bool spawn_block_override = false;
 #include <basecomm>
 #include "lib.inc"
 #include "specialday/specialday.inc"
+#include "lr/lr.inc"
 
 // cookies
 #include <clientprefs>
@@ -134,6 +135,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 	MarkNativeAsOptional("sd_current_state");
 	MarkNativeAsOptional("sd_current_day");
+	MarkNativeAsOptional("in_lr");
 
 	return APLRes_Success;
 }
@@ -310,6 +312,9 @@ public OnMapStart()
 	{
 		jb_enable_block_all();
 	}
+
+	// enable a warday on map start
+	warday_round_counter = WARDAY_ROUND_COUNT;	
 }
 
 public OnMapEnd()
@@ -935,6 +940,8 @@ public Action round_end(Handle event, const String:name[], bool dontBroadcast)
 
 public Action round_start(Handle event, const String:name[], bool dontBroadcast) 
 {
+	enable_lr();
+
 	z_command_count = 0;
 	warday_active = false;
 	warday_round_counter++;
@@ -1028,6 +1035,14 @@ public remove_warden()
 	warden_id = WARDEN_INVALID;
 }
 
+void set_rebel(int client)
+{
+	if(!warday_active && !in_lr(client))
+	{
+		rebel[client] = true;
+	}
+}
+
 public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
 {
 	if(sd_enabled() && sd_current_state() != sd_inactive)
@@ -1037,7 +1052,7 @@ public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damaget
 
 	if(is_valid_client(attacker) && GetClientTeam(attacker) == CS_TEAM_T && GetClientTeam(victim) == CS_TEAM_CT)
 	{
-		rebel[attacker] = true;
+		set_rebel(attacker);
 	}
 
 	// print ct damage to console
@@ -1070,7 +1085,7 @@ public Action weapon_equip(int client, int weapon)
 	if(!StrEqual(weapon_string,"weapon_knife") && !StrEqual(weapon_string,"weapon_hegrenade") 
 		&& !StrEqual(weapon_string,"weapon_flashbang") && !StrEqual(weapon_string,"weapon_c4"))
 	{
-		rebel[client] = true;
+		set_rebel(client);
 	}
 
 	return Plugin_Continue;

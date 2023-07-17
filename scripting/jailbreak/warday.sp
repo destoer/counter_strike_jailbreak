@@ -44,6 +44,8 @@ void warday_start()
 {
     warday_active = true;
 
+    disable_lr();
+
     PrintToChatAll("%s war day started doors will auto open in 20 seconds", WARDEN_PREFIX);
 
 
