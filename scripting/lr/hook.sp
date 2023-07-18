@@ -644,6 +644,7 @@ public OnMapStart()
 
     AddFileToDownloadsTable("sound/lr/lr_enabled.mp3");
     PrecacheSound("lr/lr_enabled.mp3");
+    PrecacheSound("buttons/blip1.wav");
 }
 
 public OnMapEnd()

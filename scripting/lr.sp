@@ -330,8 +330,6 @@ void end_lr_pair(int id, int partner)
 
 void end_lr(LrSlot slot)
 {
-    end_beacon(slot);
-
     if(is_valid_client(slot.client) && IsPlayerAlive(slot.client))
     {
         SetEntityHealth(slot.client,100);
@@ -458,13 +456,52 @@ public Action draw_line(Handle timer,int id)
     return Plugin_Continue;
 }
 
-void end_beacon(LrSlot slot)
+#define BEACON_TIMER 1.0
+
+public Action beacon_callback(Handle timer, int client)
 {
-    // stop beacon
-    if(is_valid_client(slot.client))
+    int slot = get_slot(client);
+
+    int color[4]; 
+    
+    if(!is_valid_client(client))
     {
-        ServerCommand("sm_beacon %N",slot.client);
+        return Plugin_Stop;
     }
+
+    if(GetClientTeam(client) == CS_TEAM_T)
+    { 
+        color = {230,10,10,255};
+    }
+    
+    else 
+    {
+        color = { 1, 153, 255, 255};
+    }
+
+    if(slot != INVALID_SLOT)
+    {
+        float pos[3];
+        GetClientAbsOrigin(client,pos);
+        pos[2] += 5.0;
+
+        // highlight
+        TE_SetupBeamRingPoint(pos, 35.0, 250.0, g_lbeam, g_lhalo, 0, 15, (BEACON_TIMER / 2), 2.0, 0.0, {66, 66, 66, 255}, 500, 0);
+        TE_SendToAll();   
+
+        // team color
+        TE_SetupBeamRingPoint(pos, 35.0, 250.0, g_lbeam, g_lhalo, 0, 5, (BEACON_TIMER / 2) + 0.1, 2.0, 0.0, color, 250, 0);
+        TE_SendToAll();    
+
+        EmitAmbientSound("buttons/blip1.wav", pos, client, SNDLEVEL_RAIDSIREN);
+    }
+
+    else
+    {
+        return Plugin_Stop;
+    }     
+
+    return Plugin_Continue;
 }
 
 void start_beacon(int id)
@@ -472,7 +509,7 @@ void start_beacon(int id)
     // do beacon
     if(is_valid_client(slots[id].client))
     {
-        ServerCommand("sm_beacon %N",slots[id].client);
+        CreateTimer(BEACON_TIMER,beacon_callback,slots[id].client,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
     }
 }
 
@@ -497,8 +534,10 @@ void init_slot(int id, int client, int partner, lr_type type, int option)
 
     print_slot(id);
 
-    
-    start_beacon(id);
+    if(type != sumo)
+    {
+        start_beacon(id);
+    }
 }
 
 public Action start_lr_callback(Handle timer, int id)
