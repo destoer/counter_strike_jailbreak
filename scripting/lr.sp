@@ -185,11 +185,16 @@ Handle SetCollisionGroup;
 #include "lr/custom.sp"
 #include "lr/config.sp"
 #include "lr/hook.sp"
-
+#include "jailbreak/jailbreak.inc"
 
 
 public Action command_cancel_lr(int client , int args)
 {
+    if(!(CheckCommandAccess(client, "generic_admin", ADMFLAG_KICK, false) || client == get_warden_id()))
+    {
+        PrintToChat(client,"%s You must be an admin or warden to cancel a lr\n",LR_PREFIX);
+    }
+
     for(int i = 0; i < LR_SLOTS; i++)
     {
         end_lr(slots[i]);
@@ -235,8 +240,8 @@ public OnPluginStart()
     RegConsoleCmd("force_lr",force_lr);
     RegAdminCmd("force_drop",force_drop,ADMFLAG_KICK);
 
-    RegAdminCmd("cancel_lr",command_cancel_lr,ADMFLAG_KICK);
-    RegAdminCmd("cancellr",command_cancel_lr,ADMFLAG_KICK);
+    RegConsoleCmd("cancel_lr",command_cancel_lr);
+    RegConsoleCmd("cancellr",command_cancel_lr);
     
 
     HookEvent("player_death", OnPlayerDeath,EventHookMode_Post);
