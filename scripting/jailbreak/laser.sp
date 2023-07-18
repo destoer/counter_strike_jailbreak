@@ -236,9 +236,7 @@ public Action laser_draw(Handle timer)
 }
 
 
-float DRAW_REFRESH = 45.0;
-
-
+float DRAW_REFRESH = 25.0;
 
 void do_draw(int client, int color[4])
 {
@@ -277,14 +275,25 @@ void do_draw(int client, int color[4])
 
 	float length = GetVectorLength(distance_vec);
 
-	if(!initial_draw && change_count < 3 && length <= 1000.0)
+	if(initial_draw)
 	{
-		draw_beam(prev_pos[client],cur_pos,DRAW_REFRESH,2.0,color,g_lbeam);
+		prev_pos[client] = cur_pos;	
 	}
-	prev_pos[client] = cur_pos;		
+
+	else if(change_count < 3 && length <= 1000.0)
+	{
+		draw_beam(prev_pos[client],cur_pos,DRAW_REFRESH,2.0,color,g_lbeam);	
+		prev_pos[client] = cur_pos;	
+	}
+
+	// invalid
+	else
+	{
+		prev_pos[client][0] = 0.0;
+		prev_pos[client][1] = 0.0;
+		prev_pos[client][2] = 0.0;
+	}	
 }
-
-
 
 public Action kill_laser (int client, int args)
 {

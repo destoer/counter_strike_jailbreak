@@ -156,15 +156,18 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 		return Plugin_Continue;
 	}
 */	
-	// reset laser cords we are no longer drawing
-	if(!(buttons & IN_USE))
+	bool in_use = (buttons & IN_USE) != 0;
+	laser_use[client] = in_use;
+
+
+	if(!in_use)
 	{
 		prev_pos[client][0] = 0.0;
 		prev_pos[client][1] = 0.0;
 		prev_pos[client][2] = 0.0;
-		laser_use[client] = false;
 		return Plugin_Continue;
 	}
+
 	
 	// allways draw standard laser!
 	// only warden or admin can shine laser
@@ -203,11 +206,8 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	
 	if(type != none)
 	{
-		laser_use[client] = true;
-		if(IsClientInGame(client) && laser_use[client])
+		if(is_valid_client(client))
 		{
-
-		
 			switch(type)
 			{
 				case warden:
@@ -227,16 +227,6 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 				}
 			}
 		}
-	}
-	
-	if((use_draw_laser_settings[client]))
-	{
-		// first time drawing store the 1st pos
-		if(!laser_use[client])
-		{
-			get_client_sight_end(client, prev_pos[client]);
-		}
-		laser_use[client] = true;
 	}
 
 	return Plugin_Continue;
@@ -291,7 +281,6 @@ public OnMapStart()
 	CreateTimer(RING_LIFTEIME,beacon_callback , _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 	CreateTimer(0.3, rainbow_timer, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 
-	
 	// reset laser settings
 	for (int i = 1; i <= MAXPLAYERS; i++)
 	{
@@ -519,6 +508,7 @@ public OnPluginStart()
 	RegConsoleCmd("wd_rounds",wd_rounds);
 	RegAdminCmd("enable_wd",enable_wd,ADMFLAG_CUSTOM6);
 	RegConsoleCmd("spawn_count",spawn_count_cmd);
+	RegConsoleCmd("ent_count",ent_count);
 
 	RegConsoleCmd("wcommands",warden_commands);
 	

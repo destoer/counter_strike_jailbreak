@@ -438,66 +438,15 @@ stock kill_ent(int ent, float delay)
 
 stock draw_beam(float start[3], float end[3],float life, float width, int color[4], int beam_model)
 {
-	// entity limit protection
-	if(GetEntityCount() < (GetMaxEntities() - 200))
-	{
-	#if 1
-		int beam = CreateEntityByName("env_beam");
-		if(beam != -1)
-		{
-			TeleportEntity(beam,start, NULL_VECTOR, NULL_VECTOR);
-			SetEntPropVector(beam, Prop_Data, "m_vecEndPos", end); 
-
-			// set rendering
-			SetEntityModel(beam,"materials/sprites/laserbeam.vmt");
-			DispatchKeyValue(beam,"decalname","materials/sprites/glow07.vmt");
-			SetEntityRenderColor(beam,color[0],color[1],color[2],color[3]);
-			SetEntPropFloat(beam, Prop_Data, "m_fWidth", width);
-			SetEntPropFloat(beam, Prop_Data, "m_fEndWidth", width); 
-
-			// spawn in the beam
-			DispatchSpawn(beam);
-			ActivateEntity(beam);
-			AcceptEntityInput(beam,"TurnOn");
-
-			// setup death as life aint working?
-			kill_ent(beam,life);
-		}
-	#else 
-		TE_SetupBeamPoints(start, end, beam_model, 0, 0, 0, life, width, width, 2, 0.0,color, 0);
-		TE_SendToAll();
-	#endif
-	}
+	TE_SetupBeamPoints(start, end, beam_model, 0, 0, 0, life, width, width, 2, 0.0,color, 0);
+	TE_SendToAll();
 }
 
 stock draw_glow(float pos[3],int point_model, float life)
 {
-#if 0
 	// setup laser end "glow"
 	TE_SetupGlowSprite(pos, point_model, 0.1, 0.2, 255);
 	TE_SendToAll(0.0);
-#else
-	int glow = CreateEntityByName("env_glow");
-	if(glow != -1)
-	{
-		TeleportEntity(glow,pos, NULL_VECTOR, NULL_VECTOR);
-
-		// set rendering
-		SetEntityModel(glow,"materials/sprites/glow07.vmt");
-		DispatchKeyValue(glow,"scale", "0.25");
-		DispatchKeyValue(glow,"renderfx","14");
-		DispatchKeyValue(glow, "rendermode", "3");
-		DispatchKeyValue(glow, "renderamt", "255");
-
-		// spawn in the glow
-		DispatchSpawn(glow);
-		ActivateEntity(glow);
-		AcceptEntityInput(glow,"TurnOn");
-
-		// setup death as life aint working?
-		kill_ent(glow,life);
-	}	
-#endif
 }
 
 stock setup_laser(int client,int color[4],int beam_model, int point_model, bool use_kill_laser=false)

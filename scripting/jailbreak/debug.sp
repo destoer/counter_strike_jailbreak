@@ -72,6 +72,19 @@ public Action is_rebel_cmd(int client, int args)
 }
 
 
+public Action ent_count(int client, int args)
+{
+	// debugging command
+	if(!is_sudoer(client))
+	{
+		return Plugin_Handled;
+	}
+
+	PrintToChat(client,"%s Entity count %d",JB_PREFIX,GetEntityCount());
+
+	return Plugin_Continue;	
+}
+
 public Action is_muted_cmd(int client, int args)
 {
 	// undocumented command
