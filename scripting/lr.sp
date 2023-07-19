@@ -193,6 +193,7 @@ public Action command_cancel_lr(int client , int args)
     if(!(CheckCommandAccess(client, "generic_admin", ADMFLAG_KICK, false) || client == get_warden_id()))
     {
         PrintToChat(client,"%s You must be an admin or warden to cancel a lr\n",LR_PREFIX);
+        return Plugin_Handled;
     }
 
     for(int i = 0; i < LR_SLOTS; i++)
