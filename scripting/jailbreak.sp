@@ -903,6 +903,9 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 			{
 				GivePlayerItem(client, "item_kevlar");
 			}
+
+			// give night vision
+			GivePlayerItem(client,"item_nvgs");
 		}
 
 		else if(team == CS_TEAM_T)
