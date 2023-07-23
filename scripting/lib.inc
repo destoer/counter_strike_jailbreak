@@ -599,13 +599,13 @@ new const String:gun_give_list_csgo[GUNS_SIZE][] =
 };
 
 
-stock Menu build_gun_menu(MenuHandler menu_handler, bool restrict_scope)
+stock Menu build_gun_menu(MenuHandler menu_handler, bool restrict_awp)
 {
 	int size = GUNS_SIZE;
 
-	if(restrict_scope)
+	if(restrict_awp)
 	{
-		size -= 2;
+		size -= 1;
 	}
 
 	Menu menu = new Menu(menu_handler);
