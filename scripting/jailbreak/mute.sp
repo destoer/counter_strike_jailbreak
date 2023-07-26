@@ -30,11 +30,12 @@ public Action mute_death(Handle timer, int client)
 }
 
 
-void unmute_all()
+void unmute_all(bool round_end)
 {
     for(int i = 1; i <= MAXPLAYERS; i++)
     {
-        if(is_valid_client(i) & is_muted(i) && is_on_team(i))
+        // note: we need a extra dead check here to handle late joins
+        if(is_valid_client(i) & is_muted(i) && is_on_team(i) && (round_end || IsPlayerAlive(i)))
         {
             unmute_client(i);
         }
@@ -45,7 +46,7 @@ public Action unmute_t(Handle timer)
 {
     mute_timer = null;
 
-    unmute_all();
+    unmute_all(false);
 
     PrintToChatAll("%s Terrorists may now speak... quietly...",JB_PREFIX);
 

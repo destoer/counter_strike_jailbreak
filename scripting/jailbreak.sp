@@ -553,6 +553,25 @@ public Action player_team(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(GetEventInt(event, "userid")); 
 
+	if(!is_valid_client(client))
+	{
+		return Plugin_Continue;
+	}
+
+	int team = GetEventInt(event, "team");
+
+	// team swap while timer still active to team that aint ct
+	if(team != CS_TEAM_CT && !is_admin(client) && mute_timer)
+	{
+		mute_client(client);
+	}
+
+	else if(team == CS_TEAM_CT && IsPlayerAlive(client))
+	{
+		unmute_client(client);
+	}
+
+
 	if(client == warden_id)
 	{
 		remove_warden();
@@ -923,7 +942,7 @@ public Action round_end(Handle event, const String:name[], bool dontBroadcast)
 	if(mute)
 	{
 		kill_handle(mute_timer);
-		unmute_all();
+		unmute_all(true);
 	}
 
 	spawn_block_override = false;
