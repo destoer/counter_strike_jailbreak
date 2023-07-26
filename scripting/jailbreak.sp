@@ -560,17 +560,20 @@ public Action player_team(Event event, const char[] name, bool dontBroadcast)
 
 	int team = GetEventInt(event, "team");
 
-	// team swap while timer still active to team that aint ct
-	if(team != CS_TEAM_CT && !is_admin(client) && mute_timer)
-	{
-		mute_client(client);
-	}
 
-	else if(team == CS_TEAM_CT && IsPlayerAlive(client))
+	if(mute)
 	{
-		unmute_client(client);
-	}
+		// team swap while timer still active to team that aint ct
+		if(team != CS_TEAM_CT && !is_admin(client) && mute_timer)
+		{
+			mute_client(client);
+		}
 
+		else if(team == CS_TEAM_CT && IsPlayerAlive(client))
+		{
+			unmute_client(client);
+		}
+	}
 
 	if(client == warden_id)
 	{
