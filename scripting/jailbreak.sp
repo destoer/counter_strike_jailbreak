@@ -326,8 +326,7 @@ public void OnClientPutInServer(int client)
 	}
 
 	// on any connection player cannot talk, they must be on a team
-	// unless they are an admin
-	if(mute && !is_admin(client))
+	if(mute)
 	{
 		mute_client(client);
 	}
@@ -563,15 +562,24 @@ public Action player_team(Event event, const char[] name, bool dontBroadcast)
 
 	if(mute)
 	{
-		// team swap while timer still active to team that aint ct
-		if(team != CS_TEAM_CT && !is_admin(client) && mute_timer)
+		if(!IsPlayerAlive(client))
 		{
 			mute_client(client);
 		}
 
-		else if(team == CS_TEAM_CT && IsPlayerAlive(client))
+		// player is alive
+		else
 		{
-			unmute_client(client);
+			if(team == CS_TEAM_CT)
+			{
+				unmute_client(client);
+			}
+
+			// mute timer active, mute the client
+			else if(mute_timer)
+			{
+				mute_client(client);
+			}
 		}
 	}
 

@@ -31,7 +31,8 @@ stock bool is_muted(int client)
 
 stock void mute_client(int client)
 {
-	if(is_valid_client(client))
+	// admin is immune for this kind of mute
+	if(is_valid_client(client) && !is_admin(client))
 	{
 		SetClientListeningFlags(client, VOICE_MUTED);
 	}

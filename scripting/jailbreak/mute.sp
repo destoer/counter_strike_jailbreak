@@ -20,7 +20,7 @@ void mute_t()
 
 public Action mute_death(Handle timer, int client)
 {
-    if(is_valid_client(client) && !is_admin(client))
+    if(is_valid_client(client))
     {
         PrintToChat(client,"%s You are muted until the start of the round\n",JB_PREFIX);
         mute_client(client);
