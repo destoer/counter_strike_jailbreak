@@ -56,11 +56,41 @@ void grenade_player_init(int id)
 	slots[id].weapon_string = "weapon_hegrenade";
 }
 
+void grenade_sudden_death(int slot)
+{
+	int client = slots[slot].client;
+
+	slots[slot].failsafe = true;
+
+	PrintCenterText(client,"Sudden death!");
+}
+
+public Action grenade_failsafe(Handle timer,int t_slot)
+{
+	LrSlot slot;
+	slot = slots[t_slot];
+
+	if(!is_valid_client(slot.client) || !slot.active || slots[t_slot].type != grenade)
+	{
+		return Plugin_Continue;
+	}
+
+	slots[t_slot].timer = null
+
+	int ct_slot = slot.partner;
+
+	grenade_sudden_death(t_slot);
+	grenade_sudden_death(ct_slot);
+
+	return Plugin_Continue;
+}
 
 void start_grenade(int t_slot, int ct_slot)
 {
-    grenade_player_init(t_slot);
-    grenade_player_init(ct_slot);
+	grenade_player_init(t_slot);
+	grenade_player_init(ct_slot);
+
+	slots[t_slot].timer = CreateTimer(28.0,grenade_failsafe,t_slot,TIMER_FLAG_NO_MAPCHANGE);
 }
 
 

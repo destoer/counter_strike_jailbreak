@@ -284,6 +284,15 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
             return Plugin_Changed;
         }
 
+        case grenade:
+        {
+            if(slots[id].failsafe)
+            {
+                damage = damage * 5.0;
+                return Plugin_Changed;
+            }
+        }
+
         case russian_roulette:
         {
             damage = 0.0;
@@ -450,7 +459,7 @@ public Action OnEntitySpawn(int entity)
     {
         case dodgeball:
         {
-            if (StrEqual(classname, "flashbang_projectile"))
+            if (StrEqual(classname, "flashbang_projectile") || (slots[id].failsafe && StrEqual(classname, "hegrenade_projectile")))
             {
                 CreateTimer(1.4, GiveFlash, entity);
             }
