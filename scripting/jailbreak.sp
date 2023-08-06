@@ -332,7 +332,6 @@ public void OnClientPutInServer(int client)
 	}
 
 	SDKHook(client, SDKHook_OnTakeDamage, take_damage);
-	SDKHook(client, SDKHook_WeaponEquip, weapon_equip); 
 }
 
 // If the Warden leaves
@@ -517,6 +516,7 @@ public OnPluginStart()
 	HookEvent("player_spawn", player_spawn); 
 	HookEvent("player_death", player_death); // To check when our warden dies :)
 	HookEvent("player_team", player_team);
+	HookEvent("weapon_fire",OnWeaponFire,EventHookMode_Post);
 	
 	// create a timer for a the warden text
 	CreateTimer(1.0, print_warden_text_all, _, TIMER_REPEAT);
@@ -1093,24 +1093,20 @@ public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damaget
 	return Plugin_Continue;
 }
 
-public Action weapon_equip(int client, int weapon) 
+public Action OnWeaponFire(Handle event, const String:name[], bool dontBroadcast)
 {
-	// dont care
-	if(GetClientTeam(client) == CS_TEAM_CT || sd_enabled() && sd_current_state() != sd_inactive)
-	{
-		return Plugin_Continue;
-	}
-
+	int client = GetClientOfUserId(GetEventInt(event,"userid"));
 
 	char weapon_string[32];
-	GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
+	GetEventString(event,"weapon",weapon_string,sizeof(weapon_string) - 1);
 
-	if(!StrEqual(weapon_string,"weapon_knife") && !StrEqual(weapon_string,"weapon_hegrenade") 
-		&& !StrEqual(weapon_string,"weapon_flashbang") && !StrEqual(weapon_string,"weapon_c4"))
+	bool valid_weapon = !StrEqual(weapon_string,"knife") && !StrEqual(weapon_string,"hegrenade") 
+		&& !StrEqual(weapon_string,"flashbang") && !StrEqual(weapon_string,"c4");
+
+	if(GetClientTeam(client) == CS_TEAM_T && valid_weapon)
 	{
 		set_rebel(client);
 	}
 
 	return Plugin_Continue;
 }
-
