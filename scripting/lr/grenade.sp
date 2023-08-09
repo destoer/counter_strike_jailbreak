@@ -63,6 +63,7 @@ void grenade_sudden_death(int slot)
 	slots[slot].failsafe = true;
 
 	PrintCenterText(client,"Sudden death!");
+	PrintToChat(client,"%s Sudden death!",LR_PREFIX);
 }
 
 public Action grenade_failsafe(Handle timer,int t_slot)
@@ -90,7 +91,7 @@ void start_grenade(int t_slot, int ct_slot)
 	grenade_player_init(t_slot);
 	grenade_player_init(ct_slot);
 
-	slots[t_slot].timer = CreateTimer(28.0,grenade_failsafe,t_slot,TIMER_FLAG_NO_MAPCHANGE);
+	slots[t_slot].timer = CreateTimer(35.0,grenade_failsafe,t_slot,TIMER_FLAG_NO_MAPCHANGE);
 }
 
 

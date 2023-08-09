@@ -41,6 +41,7 @@ void dodgeball_sudden_death(int slot)
 	slots[slot].weapon_string = "weapon_hegrenade";
 
 	PrintCenterText(client,"Sudden death!");
+	PrintToChat(client,"%s Sudden death!",LR_PREFIX);
 
 	strip_all_weapons(client);
 
@@ -73,7 +74,7 @@ void start_dodgeball(int t_slot, int ct_slot)
 	dodgeball_player_init(t_slot);
 	dodgeball_player_init(ct_slot);
 
-	slots[t_slot].timer = CreateTimer(28.0,dodgeball_failsafe,t_slot,TIMER_FLAG_NO_MAPCHANGE);
+	slots[t_slot].timer = CreateTimer(43.0,dodgeball_failsafe,t_slot,TIMER_FLAG_NO_MAPCHANGE);
 }
 
 
