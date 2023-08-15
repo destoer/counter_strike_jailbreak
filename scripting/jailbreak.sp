@@ -46,6 +46,7 @@ int warday_round_counter = 0;
 bool warday_active = false;
 
 int lenny_count = 0;
+int lenny_rand = 0;
 
 char warday_loc[20];
 
@@ -382,6 +383,18 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	if(StrContains(command,"( ͡° ͜ʖ ͡°)"))
 	{
 		lenny_count += 1;
+
+		//PrintToConsole(client,"%d == %d?\n",lenny_rand,lenny_count);
+		if(lenny_rand == lenny_count)
+		{
+			lenny_rand = GetRandomInt(lenny_count,lenny_count + 10000);
+
+			PrintToChat(client,"%s For some reason you feel lucky ( ͡° ͜ʖ ͡°)",JB_PREFIX);
+			GivePlayerItem(client,"weapon_flashbang");
+			GivePlayerItem(client,"weapon_hegrenade");
+			GivePlayerItem(client,"weapon_smokegrenade");
+			GivePlayerItem(client,"item_assaultsuit");
+		}
 	}
 	
 	if (warden_id == client && is_valid_client(client))
@@ -431,6 +444,8 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 // init the plugin
 public OnPluginStart()
 {
+	lenny_rand = GetRandomInt(lenny_count,lenny_count + 10000);
+
 	create_jb_convar();
 
 	setup_jb_convar();
