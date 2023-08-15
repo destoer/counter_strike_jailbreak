@@ -378,6 +378,12 @@ public Action OnWeaponEquip(int client, int weapon)
 
 public Action OnWeaponCanUse(int client, int weapon) 
 {
+
+    if(!is_valid_client(client))
+    {
+        return Plugin_Continue;
+    }
+
     int id = get_slot(client);
 
     int prev_owner = -1;

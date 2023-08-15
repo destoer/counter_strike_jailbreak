@@ -823,6 +823,14 @@ public set_warden(int client)
 	// set the actual warden
 	warden_id = client;
 	
+	if(BaseComm_IsClientMuted(client))
+	{
+		PrintToChatAll("%s Warden %N is muted\n",WARDEN_PREFIX,client);
+	}
+
+	// make sure warden is not muted!
+	unmute_client(client);
+
 	PrintToChat(client,"%s Type !wcommands for a full list of commands",JB_PREFIX);
 	
 	// set the warden with special color
@@ -897,7 +905,7 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 		override_spawn_block(client);
 
 		// spawned in and there is not a current mute
-		if(!mute_timer)
+		if(!mute_timer || team == CS_TEAM_CT)
 		{
 			unmute_client(client);
 		}
