@@ -302,6 +302,8 @@ public OnMapStart()
 		jb_enable_block_all();
 	}
 
+	mute_timer = null;
+
 	// enable a warday on map start
 	warday_round_counter = WARDAY_ROUND_COUNT;	
 }
