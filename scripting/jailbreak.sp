@@ -45,6 +45,8 @@ TODO make all names consistent
 int warday_round_counter = 0;
 bool warday_active = false;
 
+int lenny_count = 0;
+
 char warday_loc[20];
 
 
@@ -377,6 +379,10 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 		return Plugin_Handled;
 	}    
 	
+	if(StrContains(command,"( ͡° ͜ʖ ͡°)"))
+	{
+		lenny_count += 1;
+	}
 	
 	if (warden_id == client && is_valid_client(client))
 	{
@@ -434,6 +440,8 @@ public OnPluginStart()
 	// user commands
 	RegConsoleCmd("wd", warday_callback);
 	RegConsoleCmd("warday", warday_callback);
+
+	RegConsoleCmd("lenny_count",lenny_count_cmd);
 
 
 	if(warden_block)
@@ -598,6 +606,14 @@ public Action force_open_callback (int client, int args)
 	force_open();
 
 	return Plugin_Handled;
+}
+
+
+public Action lenny_count_cmd(int client,int args) 
+{
+	PrintToChat(client,"%s ( ͡° ͜ʖ ͡°) count = %d\n",JB_PREFIX,lenny_count);
+
+	return Plugin_Continue;
 }
 
 public Action warden_text_menu(int client,int args) 
