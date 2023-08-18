@@ -566,13 +566,16 @@ public Action OnWeaponDrop(int client, int weapon)
             // only mark the first drop
             if(slots[id].dropped_once)
             {
-                return Plugin_Continue;
+                return Plugin_Handled;
             }
 
             slots[id].dropped_once = true;
             slots[id].ticks = GetSysTickCount();
 
             PrintToChat(client,"%s dropped at %f",LR_PREFIX,float(slots[id].ticks - slots[id].ticks_start) / 1000.0);
+
+            // dont actually drop the gun so the other player cant see what time was picked
+            return Plugin_Handled;
         }
     }
 
