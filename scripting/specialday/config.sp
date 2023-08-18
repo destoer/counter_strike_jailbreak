@@ -29,12 +29,12 @@ void create_sd_convar()
     sd_prefix_csgo_cvar = CreateConVar("sd_prefix_csgo","\x04[Special Day]\x02","sd prefix for csgo");
 
     // common
-    ctban_cvar = CreateConVar("sd_ctban","0","enable ctban support");
+    ctban_cvar = CreateConVar("sd_ctban","1","enable ctban support");
     gangs_cvar = CreateConVar("sd_gangs","0","enable gangs support");
-    store_cvar = CreateConVar("sd_store","0","enable store support");
-    standalone_cvar = CreateConVar("sd_standalone","1","make plugin operate without jailbreak");
+    store_cvar = CreateConVar("sd_store","1","enable store support");
+    standalone_cvar = CreateConVar("sd_standalone","0","make plugin operate without jailbreak");
     freeze_cvar = CreateConVar("sd_freeze","0","enable freeze commands");
-    lr_cvar = CreateConVar("sd_lr","0","disable lr on sd");
+    lr_cvar = CreateConVar("sd_lr","1","disable lr on sd");
 }
 
 void setup_sd_convar()

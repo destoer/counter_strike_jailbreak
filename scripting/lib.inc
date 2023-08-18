@@ -56,6 +56,23 @@ stock bool steam_id_equal(int client, char[] id)
 	return StrEqual(buf, id);
 }
 
+// NOTE: array must be MAXPLAYERS + 1
+stock int filter_team(int team, int clients[MAXPLAYERS + 1], bool filter_alive)
+{
+	int count = 0;
+
+	for(int i = 0; i < MAXPLAYERS + 1; i++)
+	{
+		if(is_valid_client(i) && GetClientTeam(i) == team && !filter_alive || (filter_alive && IsPlayerAlive(i)))
+		{
+			clients[count] = i;
+			count++;
+		}
+	}
+
+	return count;
+}
+
 
 #define SUDOER_SIZE 4
 
@@ -616,6 +633,37 @@ stock Menu build_gun_menu(MenuHandler menu_handler, bool restrict_awp)
 	}
 	menu.SetTitle("Weapon Selection");
 	return menu;
+}
+
+stock void weapon_handler_generic(int client, int choice)
+{
+	strip_all_weapons(client);
+	
+
+	GivePlayerItem(client, "weapon_knife"); // give back a knife
+	GivePlayerItem(client, "weapon_deagle"); // all ways give a deagle
+	
+	
+	// give them plenty of deagle ammo
+	int weapon = GetPlayerWeaponSlot(client, CS_SLOT_SECONDARY);
+	set_reserve_ammo(client, weapon, 999);
+	
+	// finally give them there item
+	EngineVersion game = GetEngineVersion();
+
+	if(game == Engine_CSS)
+	{
+		GivePlayerItem(client, gun_give_list_css[choice]);
+	}
+
+	else if(game == Engine_CSGO)
+	{
+		GivePlayerItem(client, gun_give_list_csgo[choice]);
+	}
+	
+	// give them plenty of primary ammo
+	weapon = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);
+	set_reserve_ammo(client, weapon, 999);	
 }
 
 stock bool trace_hit_player(int hit, int mask, int client) 

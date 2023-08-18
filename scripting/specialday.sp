@@ -73,7 +73,8 @@ new const String:sd_list[SD_SIZE][] =
 	"Death Match",
 	"Laser Wars",
 	"Spectre",
-	"Headshot"
+	"Headshot",
+	//"VIP",
 };
 
 
@@ -184,6 +185,7 @@ bool wsd_ff = false;
 #include "specialday/laserwars.sp"
 #include "specialday/spectre.sp"
 #include "specialday/headshot.sp"
+//#include "specialday/vip.sp"
 #include "specialday/debug.sp"
 //#include "specialday/spawn.sp"
 #include "specialday/hook.sp"
@@ -569,7 +571,14 @@ public void init_function_pointers()
 				start_fptr[i] = StartHeadshot;
 				init_fptr[i] = headshot_init;
 			}
-
+/*
+			case vip_day:
+			{
+				end_fptr[i] = callback_dummy;
+				start_fptr[i] = StartVip;
+				init_fptr[i] = vip_init;				
+			}
+*/
 			default:
 			{
 				ThrowNativeError(SP_ERROR_NATIVE, "did not initalize sd %d", i);				
@@ -1041,42 +1050,7 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 			return -1;
 		}
 		
-		strip_all_weapons(client);
-		
-	
-		GivePlayerItem(client, "weapon_knife"); // give back a knife
-		GivePlayerItem(client, "weapon_deagle"); // all ways give a deagle
-		
-		
-		// give them plenty of deagle ammo
-		int weapon = GetPlayerWeaponSlot(client, CS_SLOT_SECONDARY);
-		set_reserve_ammo(client, weapon, 999)
-		
-		// give player nades
-		GivePlayerItem(client, "weapon_flashbang"); 
-		GivePlayerItem(client, "weapon_hegrenade"); 
-		GivePlayerItem(client, "weapon_smokegrenade");
-		
-		// and kevlar
-		GivePlayerItem(client, "item_assaultsuit"); 
-		
-		EngineVersion game = GetEngineVersion();
-
-		if(game == Engine_CSS)
-		{
-			// finally give the player the item
-			GivePlayerItem(client, gun_give_list_css[param2]);
-		}
-
-		if(game == Engine_CSGO)
-		{
-			GivePlayerItem(client, gun_give_list_csgo[param2]);
-		}
-
-		
-		// give them plenty of primary ammo
-		weapon = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);
-		set_reserve_ammo(client, weapon, 999);
+		weapon_handler_generic(client,param2);
 	}
 
 	

@@ -23,33 +23,7 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 			return -1;
 		}
 
-		strip_all_weapons(client);
-		
-	
-		GivePlayerItem(client, "weapon_knife"); // give back a knife
-		GivePlayerItem(client, "weapon_deagle"); // all ways give a deagle
-		
-		
-		// give them plenty of deagle ammo
-		int weapon = GetPlayerWeaponSlot(client, CS_SLOT_SECONDARY);
-		set_reserve_ammo(client, weapon, 999);
-		
-		// finally give them there item
-		EngineVersion game = GetEngineVersion();
-
-		if(game == Engine_CSS)
-		{
-			GivePlayerItem(client, gun_give_list_css[param2]);
-		}
-
-		else if(game == Engine_CSGO)
-		{
-			GivePlayerItem(client, gun_give_list_csgo[param2]);
-		}
-		
-		// give them plenty of primary ammo
-		weapon = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);
-		set_reserve_ammo(client, weapon, 999);
+		weapon_handler_generic(client,param2);
 	}
 
 	

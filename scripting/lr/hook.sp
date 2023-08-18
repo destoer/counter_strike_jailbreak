@@ -4,6 +4,7 @@ int weapon_owner[2048];
 void purge_state()
 {
     rebel_lr_active = false;
+    knife_rebel_active = false;
     lr_ready = false;
 
     for(int i = 1; i <= MaxClients; i++)
@@ -384,6 +385,17 @@ public Action OnWeaponCanUse(int client, int weapon)
         return Plugin_Continue;
     }
 
+    char weapon_string[32];
+    GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
+
+    if(knife_rebel_active)
+    {
+        if(!StrEqual(weapon_string,"weapon_knife"))
+        {
+            return Plugin_Handled;
+        }
+    }
+
     int id = get_slot(client);
 
     int prev_owner = -1;
@@ -420,10 +432,6 @@ public Action OnWeaponCanUse(int client, int weapon)
     }
 
     //print_slot(client,slot[id]);
-
-    char weapon_string[32];
-    GetEdictClassname(weapon, weapon_string, sizeof(weapon_string)); 
-
 
     // if we have a string
     if(slots[id].weapon_string[0])
@@ -655,6 +663,8 @@ public OnMapStart()
     g_lbeam = PrecacheModel("materials/sprites/laserbeam.vmt");
     g_lhalo = PrecacheModel("materials/sprites/halo01.vmt");
 
+    gun_menu = build_gun_menu(WeaponHandler,true);
+
     purge_state();
 
     AddFileToDownloadsTable("sound/lr/lr_enabled.mp3");
@@ -666,5 +676,6 @@ public OnMapEnd()
 {
     purge_state();
 
+    delete gun_menu;
     delete lr_menu;
 }

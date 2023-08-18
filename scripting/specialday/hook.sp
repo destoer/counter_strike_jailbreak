@@ -72,7 +72,20 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 					laser_discon_started(client);
 				}
 			}
-			
+/*
+			case vip_day:
+			{
+				if(client == t_vip)
+				{
+					pick_t_vip();
+				}
+
+				else if(client == ct_vip)
+				{
+					pick_ct_vip();
+				}
+			}
+*/			
 			default: {}
 		}
 	}
@@ -114,7 +127,20 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 				}
 			}
 
-			
+/*
+			case vip_day:
+			{
+				if(client == t_vip)
+				{
+					pick_t_vip();
+				}
+
+				else if(client == ct_vip)
+				{
+					pick_ct_vip();
+				}
+			}
+*/
 			default: {}
 		}
 	}

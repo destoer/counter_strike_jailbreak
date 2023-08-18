@@ -19,8 +19,8 @@
 
 // TODO: later
 -Add back button in LR menu
--Add chicken fight lr
--Add hot potato lr
+-Add crash lr
+-Add knife rebel
 -Add auto open LR menu to non rebellers when availiable
 -impl more lr's
 -remove guns on slay (probs easiest to just hook the comamnds like in the team bal plugin)
@@ -54,12 +54,13 @@ enum lr_type
     scout_knife,
     custom,
     rebel,
+    knife_rebel,
 
     // this is an invalid entry if we get this we have trouble
     slot_error,
 }
 
-const int LR_SIZE = 15;
+const int LR_SIZE = 16;
 new const String:lr_list[LR_SIZE][] =
 {	
     "Knife fight",
@@ -76,6 +77,7 @@ new const String:lr_list[LR_SIZE][] =
     "Scout knife",
     "Custom",
     "Rebel",
+    "Knife rebel",
     "Error"
 /*
     "Race",
@@ -129,6 +131,8 @@ enum struct LrSlot
 
 #define GUNTOSS_TIMER 0.1
 
+#define BEACON_TIMER 1.0
+
 // NOTE: only take a copy for convience
 // it only passes as reference when we directly access it
 LrSlot slots[LR_SLOTS];
@@ -155,10 +159,13 @@ enum struct LrTimer
 
 Choice lr_choice[MAXPLAYERS + 1]
 
+Menu gun_menu;
+
 int g_lbeam;
 int g_lhalo;
 
 bool rebel_lr_active = false;
+bool knife_rebel_active = false;
 
 bool lr_ready = false;
 
@@ -166,6 +173,30 @@ bool use_key[MAXPLAYERS+1] = {false};
 
 // handle for sdkcall
 Handle SetCollisionGroup;
+
+
+public int WeaponHandler(Menu menu, MenuAction action, int client, int param2) 
+{
+	if(action == MenuAction_Select) 
+	{
+        // canot use the menu
+        if(!IsPlayerAlive(client) || !rebel_lr_active)
+        {
+            return -1;
+        }
+
+        weapon_handler_generic(client,param2);
+	}
+
+	
+	else if (action == MenuAction_Cancel) 
+	{
+		PrintToServer("Client %d's menu was cancelled. Reason: %d", client, param2);
+	}
+	return 0;
+}
+
+
 
 // unity build
 #include "lr/debug.sp"
@@ -457,11 +488,18 @@ public Action draw_line(Handle timer,int id)
     return Plugin_Continue;
 }
 
-#define BEACON_TIMER 1.0
-
 public Action beacon_callback(Handle timer, int client)
 {
-    int slot = get_slot(client);
+    // if in a knife rebel beacon can stay active as long as it wants
+    if(!knife_rebel_active)
+    {
+        int slot = get_slot(client);
+
+        if(slot == INVALID_SLOT)
+        {
+            return Plugin_Stop;
+        }
+    }
 
     int color[4]; 
     
@@ -480,28 +518,21 @@ public Action beacon_callback(Handle timer, int client)
         color = { 1, 153, 255, 255};
     }
 
-    if(slot != INVALID_SLOT)
-    {
-        float pos[3];
-        GetClientAbsOrigin(client,pos);
-        pos[2] += 5.0;
 
-        // highlight
-        TE_SetupBeamRingPoint(pos, 35.0, 250.0, g_lbeam, g_lhalo, 0, 15, (BEACON_TIMER / 2), 2.0, 0.0, {66, 66, 66, 255}, 500, 0);
-        TE_SendToAll();   
+    float pos[3];
+    GetClientAbsOrigin(client,pos);
+    pos[2] += 5.0;
 
-        // team color
-        TE_SetupBeamRingPoint(pos, 35.0, 250.0, g_lbeam, g_lhalo, 0, 5, (BEACON_TIMER / 2) + 0.1, 2.0, 0.0, color, 250, 0);
-        TE_SendToAll();    
+    // highlight
+    TE_SetupBeamRingPoint(pos, 35.0, 250.0, g_lbeam, g_lhalo, 0, 15, (BEACON_TIMER / 2), 2.0, 0.0, {66, 66, 66, 255}, 500, 0);
+    TE_SendToAll();   
 
-        EmitAmbientSound("buttons/blip1.wav", pos, client, SNDLEVEL_RAIDSIREN);
-    }
+    // team color
+    TE_SetupBeamRingPoint(pos, 35.0, 250.0, g_lbeam, g_lhalo, 0, 5, (BEACON_TIMER / 2) + 0.1, 2.0, 0.0, color, 250, 0);
+    TE_SendToAll();    
 
-    else
-    {
-        return Plugin_Stop;
-    }     
-
+    EmitAmbientSound("buttons/blip1.wav", pos, client, SNDLEVEL_RAIDSIREN);
+    
     return Plugin_Continue;
 }
 
@@ -857,6 +888,21 @@ void pick_partner(int client)
     menu.Display(client,20);    
 }
 
+bool check_last_rebel(int client)
+{
+    int unused;
+    int alive_t = get_alive_team_count(CS_TEAM_T,unused); 
+
+    bool res = alive_t == 1;   
+
+    if(!res)
+    {
+        PrintToChat(client,"%s You must be last t alive to rebel",LR_PREFIX);
+    }
+
+    return res;
+}
+
 public int lr_select(int client, int lr)
 {
     PrintToChat(client,"%s Selected %s\n",LR_PREFIX,lr_list[lr]);
@@ -872,20 +918,25 @@ public int lr_select(int client, int lr)
     // rebel has only one user
     if(type == rebel)
     {
-        int unused;
-        int alive_t = get_alive_team_count(CS_TEAM_T,unused);
-        if(alive_t == 1)
+        if(check_last_rebel(client))
         {
             rebel_player_init(client);
             return 0;
         }
 
-        else
-        {
-            PrintToChat(client,"%s You must be last t alive to rebel",LR_PREFIX);
-            return -1;
-        }
+        return -1;  
     }
+
+    if(type == knife_rebel)
+    {
+        if(check_last_rebel(client))
+        {
+            knife_rebel_player_init(client);
+            return 0;
+        }
+
+        return -1;  
+    }    
 
     // save what lr the current client is requesting so we can pull it inside the player handler
     lr_choice[client].type = view_as<lr_type>(lr);

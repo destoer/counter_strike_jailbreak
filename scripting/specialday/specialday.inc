@@ -24,6 +24,7 @@ enum SpecialDay
 	laser_day,
 	spectre_day,
 	headshot_day,
+	//vip_day,
 	normal_day,
 };
 
