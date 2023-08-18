@@ -22,15 +22,15 @@ public Action warday_callback(client, args)
     // we have called a warday reset the counter
     warday_round_counter = 0;
 
-    if(args >= 1)
-    {
-        GetCmdArg(1,warday_loc,sizeof(warday_loc));
-    }
-
     // no loc passed init to nothing
-    else
+    if(args <= 1)
     {
         Format(warday_loc,sizeof(warday_loc),"");
+    }
+
+    else
+    {
+        GetCmdArgString(warday_loc,sizeof(warday_loc));
     }
 
     // start a warday....
