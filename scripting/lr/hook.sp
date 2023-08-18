@@ -310,6 +310,12 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
             }
         }
 
+        case crash:
+        {
+            damage = 0.0;
+            return Plugin_Changed;
+        }
+
         case sumo:
         {
             if(!slots[id].failsafe)
