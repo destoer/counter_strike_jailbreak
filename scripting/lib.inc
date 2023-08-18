@@ -63,7 +63,7 @@ stock int filter_team(int team, int clients[MAXPLAYERS + 1], bool filter_alive)
 
 	for(int i = 0; i < MAXPLAYERS + 1; i++)
 	{
-		if(is_valid_client(i) && GetClientTeam(i) == team && !filter_alive || (filter_alive && IsPlayerAlive(i)))
+		if(is_valid_client(i) && GetClientTeam(i) == team && (!filter_alive || (filter_alive && IsPlayerAlive(i))))
 		{
 			clients[count] = i;
 			count++;

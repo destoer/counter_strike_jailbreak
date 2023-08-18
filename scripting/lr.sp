@@ -790,11 +790,12 @@ bool is_valid_t(int client)
     return true;    
 }
 
-Action command_lr (int client, int args)
+// error when true
+bool command_lr_internal(int client)
 {
     if(rebel_lr_active)
     {
-        return Plugin_Continue;
+        return true;
     }
 
     SetCollisionGroup = init_set_collision();
@@ -804,12 +805,12 @@ Action command_lr (int client, int args)
     if(lr_cvar.IntValue == 0)
     {
         PrintToChat(client,"%s Lr is currently disabled!",LR_PREFIX);
-        return Plugin_Continue;
+        return true;
     }
 
     if(!is_valid_t(client))
     {
-        return Plugin_Handled;
+        return true;
     }
 
 
@@ -818,11 +819,21 @@ Action command_lr (int client, int args)
     if(alive_t > LR_SLOTS / 2)
     {
         PrintToChat(client,"%s Too many players left alive %d : %d\n",LR_PREFIX,alive_t,LR_SLOTS / 2);
-        return Plugin_Handled;
+        return true;
     }
 
     // open a selection menu for 20 seconds
-    lr_menu.Display(client,20);
+    lr_menu.Display(client,20);  
+
+    return false;  
+}
+
+Action command_lr (int client, int args)
+{
+    if(command_lr_internal(client))
+    {
+        return Plugin_Continue;
+    }
 
     return Plugin_Handled;
 }

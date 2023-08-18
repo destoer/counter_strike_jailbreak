@@ -74,6 +74,15 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
         PrintToChatAll("%s Last request is now ready type !lr",LR_PREFIX);
 
         EmitSoundToAll("lr/lr_enabled.mp3");
+
+        int clients[MAXPLAYERS + 1];
+
+        int count = filter_team(CS_TEAM_T,clients,true);
+
+        for(int i = 0; i < count; i++)
+        {
+            command_lr_internal(clients[i]);
+        }
     }
 
     return Plugin_Continue;
