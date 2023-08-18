@@ -186,13 +186,15 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
         }
 
         weapon_handler_generic(client,param2);
+        PrintToChatAll("%s %N is a rebel!",LR_PREFIX,client);
 	}
 
 	
 	else if (action == MenuAction_Cancel) 
-	{
-		PrintToServer("Client %d's menu was cancelled. Reason: %d", client, param2);
-	}
+    {
+        PrintToChatAll("%s %N is a rebel!",LR_PREFIX,client);
+        PrintToServer("Client %d's menu was cancelled. Reason: %d", client, param2);
+    }
 	return 0;
 }
 
