@@ -537,11 +537,6 @@ public Action OnWeaponDrop(int client, int weapon)
         return Plugin_Continue;
     }
 
-    if(slots[id].restrict_drop)
-    {
-        return Plugin_Handled;
-    }
-
     switch(slots[id].type)
     {
         case gun_toss:
@@ -565,6 +560,25 @@ public Action OnWeaponDrop(int client, int weapon)
                 }
             }
         }
+
+        case crash:
+        {
+            // only mark the first drop
+            if(slots[id].dropped_once)
+            {
+                return Plugin_Continue;
+            }
+
+            slots[id].dropped_once = true;
+            slots[id].ticks = GetSysTickCount();
+
+            PrintToChat(client,"%s dropped at %f",LR_PREFIX,float(slots[id].ticks - slots[id].ticks_start) / 1000.0);
+        }
+    }
+
+    if(slots[id].restrict_drop)
+    {
+        return Plugin_Handled;
     }
 
     if(is_valid_ent(weapon))

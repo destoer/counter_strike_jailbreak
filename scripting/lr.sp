@@ -45,6 +45,7 @@ enum lr_type
     grenade,
     no_scope,
     gun_toss,
+    crash,
     shot_for_shot,
     mag_for_mag,
     shotgun_war,
@@ -60,7 +61,7 @@ enum lr_type
     slot_error,
 }
 
-const int LR_SIZE = 16;
+const int LR_SIZE = 17;
 new const String:lr_list[LR_SIZE][] =
 {	
     "Knife fight",
@@ -68,6 +69,7 @@ new const String:lr_list[LR_SIZE][] =
     "Nade war",
     "No scope",
     "Gun toss",
+    "Crash",
     "Shot for shot",
     "Mag for Mag",
     "Shotgun war",
@@ -82,8 +84,6 @@ new const String:lr_list[LR_SIZE][] =
 /*
     "Race",
     "Rock paper scissors",
-    "Hot potato",
-    "Chicken fight", // (Yeah screw this one)
 */
 };
 
@@ -112,6 +112,10 @@ enum struct LrSlot
     int bullet_chamber;
 
     bool restrict_drop;
+
+    int ticks;
+    int ticks_start;
+    int crash_delay;
 
     bool failsafe;
 
@@ -215,6 +219,7 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 //#include "lr/race.sp"
 #include "lr/sumo.sp"
 #include "lr/rebel.sp"
+#include "lr/crash.sp"
 #include "lr/custom.sp"
 #include "lr/config.sp"
 #include "lr/hook.sp"
@@ -673,6 +678,11 @@ public Action start_lr_callback(Handle timer, int id)
         {
             start_scout_knife(t_slot,ct_slot);
         }
+
+        case crash:
+        {
+            start_crash(t_slot,ct_slot);
+        }
 /*
         case race:
         {
@@ -686,6 +696,12 @@ public Action start_lr_callback(Handle timer, int id)
     }
 
     return Plugin_Continue;
+}
+
+void print_crash_info(int client)
+{
+    PrintToChat(client,"%s drop your weapon as close to the timer as possible (between 5 - 20 seconds)",LR_PREFIX);
+    PrintToChat(client,"%s however, dont go over the selected time or you may die",LR_PREFIX);
 }
 
 void start_lr_internal(int t, int ct, lr_type type)
@@ -713,6 +729,12 @@ void start_lr_internal(int t, int ct, lr_type type)
         case sumo:
         {
             sumo_startup(t_slot,ct_slot);
+        }
+
+        case crash:
+        {
+            print_crash_info(t);
+            print_crash_info(ct);
         }        
     }
 
