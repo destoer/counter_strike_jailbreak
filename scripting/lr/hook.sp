@@ -663,7 +663,7 @@ public OnMapStart()
     g_lbeam = PrecacheModel("materials/sprites/laserbeam.vmt");
     g_lhalo = PrecacheModel("materials/sprites/halo01.vmt");
 
-    gun_menu = build_gun_menu(WeaponHandler,true);
+    gun_menu = build_gun_menu(WeaponHandler,false);
 
     purge_state();
 
