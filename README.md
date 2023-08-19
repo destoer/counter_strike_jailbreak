@@ -44,3 +44,15 @@ jb_rebel - print rebels being killed (bool)
 NOTE: please ensure hosties block setting is the same as jailbreak if used
 also make sure no other no block plugins are active as this may intefere with sd/jb
 which uses SetCollisionGroup rather than SetEntProp to prevent physics breaking
+
+# sample db config
+"lr_stats"
+{
+    "driver"			"default"
+    "host"				"127.0.0.1"
+    "database"			"lr_stats"
+    "user"				"root"
+    "pass"			    "boop"
+    //"timeout"			"0"
+    //"port"			"0"
+}

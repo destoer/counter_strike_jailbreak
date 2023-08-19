@@ -39,6 +39,30 @@ public Action OnRoundStart(Handle event, const String:name[], bool dontBroadcast
 
 public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 {
+    if(rebel_lr_active)
+    {
+        int player;
+        int count = get_alive_team_count(CS_TEAM_T,player);
+
+        if(is_valid_client(player))
+        {
+            // if t is alive then they have won
+            bool won = count != 0;
+
+            lr_type type = knife_rebel_active? knife_rebel : rebel;
+
+            if(won)
+            {
+                lr_win(player,type);
+            }
+
+            else
+            {
+                lr_lose(player,type);
+            }
+        }
+    }
+
     purge_state();
     return Plugin_Continue;
 }
@@ -58,6 +82,16 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
         if(victim == slot.client)
         {
             PrintToChatAll("%s %N won %s, %N lost\n",LR_PREFIX,slots[slot.partner].client,lr_list[slot.type],slot.client);
+
+            int partner = slots[slot.partner].client;
+
+            lr_lose(victim,slot.type);
+            lr_win(partner,slot.type);
+
+            int idx = view_as<int>(slot.type);
+
+            print_lr_stat_all(victim,idx);
+            print_lr_stat_all(partner,idx);
         }
         
         int partner = slots[id].partner;
@@ -173,7 +207,16 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
         end_lr_pair(id,partner);
     }
 
+    clear_stat(client);
+
     return Plugin_Continue;
+}
+
+public void OnClientAuthorized(int client, const char[] auth)
+{
+    clear_stat(client);
+
+    CreateTimer(3.0,load_from_db_callback,client,TIMER_FLAG_NO_MAPCHANGE);
 }
 
 //remove damage and aimpunch

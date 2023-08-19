@@ -60,6 +60,7 @@ enum lr_type
 }
 
 const int LR_SIZE = 17;
+#define LR_SIZE_ACTUAL 16
 new const String:lr_list[LR_SIZE][] =
 {	
     "Knife fight",
@@ -85,6 +86,46 @@ new const String:lr_list[LR_SIZE][] =
 */
 };
 
+new const String:lr_win_field[LR_SIZE_ACTUAL][] =
+{	
+    "Knife_fight_Win",
+    "Dodgeball_Win",
+    "Nade_war_Win",
+    "No_scope_Win",
+    "Gun_toss_Win",
+    "Crash_Win",
+    "Shot_for_shot_Win",
+    "Mag_for_Mag_Win",
+    "Shotgun_war_Win",
+    "Russian_roulette_Win",
+    "Headshot_only_Win",
+    "Sumo_Win",
+    "Scout_knife_Win",
+    "Custom_Win",
+    "Rebel_Win",
+    "Knife_rebel_Win",
+};
+
+
+new const String:lr_loss_field[LR_SIZE_ACTUAL][] =
+{	
+    "Knife_fight_Loss",
+    "Dodgeball_Loss",
+    "Nade_war_Loss",
+    "No_scope_Loss",
+    "Gun_toss_Loss",
+    "Crash_Loss",
+    "Shot_for_shot_Loss",
+    "Mag_for_Mag_Loss",
+    "Shotgun_war_Loss",
+    "Russian_roulette_Loss",
+    "Headshot_only_Loss",
+    "Sumo_Loss",
+    "Scout_knife_Loss",
+    "Custom_Loss",
+    "Rebel_Loss",
+    "Knife_rebel_Loss",
+};
 
 enum struct LrSlot  
 {
@@ -221,6 +262,7 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 #include "lr/custom.sp"
 #include "lr/config.sp"
 #include "lr/hook.sp"
+#include "lr/stats.sp"
 #include "jailbreak/jailbreak.inc"
 
 
@@ -269,6 +311,7 @@ public OnPluginStart()
     create_lr_convar();
 
     RegConsoleCmd("lr",command_lr);
+    RegConsoleCmd("lr_stats",lr_stats);
 
     // debugging
     RegConsoleCmd("register_console",register_console);
@@ -300,6 +343,8 @@ public OnPluginStart()
             OnClientPutInServer(i);
         }
     }
+
+    database_connect();
 
     SetCollisionGroup = init_set_collision();
 }
