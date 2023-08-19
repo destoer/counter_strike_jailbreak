@@ -274,7 +274,7 @@ public Action lr_stats(int client, int args)
 
         GetCmdArg(1,arg,sizeof(arg));
 
-        int tmp = FindTarget(client,arg);
+        int tmp = FindTarget(client,arg,false,false);
 
         if(is_valid_client(tmp))
         {
