@@ -115,6 +115,9 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 
         for(int i = 0; i < count; i++)
         {
+            // give a extra chance by here
+            add_db_client(clients[i]);
+
             command_lr_internal(clients[i]);
         }
     }
@@ -216,7 +219,7 @@ public void OnClientAuthorized(int client, const char[] auth)
 {
     clear_stat(client);
 
-    CreateTimer(3.0,load_from_db_callback,client,TIMER_FLAG_NO_MAPCHANGE);
+    CreateTimer(10.0,load_from_db_callback,client,TIMER_FLAG_NO_MAPCHANGE);
 }
 
 //remove damage and aimpunch

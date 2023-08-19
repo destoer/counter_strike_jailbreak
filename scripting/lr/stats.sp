@@ -144,6 +144,29 @@ void load_from_db(int client)
     SQL_TQuery(database,T_load_from_db,query,client);
 }
 
+void add_db_client(int client)
+{
+    if(!is_valid_client(client) || !database)
+    {
+        return;
+    }
+
+    char steam_id[40];
+    if(!GetClientAuthId(client,AuthId_Engine,steam_id,sizeof(steam_id)))
+    {
+        PrintToServer("Could not get auth id");
+        return;
+    }
+
+    char query[256];
+    SQL_FormatQuery(database,query,sizeof(query),"INSERT IGNORE INTO stats (steamid,name) VALUES ('%s' ,'%N')",steam_id,client);
+
+    //PrintToServer("Query: %s\n",query);
+
+    // perform the query
+    SQL_TQuery(database,T_QueryGeneric,query,client);    
+}
+
 public void T_load_from_db(Database db, DBResultSet results, const char[] error, int client)
 {
     if (db == null || results == null || error[0] != '\0')
@@ -160,20 +183,7 @@ public void T_load_from_db(Database db, DBResultSet results, const char[] error,
     // this user is new, go add them
     if(!results.RowCount)
     {
-        char steam_id[40];
-        if(!GetClientAuthId(client,AuthId_Engine,steam_id,sizeof(steam_id)))
-        {
-            PrintToServer("Could not get auth id");
-            return;
-        }
-
-        char query[256];
-        SQL_FormatQuery(database,query,sizeof(query),"INSERT IGNORE INTO stats (steamid,name) VALUES ('%s' ,'%N')",steam_id,client);
-
-        //PrintToServer("Query: %s\n",query);
-
-        // perform the query
-        SQL_TQuery(database,T_QueryGeneric,query,client);
+        add_db_client(client);
         return;        
     }
 
