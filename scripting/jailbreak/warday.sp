@@ -23,7 +23,7 @@ public Action warday_callback(client, args)
     warday_round_counter = 0;
 
     // no loc passed init to nothing
-    if(args <= 1)
+    if(args == 0)
     {
         Format(warday_loc,sizeof(warday_loc),"");
     }
