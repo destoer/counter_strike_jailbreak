@@ -265,6 +265,23 @@ void list_lr_stats(int client, int player)
 
 public Action lr_stats(int client, int args)
 {
-    list_lr_stats(client,client);
+    int player = client;
+
+    // if we have args try to get another player
+    if(GetCmdArgs() == 1)
+    {
+        new String:arg[64];
+
+        GetCmdArg(1,arg,sizeof(arg));
+
+        int tmp = FindTarget(client,arg);
+
+        if(is_valid_client(tmp))
+        {
+            player = tmp;
+        }   
+    }
+
+    list_lr_stats(client,player);
     return Plugin_Continue;
 }

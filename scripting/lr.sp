@@ -347,6 +347,8 @@ public OnPluginStart()
     database_connect();
 
     SetCollisionGroup = init_set_collision();
+
+    LoadTranslations("common.phrases"); 
 }
 
 
