@@ -64,12 +64,12 @@ void setup_db()
 
     SQL_TQuery(database,T_QueryGeneric,"CREATE TABLE IF NOT EXISTS stats (steamid varchar(64) PRIMARY KEY,name varchar(64))");
 
-    char query[256];
 
-    for(int i = 0; i < LR_SIZE_ACTUAL; i++)
-    {
         // add each col if not present
 
+        // not working on new sql versions
+        
+    /* 
         // win
         SQL_FormatQuery(database,query,sizeof(query),"ALTER TABLE stats ADD COLUMN IF NOT EXISTS %s int DEFAULT 0",lr_win_field[i]);
         SQL_TQuery(database,T_QueryGeneric,query);
@@ -77,11 +77,41 @@ void setup_db()
         // loss
         SQL_FormatQuery(database,query,sizeof(query),"ALTER TABLE stats ADD COLUMN IF NOT EXISTS %s int DEFAULT 0",lr_loss_field[i]);
         SQL_TQuery(database,T_QueryGeneric,query);
-    }
+    */
+    
+    // use a seperate query
+    SQL_TQuery(database,T_create_table,"SHOW COLUMNS FROM stats");
 
     PrintToServer("[LR]: stat database setup sucessfully");
 }
 
+public void T_create_table(Database db, DBResultSet results, const char[] error, any data)
+{
+    if (db == null || results == null || error[0] != '\0' || !results.RowCount)
+    {
+        LogError("Query failed! %s", error);
+    }
+
+    // TODO: this will error out the first time we add a new lr...
+    if(((results.RowCount) == (LR_SIZE_ACTUAL * 2) + 2))
+    {
+        return;
+    }
+
+    char query[256];
+
+    for(int i = 0; i < LR_SIZE_ACTUAL; i++)
+    {
+        // win
+        SQL_FormatQuery(database,query,sizeof(query),"ALTER TABLE stats ADD COLUMN %s int DEFAULT 0",lr_win_field[i]);
+        SQL_TQuery(database,T_QueryGeneric,query);
+        
+
+        // loss
+        SQL_FormatQuery(database,query,sizeof(query),"ALTER TABLE stats ADD COLUMN %s int DEFAULT 0",lr_loss_field[i]);
+        SQL_TQuery(database,T_QueryGeneric,query);     
+    }    
+}
 
 public Action load_from_db_callback(Handle timer, int client)
 {
