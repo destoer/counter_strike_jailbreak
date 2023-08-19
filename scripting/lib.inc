@@ -95,7 +95,6 @@ bool is_sudoer(int client)
 		}
 	}
 
-	PrintToChat(client,"%N is not in the sudoers file this incident will be reported",client);
 	return false;
 }
 

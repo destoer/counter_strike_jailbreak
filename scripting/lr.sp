@@ -19,6 +19,7 @@
 
 // TODO: later
 -Add back button in LR menu
+-Add lr leaderboard
 -impl more lr's
 -remove guns on slay (probs easiest to just hook the comamnds like in the team bal plugin)
 */
