@@ -407,6 +407,9 @@ public Action player_team(Event event, const char[] name, bool dontBroadcast)
 {
     int client = GetClientOfUserId(GetEventInt(event, "userid")); 
 
+    // extra load
+    load_from_db(client);
+
     int id = get_slot(client);
 
     if(id != INVALID_SLOT)
