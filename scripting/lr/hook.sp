@@ -634,9 +634,15 @@ public Action OnWeaponDrop(int client, int weapon)
             }
 
             slots[id].dropped_once = true;
-            slots[id].ticks = GetSysTickCount();
 
-            PrintToChat(client,"%s dropped at %f",LR_PREFIX,float(slots[id].ticks - slots[id].ticks_start) / 1000.0);
+            int ct_slot = GetClientTeam(client) == CS_TEAM_CT? id : slots[id].partner;
+
+            slots[id].crash_stop = slots[ct_slot].delay;
+
+            slots[id].dropped_last = client;
+            slots[slots[id].partner].dropped_last = client;
+
+            PrintToChat(client,"%s dropped at %d",LR_PREFIX,slots[id].crash_stop);
 
             // dont actually drop the gun so the other player cant see what time was picked
             return Plugin_Handled;

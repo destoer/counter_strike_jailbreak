@@ -22,10 +22,6 @@ void start_crash(int t_slot, int ct_slot)
     crash_player_init(t_slot);
     crash_player_init(ct_slot);
 
-    // Use a ms timer for the actual triggers
-    int start = GetSysTickCount();
-    slots[t_slot].ticks_start = start;
-    slots[ct_slot].ticks_start = start;
 
     slots[t_slot].crash_delay = GetRandomInt(5,20);
 
@@ -42,7 +38,7 @@ void print_time(int slot)
 {
     if(slots[slot].dropped_once)
     {
-        PrintToChatAll("%s %N dropped at %f",LR_PREFIX,slots[slot].client,float(slots[slot].ticks - slots[slot].ticks_start) / 1000.0);
+        PrintToChatAll("%s %N dropped at %d",LR_PREFIX,slots[slot].client,slots[slot].crash_stop);
     }
 }
 
@@ -93,8 +89,8 @@ public Action crash_end(Handle timer, int t_slot)
     // both players have picked
     if(t_dropped && ct_dropped)
     {
-        // As we cannot go over whoever has the HIGHEST timer is the winner
-        if(slots[t_slot].ticks > slots[ct_slot].ticks)
+        // whoever dropped last wins
+        if(slots[t_slot].dropped_last == t)
         {   
             ForcePlayerSuicide(ct);
         }

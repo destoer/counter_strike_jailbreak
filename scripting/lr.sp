@@ -152,8 +152,8 @@ enum struct LrSlot
 
     bool restrict_drop;
 
-    int ticks;
-    int ticks_start;
+    int crash_stop;
+    int dropped_last;
     int crash_delay;
 
     bool failsafe;
@@ -474,6 +474,9 @@ void end_lr(LrSlot slot)
 
     slot.gun_dropped = false;
     slot.dropped_once = false;
+
+    slot.crash_stop = -1;
+    slot.dropped_last = -1;
 
     end_line(slot);
 }
