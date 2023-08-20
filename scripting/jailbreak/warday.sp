@@ -4,24 +4,8 @@
 #define _WARDAY_INCLUDE_included#
 
 
-public Action warday_callback(client, args)
+void format_warday(int args)
 {
-    if(client != warden_id)
-    {
-        PrintToChat(client,"%s Only a warden may call a warday!",WARDEN_PREFIX);
-        return Plugin_Handled;
-    }
-
-
-    if(warday_round_counter < WARDAY_ROUND_COUNT)
-    {
-        PrintToChat(client,"%s please wait %d rounds",WARDEN_PREFIX,WARDAY_ROUND_COUNT - warday_round_counter);
-        return Plugin_Handled;
-    }
-
-    // we have called a warday reset the counter
-    warday_round_counter = 0;
-
     // no loc passed init to nothing
     if(args == 0)
     {
@@ -33,8 +17,39 @@ public Action warday_callback(client, args)
         GetCmdArgString(warday_loc,sizeof(warday_loc));
     }
 
-    // start a warday....
-    warday_start();
+}
+
+public Action warday_callback(int client, int args)
+{
+    if(!warday_active)
+    {
+        if(client != warden_id)
+        {
+            PrintToChat(client,"%s Only a warden may call a warday!",WARDEN_PREFIX);
+            return Plugin_Handled;
+        }
+
+
+        if(warday_round_counter < WARDAY_ROUND_COUNT)
+        {
+            PrintToChat(client,"%s please wait %d rounds",WARDEN_PREFIX,WARDAY_ROUND_COUNT - warday_round_counter);
+            return Plugin_Handled;
+        }
+
+        // we have called a warday reset the counter
+        warday_round_counter = 0;
+
+        format_warday(args);
+
+        // start a warday....
+        warday_start();
+    }
+
+    // recalled when active let them re format the name
+    else
+    {
+        format_warday(args);
+    }
 
     return Plugin_Continue;
 }
