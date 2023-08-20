@@ -21,15 +21,14 @@ void format_warday(int args)
 
 public Action warday_callback(int client, int args)
 {
+    if(client != warden_id)
+    {
+        PrintToChat(client,"%s Only a warden may call a warday!",WARDEN_PREFIX);
+        return Plugin_Handled;
+    }
+
     if(!warday_active)
     {
-        if(client != warden_id)
-        {
-            PrintToChat(client,"%s Only a warden may call a warday!",WARDEN_PREFIX);
-            return Plugin_Handled;
-        }
-
-
         if(warday_round_counter < WARDAY_ROUND_COUNT)
         {
             PrintToChat(client,"%s please wait %d rounds",WARDEN_PREFIX,WARDAY_ROUND_COUNT - warday_round_counter);
