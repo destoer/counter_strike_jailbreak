@@ -184,6 +184,14 @@ public void T_load_from_db(Database db, DBResultSet results, const char[] error,
     if(!results.RowCount)
     {
         add_db_client(client);
+
+        // ct ban client because this player is new
+        if(check_command_exists("sm_ctban") && ct_ban)
+        {
+            CTBan_Client(client,45,0,"Please play on T for a while to learn the rules");
+            PrintToChat(client,"%s Please read the rules before joining ct you can join in 45 minutes\n",LR_PREFIX);
+        }
+
         return;        
     }
 

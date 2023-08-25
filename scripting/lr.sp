@@ -306,9 +306,15 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     return APLRes_Success;
 }
 
+#undef REQUIRE_PLUGIN
+#include "thirdparty/ctban.inc"
+#define REQUIRE_PLUGIN
+
+
 public OnPluginStart()
 {
     create_lr_convar();
+    setup_config();
 
     RegConsoleCmd("lr",command_lr);
     RegConsoleCmd("lr_stats",lr_stats);
