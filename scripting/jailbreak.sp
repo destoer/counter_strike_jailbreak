@@ -912,7 +912,7 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 			}
 
 			// restore hp
-			SetEntityHealth(new_warden,100);
+			SetEntityHealth(new_warden,ct_handicap? 130 : 100);
 			set_warden(new_warden);
 		}
 	}
@@ -1147,14 +1147,19 @@ void set_rebel(int client)
 
 public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
 {
-	if(sd_enabled() && sd_current_state() != sd_inactive)
-	{
-		return Plugin_Continue;
-	}
-
 	if(is_valid_client(attacker) && GetClientTeam(attacker) == CS_TEAM_T && GetClientTeam(victim) == CS_TEAM_CT)
 	{
 		set_rebel(attacker);
+
+		char weapon[64];
+		GetClientWeapon(attacker, weapon, sizeof(weapon) - 1);
+
+		if(ct_handicap && !in_lr(attacker) && StrEqual(weapon,"weapon_knife"))
+		{
+			// up damage to account for ct handicap
+			damage = damage * 1.3;
+			return Plugin_Changed;
+		}
 	}
 
 	// print ct damage to console
