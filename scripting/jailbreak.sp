@@ -69,6 +69,8 @@ bool warden_text[MAXPLAYERS + 1];
 
 bool spawn_block_override = false;
 
+bool ct_handicap = false;
+
 #include <sourcemod>
 #include <sdktools>
 #include <sdkhooks>
@@ -745,6 +747,12 @@ public Action leave_warden(int client, int args)
 
 public Action become_warden(int client, int args) 
 {
+	if(BaseComm_IsClientMuted(client))
+	{
+		PrintToChat(client,"%s You are muted and cannot take warden",WARDEN_PREFIX);
+		return Plugin_Handled;
+	}
+
 	// warden does not exist
 	if(warden_id == WARDEN_INVALID)
 	{
@@ -903,6 +911,8 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 				EmitSoundToAll("bot\\its_all_up_to_you_sir.wav");
 			}
 
+			// restore hp
+			SetEntityHealth(new_warden,100);
 			set_warden(new_warden);
 		}
 	}
@@ -965,6 +975,11 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 				
 		if(team == CS_TEAM_CT)
 		{
+			if(ct_handicap)
+			{
+				SetEntityHealth(client,130);
+			}
+
 			if(helmet)
 			{
 				GivePlayerItem(client, "item_assaultsuit");
@@ -999,6 +1014,8 @@ public Action round_end(Handle event, const String:name[], bool dontBroadcast)
 
 	spawn_block_override = false;
 
+	ct_handicap = false;
+
 	return Plugin_Continue;
 }
 
@@ -1029,6 +1046,27 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 		{
 			jb_enable_block_all();
 		}
+	}
+
+	ct_handicap = false;
+
+	int ct_count = GetTeamClientCount(CS_TEAM_CT);
+	int t_count = GetTeamClientCount(CS_TEAM_T);
+
+	if(ct_count * 3 <= t_count)
+	{
+		ct_handicap = true;
+
+		for(int i = 1; i <= MAXPLAYERS + 1; i++)
+		{
+			if(is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT)
+			{
+				SetEntityHealth(i,130);
+			}
+		}
+
+
+		PrintToChatAll("%s CT's are outnumbered 3 to 1 increasing health to 130",JB_PREFIX);
 	}
 
 	// there is no warden

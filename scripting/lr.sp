@@ -923,14 +923,15 @@ public int partner_handler(Menu menu, MenuAction action, int t, int param2)
     // Get the selected parter and start the LR
     if(action == MenuAction_Select)
     {
-        char name[64]
-        menu.GetItem(param2,name,sizeof(name) - 1);
+        char id[64];
+        menu.GetItem(param2,id,sizeof(id) - 1);
 
-        int partner = FindTarget(t,name,false,false);
+        int partner = StringToInt(id);
 
-        if(partner == -1)
+        if(!is_valid_partner(partner))
         {
-            PrintToChat(t,"%s No such player: %s\n",LR_PREFIX,name)
+            PrintToChat(t,"%s invalid lr partner\n",LR_PREFIX);
+            return 0;
         }
 
         lr_type type = lr_choice[t].type;
@@ -961,7 +962,10 @@ void pick_partner(int client)
             char name[64];
             GetClientName(i,name,sizeof(name) - 1)
 
-            menu.AddItem(name,name);
+            char id[64];
+            Format(id,sizeof(id) - 1,"%d",i);
+
+            menu.AddItem(id,name);
             valid_players++;
         }
     }
