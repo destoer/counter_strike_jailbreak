@@ -534,6 +534,7 @@ public OnPluginStart()
 	RegAdminCmd("enable_wd",enable_wd,ADMFLAG_CUSTOM6);
 	RegConsoleCmd("spawn_count",spawn_count_cmd);
 	RegConsoleCmd("ent_count",ent_count);
+	RegConsoleCmd("is_stuck",is_stuck_cmd);
 
 	RegConsoleCmd("wcommands",warden_commands);
 	
@@ -1057,7 +1058,7 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 	{
 		ct_handicap = true;
 
-		for(int i = 1; i <= MAXPLAYERS + 1; i++)
+		for(int i = 1; i <= MAXPLAYERS; i++)
 		{
 			if(is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT)
 			{

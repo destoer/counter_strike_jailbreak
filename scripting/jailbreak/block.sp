@@ -63,3 +63,32 @@ public Action enable_block_warden_callback(int client, int args)
 	jb_enable_block_all();
 	return Plugin_Handled;
 }
+
+/*
+
+// stuck grenade unblock
+
+public OnEntityCreated(int entity, const String:classname[])
+{
+    SDKHook(entity, SDKHook_Spawn, OnEntitySpawn); 
+}
+
+public Action OnEntitySpawn(int entity)
+{
+	char classname[64];
+	GetEntityClassname(entity,classname,sizeof(classname) - 1);
+
+	int client = GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity");
+
+	// if nade is thrown while a player is stuck give it no block
+	if(is_valid_client(client) && is_stuck_in_player(client))
+	{
+		if (StrEqual(classname, "flashbang_projectile") || StrEqual(classname, "hegrenade_projectile") || StrEqual(classname, "smokegrenade_projectile"))
+		{
+			SetClientCollision(entity,SetCollisionGroup,COLLISION_GROUP_DEBRIS_TRIGGER);
+		}
+	}
+
+	return Plugin_Continue;
+}
+*/

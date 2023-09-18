@@ -67,8 +67,12 @@ void sumo_startup(int t_slot, int ct_slot)
     slots[t_slot].timer = CreateTimer(CIRCLE_TIMER,draw_circle,t_slot,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
     slots[ct_slot].timer = CreateTimer(28.0,enable_sumo_damage,ct_slot,TIMER_FLAG_NO_MAPCHANGE);
 
+    float zero[3] = {0.0,0.0,0.0};
 
+    set_player_velocity(slots[t_slot].client,zero);
     SetEntityMoveType(slots[t_slot].client, MOVETYPE_NONE);
+
+    set_player_velocity(slots[ct_slot].client,zero);
     SetEntityMoveType(slots[ct_slot].client, MOVETYPE_NONE);
 
 

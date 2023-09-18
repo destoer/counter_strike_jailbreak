@@ -671,6 +671,19 @@ stock bool trace_hit_player(int hit, int mask, int client)
     return client != hit && is_valid_client(hit);
 }
 
+
+stock void get_ent_pos(int entity, float pos[3])
+{
+    GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos)  
+}
+
+stock bool is_ent_stuck_in_player(int entity,float origin[3], float min[3], float max[3])
+{
+	TR_TraceHullFilter(origin, origin,min, max, MASK_ALL, trace_hit_player, entity);
+	return TR_DidHit();
+}
+
+
 stock bool is_stuck_in_player(int client)
 {
 	float min[3]; 
@@ -682,8 +695,7 @@ stock bool is_stuck_in_player(int client)
 
 	GetClientAbsOrigin(client, origin);
 
-	TR_TraceHullFilter(origin, origin,min, max, MASK_ALL, trace_hit_player, client);
-	return TR_DidHit();
+	return is_ent_stuck_in_player(client,origin,min,max);
 }
 
 stock void enable_lr()

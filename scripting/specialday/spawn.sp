@@ -23,26 +23,6 @@ void sample_cords()
 	}
 }
 
-bool is_player_stuck(int client)
-{
-	float min[3];
-	float max[3];
-	float origin[3];
-	
-	GetClientMins(client, min);
-	GetClientMaxs(client, max);
-	
-	GetClientAbsOrigin(client, origin);
-	
-	TR_TraceHullFilter(origin, origin, min, max, MASK_PLAYERSOLID, trace_stuck, client);
-}
-
-bool trace_stuck(int entity, int client)
-{
-	return entity != client;
-}
-
-
 // if there aernt enough sampled respawn points
 // (less than 5)
 // then do a tradional spawn or we are just gonna

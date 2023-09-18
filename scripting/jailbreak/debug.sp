@@ -129,6 +129,17 @@ public Action spawn_count_cmd(int client, int args)
 	return Plugin_Continue;	
 }
 
+public Action is_stuck_cmd(int client, int args)
+{
+	if(!is_sudoer(client))
+	{
+		return Plugin_Handled;
+	}
+	
+	PrintToChat(client,"%s stuck %s",JB_PREFIX,is_stuck_in_player(client)? "true" : "false");
+	
+	return Plugin_Continue;		
+}
 
 public Action enable_wd(int client, int args)
 {

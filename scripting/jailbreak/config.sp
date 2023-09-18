@@ -60,7 +60,7 @@ void create_jb_convar()
     laser_cvar = CreateConVar("jb_kill_laser","0","enable kill laser");
     t_laser_cvar = CreateConVar("jb_t_laser","0","enable t laser");
     gun_cvar = CreateConVar("jb_gun_commands","0","enable ct gun menu");
-    voice_cvar = CreateConVar("jb_warden_voice","1","enable getting warden from voice");
+    voice_cvar = CreateConVar("jb_warden_voice","0","enable getting warden from voice");
     armor_cvar = CreateConVar("jb_armor","1","give ct armor on spawn");
     helmet_cvar = CreateConVar("jb_helmet","1","give ct helmet+kevlar on spawn");
     warden_block_cvar = CreateConVar("jb_warden_block","1","enable warden block commands");
