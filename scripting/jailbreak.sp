@@ -1068,6 +1068,7 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 
 
 		PrintToChatAll("%s CT's are outnumbered 3 to 1 increasing health to 130",JB_PREFIX);
+		PrintCenterTextAll("CT's are outnumbered 3 to 1 increasing health to 130");
 	}
 
 	// there is no warden
