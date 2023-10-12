@@ -95,7 +95,7 @@ public Action force_lr(int client, int args)
 
     GetCmdArg(1,arg,sizeof(arg));
 
-    int cli1 = FindTarget(client,arg);
+    int cli1 = FindTarget(client,arg,false,false);
 
     if(cli1 == -1)
     {
@@ -105,7 +105,7 @@ public Action force_lr(int client, int args)
 
     GetCmdArg(2,arg,sizeof(arg));
 
-    int cli2 = FindTarget(client,arg);
+    int cli2 = FindTarget(client,arg,false,false);
 
     if(cli2 == -1)
     {

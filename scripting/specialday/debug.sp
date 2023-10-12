@@ -37,7 +37,7 @@ public Action rig_client(int client, int args)
 
 	PrintToChat(client,"%s Rigging next sd for client %s\n",SPECIALDAY_PREFIX,arg);
 
-	rigged_client = FindTarget(client,arg);
+	rigged_client = FindTarget(client,arg,false,false);
 
 	PrintToChat(client,"%s Rigged to client %d:%N\n",SPECIALDAY_PREFIX,rigged_client,rigged_client);
 

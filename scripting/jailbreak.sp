@@ -1049,15 +1049,13 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 		}
 	}
 
-	ct_handicap = false;
-
 	int ct_count = GetTeamClientCount(CS_TEAM_CT);
 	int t_count = GetTeamClientCount(CS_TEAM_T);
 
-	if(ct_count * 3 <= t_count)
-	{
-		ct_handicap = true;
+	ct_handicap = (ct_count * 3) <= t_count;
 
+	if(ct_handicap)
+	{
 		for(int i = 1; i <= MAXPLAYERS; i++)
 		{
 			if(is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT)
@@ -1065,7 +1063,6 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 				SetEntityHealth(i,130);
 			}
 		}
-
 
 		PrintToChatAll("%s CT's are outnumbered 3 to 1 increasing health to 130",JB_PREFIX);
 		PrintCenterTextAll("CT's are outnumbered 3 to 1 increasing health to 130");
@@ -1156,7 +1153,7 @@ public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damaget
 		char weapon[64];
 		GetClientWeapon(attacker, weapon, sizeof(weapon) - 1);
 
-		if(ct_handicap && !in_lr(attacker) && StrEqual(weapon,"weapon_knife"))
+		if(ct_handicap && !in_lr(attacker) && (StrEqual(weapon,"weapon_knife") || StrEqual(weapon,"weapon_awp")))
 		{
 			// up damage to account for ct handicap
 			damage = damage * 1.3;
