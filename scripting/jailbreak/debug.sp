@@ -64,7 +64,7 @@ public Action is_rebel_cmd(int client, int args)
 	{
 		if(is_valid_client(i))
 		{
-			PrintToConsole(client, "rebel: %N %s", i, rebel[i] ? "true" : "false");
+			PrintToConsole(client, "rebel: %N %s", i, players[i].rebel ? "true" : "false");
 		}
 	}
 
@@ -112,7 +112,7 @@ public Action wd_rounds(int client, int args)
 		return Plugin_Handled;
 	}
 
-	PrintToChat(client,"%s warday round counter %d:%d",WARDEN_PREFIX,warday_round_counter,WARDAY_ROUND_COUNT);
+	PrintToChat(client,"%s warday round counter %d:%d",WARDEN_PREFIX,global_ctx.warday_round_counter,WARDAY_ROUND_COUNT);
 
 	return Plugin_Continue;
 }
@@ -149,7 +149,7 @@ public Action enable_wd(int client, int args)
 		return Plugin_Handled;
 	}
 
-	warday_round_counter = WARDAY_ROUND_COUNT;	
+	global_ctx.warday_round_counter = WARDAY_ROUND_COUNT;	
 
 	return Plugin_Continue;
 }

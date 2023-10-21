@@ -7,20 +7,12 @@
 #define _LASER_INCLUDE_included
 
 
-// laser stuff
-// laser globals
-bool laser_use[MAXPLAYERS+1];
-float prev_pos[MAXPLAYERS+1][3];
+// laser globals for models
 int g_lbeam;
 int g_lpoint;
 
-bool use_draw_laser_settings[MAXPLAYERS + 1];
-bool t_use_draw_laser[MAXPLAYERS + 1];
-bool laser_kill = false;
 
 
-// what has the clients picked for laser color
-int laser_color[MAXPLAYERS+1];
 
 #define LASER_COLOR_SIZE 7
 int laser_colors[LASER_COLOR_SIZE][4] =
@@ -34,6 +26,7 @@ int laser_colors[LASER_COLOR_SIZE][4] =
 	{ 255, 255, 0, 255 } // yellow
 };
 
+// cur rainbow
 int rainbow_color = 0;
 
 int laser_rainbow[7][4] = 
@@ -76,9 +69,9 @@ public int color_handler(Menu menu, MenuAction action, int client, int choice)
 {
 	if(action == MenuAction_Select) 
 	{
-		laser_color[client] = choice - 1;
+		players[client].laser_color = choice - 1;
 		
-		set_cookie_int(client,laser_color[client],client_laser_color_pref);
+		set_cookie_int(client,players[client].laser_color,client_laser_color_pref);
 	}
 
 	
@@ -103,7 +96,7 @@ enum laser_type
 
 public void SetupLaser(int client,int color[4])
 {
-	setup_laser(client, color, g_lbeam, g_lpoint, laser_kill);
+	setup_laser(client, color, g_lbeam, g_lpoint, global_ctx.laser_kill);
 }
 
 int t_client_list[MAXPLAYERS+1] = {0};
@@ -112,7 +105,7 @@ int t_client_list[MAXPLAYERS+1] = {0};
 public Action t_laser_menu(int client,int args)
 {
 
-	if(client != warden_id)
+	if(client != global_ctx.warden_id)
 	{
 		return Plugin_Handled;
 	}
@@ -146,7 +139,7 @@ public t_laser_handler(Menu menu, MenuAction action, int param1, int param2)
 
     if (action == MenuAction_Select)
     {
-		t_use_draw_laser[t_client_list[param2]] = !t_use_draw_laser[t_client_list[param2]];
+		players[t_client_list[param2]].t_laser = !players[t_client_list[param2]].t_laser;
     }
 
     else if (action == MenuAction_Cancel)
@@ -182,16 +175,9 @@ public laser_handler(Menu menu, MenuAction action, int client, int param2)
 {
 	if(action == MenuAction_Select) 
 	{
-		switch(param2)
-		{
-			case 1:
-				use_draw_laser_settings[client] = false;
-				
-			case 2:
-				use_draw_laser_settings[client] = true;
-		}
+		players[client].draw_laser = param2 == 2;
 		
-		set_cookie_int(client,use_draw_laser_settings[client],client_laser_draw_pref);
+		set_cookie_int(client,players[client].draw_laser,client_laser_draw_pref);
 	}
 	
 	else if (action == MenuAction_Cancel) 
@@ -201,21 +187,12 @@ public laser_handler(Menu menu, MenuAction action, int client, int param2)
 }
 
 
-// reset the laser draw for t's
-void reset_laser_setting()
-{
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		t_use_draw_laser[i] = false;	
-	}
-}
-
 // timer here to draw connected points
 public Action laser_draw(Handle timer)
 {
-	if(warden_id != WARDEN_INVALID && use_draw_laser_settings[warden_id] && laser_use[warden_id])
+	if(global_ctx.warden_id != WARDEN_INVALID && players[global_ctx.warden_id].draw_laser && players[global_ctx.warden_id].laser_use)
 	{
-		do_draw(warden_id, {1, 153, 255, 255} );
+		do_draw(global_ctx.warden_id, {1, 153, 255, 255} );
 	}
 	
 	// now check if any of our t's happen to be drawing
@@ -226,7 +203,7 @@ public Action laser_draw(Handle timer)
 			continue;
 		}
 		
-		if(t_use_draw_laser[i])
+		if(players[i].t_laser)
 		{
 			do_draw(i, {255,0,0,255} );
 		}
@@ -244,8 +221,8 @@ void do_draw(int client, int color[4])
 	get_client_sight_end(client, cur_pos);
 	
 	// check we are not on the first laser shine
-	bool initial_draw = prev_pos[client][0] == 0.0 && prev_pos[client][1] == 0.0 
-		&& prev_pos[client][2] == 0.0;
+	bool initial_draw = players[client].prev_pos[0] == 0.0 && players[client].prev_pos[1] == 0.0 
+		&& players[client].prev_pos[2] == 0.0;
 	
 
 	// we only want to allow drawing on a wall or floor not lines between
@@ -259,7 +236,7 @@ void do_draw(int client, int color[4])
 
 	for(int i = 0; i < 3; i++)
 	{
-		float change = FloatAbs(cur_pos[i] - prev_pos[client][i]);
+		float change = FloatAbs(cur_pos[i] - players[client].prev_pos[i]);
 
 		//PrintToChatAll("change %d : %f",i,change);
 
@@ -271,40 +248,40 @@ void do_draw(int client, int color[4])
 
 	// additonally cut off lines that are too long
 	float distance_vec[3];
-	SubtractVectors(cur_pos,prev_pos[client],distance_vec);
+	SubtractVectors(cur_pos,players[client].prev_pos,distance_vec);
 
 	float length = GetVectorLength(distance_vec);
 
 	if(initial_draw)
 	{
-		prev_pos[client] = cur_pos;	
+		players[client].prev_pos = cur_pos;	
 	}
 
 	else if(change_count < 3 && length <= 1000.0)
 	{
-		draw_beam(prev_pos[client],cur_pos,DRAW_REFRESH,2.0,color,g_lbeam);	
-		prev_pos[client] = cur_pos;	
+		draw_beam(players[client].prev_pos,cur_pos,DRAW_REFRESH,2.0,color,g_lbeam);	
+		players[client].prev_pos = cur_pos;	
 	}
 
 	// invalid
 	else
 	{
-		prev_pos[client][0] = 0.0;
-		prev_pos[client][1] = 0.0;
-		prev_pos[client][2] = 0.0;
+		players[client].prev_pos[0] = 0.0;
+		players[client].prev_pos[1] = 0.0;
+		players[client].prev_pos[2] = 0.0;
 	}	
 }
 
 public Action kill_laser (int client, int args)
 {
-	laser_kill = true;
+	global_ctx.laser_kill = true;
 
 	return Plugin_Handled;
 }
 
 public Action safe_laser (int client, int args)
 {
-	laser_kill = false;
+	global_ctx.laser_kill = false;
 
 	return Plugin_Handled;
 }

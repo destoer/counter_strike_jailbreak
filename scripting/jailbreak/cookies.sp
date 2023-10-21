@@ -56,12 +56,12 @@ public void OnClientCookiesCached(int client)
 		color = 0;
 	}
 
-	laser_color[client] = color;
+	players[client].laser_color = color;
 	
 
 	int draw = get_cookie_int(client,client_laser_draw_pref);
-	use_draw_laser_settings[client] = draw > 0;
+	players[client].draw_laser = draw > 0;
 
 	int text_enable = get_cookie_int(client,client_warden_text_pref);
-	warden_text[client] = text_enable > 0;
+	players[client].warden_text = text_enable > 0;
 }

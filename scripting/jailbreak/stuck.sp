@@ -6,8 +6,6 @@
 #endif
 #define _STUCK_INCLUDE_included
 
-bool timer_active = false;
-
 public Action command_stuck(int client, int args)
 {
 	static int next = 0;
@@ -19,19 +17,19 @@ public Action command_stuck(int client, int args)
 	}	
 	
 	
-	if (IsClientInGame(client) && IsPlayerAlive(client) && !timer_active && !noblock_enabled())
+	if (IsClientInGame(client) && IsPlayerAlive(client) && !global_ctx.stuck_timer && !noblock_enabled())
 	{
 		// 5 second usage delay
 		next = GetTime() + 5;
 		
 		PrintToChatAll("%s %N unstuck all players", JB_PREFIX, client);    
-		timer_active = true;
+		global_ctx.stuck_timer = true;
 		CreateTimer(2.0, timer_end_stuck, client);
 		
 		// NOTE: we use the internal function as we want to use the others for state tracking of what block is meant to be
 		unblock_all_clients(SetCollisionGroup);
 	}
-	else if (timer_active)
+	else if (global_ctx.stuck_timer)
 	{
 		PrintToChat(client, "%s Command is already in use", JB_PREFIX);
 	}
@@ -50,7 +48,7 @@ public Action timer_end_stuck(Handle timer, int client)
 {
 	PrintToChatAll("%s unstuck over", JB_PREFIX);    
 
-  	timer_active = false;
+  	global_ctx.stuck_timer = false;
     
 	// restore to correct state
 	// NOTE: this may not be the state before stuck was triggered

@@ -52,7 +52,7 @@ stock int get_client_at_sight(int client)
 
 public Action warden_reset_color(int client, int args)
 {
-	if(client != warden_id)
+	if(client != global_ctx.warden_id)
 	{
 		return Plugin_Handled;
 	}	
@@ -61,7 +61,7 @@ public Action warden_reset_color(int client, int args)
 	{
 		if(is_valid_client(i) && IsPlayerAlive(i))
 		{
-			if(i != warden_id)
+			if(i != global_ctx.warden_id)
 			{
 				// make players invis
 				SetEntityRenderColor(i, 255, 255, 255, 255);
@@ -74,7 +74,7 @@ public Action warden_reset_color(int client, int args)
 
 public Action warden_color(int client, int args)
 {
-	if(client != warden_id)
+	if(client != global_ctx.warden_id)
 	{
 		return Plugin_Handled;
 	}
@@ -153,7 +153,7 @@ public int player_color_team_handler(Menu menu, MenuAction action, int client, i
 
 public Action make_teams(int client, int args)
 {
-	if(client != warden_id)
+	if(client != global_ctx.warden_id)
 	{
 		return Plugin_Handled;
 	}

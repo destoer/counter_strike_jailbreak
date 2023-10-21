@@ -42,34 +42,106 @@ TODO make all names consistent
 
 
 #define WARDAY_ROUND_COUNT 3
-int warday_round_counter = 0;
-bool warday_active = false;
-
-int lenny_count = 0;
-int lenny_rand = 0;
-
-char warday_loc[20];
 
 
-const int WARDEN_INVALID = -1;
 // global vars
 
-// client id of current warden
-int warden_id = WARDEN_INVALID;
 
 
 // handle for sdkcall
 Handle SetCollisionGroup;
 
-int z_command_count = 0;
+// handles for client cookies
+Handle client_laser_draw_pref;
+Handle client_laser_color_pref;
+Handle client_warden_text_pref;
 
-bool rebel[MAXPLAYERS+1];
 
-bool warden_text[MAXPLAYERS + 1];
+const int WARDEN_INVALID = -1;
 
-bool spawn_block_override = false;
+enum struct Context
+{
+	int z_command_count;
 
-bool ct_handicap = false;
+	// currernt warden
+	int warden_id;
+	bool ct_handicap;
+	bool spawn_block_override;
+
+	int lenny_rand;
+	int lenny_count;
+
+	bool warday_active;
+	int warday_round_counter;
+	char warday_loc[20];
+
+	bool stuck_timer;
+
+	bool laser_kill;
+}
+
+// player configs
+enum struct Player
+{
+	bool rebel;
+	bool warden_text;
+	
+	bool draw_laser;
+	bool laser_use;
+	int laser_color;
+	float prev_pos[3];
+	bool t_laser;
+}
+
+Player players[MAXPLAYERS + 1];
+Context global_ctx;
+
+void reset_context()
+{
+	global_ctx.z_command_count = 0;
+
+	global_ctx.warden_id = WARDEN_INVALID;
+	global_ctx.ct_handicap = false;
+	global_ctx.spawn_block_override = false;
+
+	global_ctx.warday_active = false;
+
+	global_ctx.stuck_timer = false;
+
+	global_ctx.laser_kill = false;
+}
+
+void init_context()
+{
+	reset_context();
+
+	global_ctx.warday_round_counter = 0;
+
+	global_ctx.lenny_rand = 0;
+	global_ctx.lenny_count = 0;
+}
+
+void init_player(int client)
+{
+	reset_player(client);
+
+	players[client].laser_color = 0;
+	players[client].warden_text = false;
+	players[client].draw_laser = false;
+}
+
+void reset_player(int client)
+{
+	players[client].rebel = false;
+
+	players[client].laser_use = false;
+	players[client].t_laser = false;
+
+	for(int i = 0; i < 3 ; i++)
+	{
+		players[client].prev_pos[i] = 0.0;
+	}
+}
 
 #include <sourcemod>
 #include <sdktools>
@@ -82,11 +154,6 @@ bool ct_handicap = false;
 
 // cookies
 #include <clientprefs>
-
-Handle client_laser_draw_pref;
-Handle client_laser_color_pref;
-Handle client_warden_text_pref;
-
 
 
 // split files for this plugin
@@ -108,20 +175,18 @@ public Plugin:myinfo =
 {
 	name = "Private Warden plugin",
 	author = PLUGIN_AUTHOR,
-	description = "warden and special days for jailbreak",
+	description = "warden for jailbreak",
 	version = PLUGIN_VERSION,
 	url = "https://github.com/destoer/css_jailbreak_plugins"
 };
 
 // todo
-// lr leaderboard (hard)
-// draw toggle for t's (done)
 // trivia generator (hard)
 
 
 public int native_get_warden_id(Handle plugin, int num_param)
 {
-	return warden_id;
+	return global_ctx.warden_id;
 }
 
 public int native_remove_warden(Handle plugin, int num_param)
@@ -162,21 +227,24 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	}
 */	
 	bool in_use = (buttons & IN_USE) != 0;
-	laser_use[client] = in_use;
+	players[client].laser_use = in_use;
 
 
 	if(!in_use)
 	{
-		prev_pos[client][0] = 0.0;
-		prev_pos[client][1] = 0.0;
-		prev_pos[client][2] = 0.0;
+		// reset laser posistion
+		for(int i = 0; i < 3; i++)
+		{
+			players[client].prev_pos[i] = 0.0;
+		}
+
 		return Plugin_Continue;
 	}
 
 	
 	// allways draw standard laser!
 	// only warden or admin can shine laser
-	bool is_warden = (client == warden_id);
+	bool is_warden = (client == global_ctx.warden_id);
 	
 	laser_type type;
 	
@@ -228,7 +296,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 				
 				case donator:
 				{
-					SetupLaser(client,laser_colors[laser_color[client]]);
+					SetupLaser(client,laser_colors[players[client].laser_color]);
 				}
 			}
 		}
@@ -240,7 +308,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 
 void voice_internal(int client)
 {
-	if(voice && GetClientTeam(client) == CS_TEAM_CT && IsPlayerAlive(client) && warden_id == WARDEN_INVALID)
+	if(voice && GetClientTeam(client) == CS_TEAM_CT && IsPlayerAlive(client) && global_ctx.warden_id == WARDEN_INVALID)
 	{
 		set_warden(client);
 	}	
@@ -286,12 +354,12 @@ public OnMapStart()
 	CreateTimer(RING_LIFTEIME,beacon_callback , _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 	CreateTimer(0.3, rainbow_timer, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 
-	// reset laser settings
+	// clear info
+	init_context();
+
 	for (int i = 1; i <= MAXPLAYERS; i++)
 	{
-		laser_use[i] = false;
-		use_draw_laser_settings[i] = false;
-		warden_text[i] = true;
+		init_player(i);
 	}
 	
 	
@@ -310,7 +378,7 @@ public OnMapStart()
 	mute_timer = null;
 
 	// enable a warday on map start
-	warday_round_counter = WARDAY_ROUND_COUNT;	
+	global_ctx.warday_round_counter = WARDAY_ROUND_COUNT;	
 }
 
 public OnMapEnd()
@@ -323,13 +391,11 @@ public OnMapEnd()
 // thanks tring
 public void OnClientPutInServer(int client)
 {
-	laser_use[client] = false;
-	rebel[client] = false;
+	reset_player(client);
+
 	if(!AreClientCookiesCached(client))
 	{
-		use_draw_laser_settings[client] = false;
-		laser_color[client] = 0;
-		warden_text[client] = true;
+		init_player(client);
 	}
 
 	// on any connection player cannot talk, they must be on a team
@@ -344,14 +410,12 @@ public void OnClientPutInServer(int client)
 // If the Warden leaves
 public void OnClientDisconnect(int client)
 {
-	laser_use[client] = false;
-	use_draw_laser_settings[client] = false;
-	laser_color[client] = 0;
-	rebel[client] = false;
-	warden_text[client] = false;
-	if(client == warden_id)
+	// clear all player info
+	init_player(client);
+
+	if(client == global_ctx.warden_id)
 	{
-		warden_id = WARDEN_INVALID;
+		global_ctx.warden_id  = WARDEN_INVALID;
 		PrintToChatAll("%s Warden has left the game!", WARDEN_PREFIX);
 	}
 }
@@ -362,8 +426,8 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	// hook zombie commands
 	if(StrContains(sArgs,"ztele") != -1 || StrContains(sArgs,"zspawn") != -1)
 	{
-		z_command_count++;
-		if(z_command_count >= 3)
+		global_ctx.z_command_count++;
+		if(global_ctx.z_command_count >= 3)
 		{
 			ForcePlayerSuicide(client);
 		}
@@ -384,12 +448,12 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	
 	if(StrContains(command,"( ͡° ͜ʖ ͡°)"))
 	{
-		lenny_count += 1;
+		global_ctx.lenny_count += 1;
 
-		//PrintToConsole(client,"%d == %d?\n",lenny_rand,lenny_count);
-		if(lenny_rand == lenny_count)
+		//PrintToConsole(client,"%d == %d?\n",lenny_rand,global_ctx.lenny_count);
+		if(global_ctx.lenny_rand == global_ctx.lenny_count)
 		{
-			lenny_rand = GetRandomInt(lenny_count,lenny_count + 10000);
+			global_ctx.lenny_rand = GetRandomInt(global_ctx.lenny_count,global_ctx.lenny_count + 10000);
 
 			PrintToChat(client,"%s For some reason you feel lucky ( ͡° ͜ʖ ͡°)",JB_PREFIX);
 			GivePlayerItem(client,"weapon_flashbang");
@@ -399,7 +463,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 		}
 	}
 	
-	if (warden_id == client && is_valid_client(client))
+	if (global_ctx.warden_id == client && is_valid_client(client))
 	{
 		char color1[] = "\x07000000";
 		char color2[] = "\x07FFC0CB";
@@ -446,7 +510,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 // init the plugin
 public OnPluginStart()
 {
-	lenny_rand = GetRandomInt(lenny_count,lenny_count + 10000);
+	global_ctx.lenny_rand = GetRandomInt(global_ctx.lenny_count,global_ctx.lenny_count + 10000);
 
 	create_jb_convar();
 
@@ -611,7 +675,7 @@ public Action player_team(Event event, const char[] name, bool dontBroadcast)
 		}
 	}
 
-	if(client == warden_id)
+	if(client == global_ctx.warden_id)
 	{
 		remove_warden();
 	}
@@ -629,7 +693,7 @@ public Action force_open_callback (int client, int args)
 
 public Action lenny_count_cmd(int client,int args) 
 {
-	PrintToChat(client,"%s ( ͡° ͜ʖ ͡°) count = %d\n",JB_PREFIX,lenny_count);
+	PrintToChat(client,"%s ( ͡° ͜ʖ ͡°) count = %d\n",JB_PREFIX,global_ctx.lenny_count);
 
 	return Plugin_Continue;
 }
@@ -654,16 +718,9 @@ public warden_text_handler(Menu menu, MenuAction action, int client, int param2)
 {
 	if(action == MenuAction_Select) 
 	{
-		switch(param2)
-		{
-			case 1:
-				warden_text[client] = false;
-				
-			case 2:
-				warden_text[client] = true;
-		}
-		
-		set_cookie_int(client,warden_text[client],client_warden_text_pref);
+		players[client].warden_text = param2 == 2;
+
+		set_cookie_int(client,players[client].warden_text,client_warden_text_pref);
 	}
 	
 	else if (action == MenuAction_Cancel) 
@@ -686,12 +743,12 @@ public Action print_warden_text_all(Handle timer)
 	
 
 	
-	if(!warday_active)
+	if(!global_ctx.warday_active)
 	{
-		if(warden_id != WARDEN_INVALID)
+		if(global_ctx.warden_id != WARDEN_INVALID)
 		{
 			
-			Format(buf, sizeof(buf), "Current Warden:  %N  ", warden_id);
+			Format(buf, sizeof(buf), "Current Warden:  %N  ", global_ctx.warden_id);
 		}
 
 
@@ -703,7 +760,7 @@ public Action print_warden_text_all(Handle timer)
 
 	else
 	{
-		Format(buf, sizeof(buf), "Warday %s",warday_loc);
+		Format(buf, sizeof(buf), "Warday %s",global_ctx.warday_loc);
 	}
 	
 	
@@ -723,7 +780,7 @@ public Action print_warden_text_all(Handle timer)
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		// is its a valid client
-		if (IsClientInGame(i) && !IsFakeClient(i) && warden_text[i])
+		if (IsClientInGame(i) && !IsFakeClient(i) && players[i].warden_text)
 		{
 			ShowSyncHudText(i, h_hud_text, buf);
 		}
@@ -738,7 +795,7 @@ public Action print_warden_text_all(Handle timer)
 public Action leave_warden(int client, int args)
 {
 	// only warden is allowed to quit
-	if(client == warden_id)
+	if(global_ctx.warden_id == client)
 	{
 		remove_warden();
 	}
@@ -755,7 +812,7 @@ public Action become_warden(int client, int args)
 	}
 
 	// warden does not exist
-	if(warden_id == WARDEN_INVALID)
+	if(global_ctx.warden_id == WARDEN_INVALID)
 	{
 		// only allow cts to warden
 		if(GetClientTeam(client) == CS_TEAM_CT)
@@ -781,7 +838,7 @@ public Action become_warden(int client, int args)
 	// already a warden
 	else
 	{
-		PrintToChat(client, "%s %N is already a warden.", WARDEN_PREFIX,warden_id);
+		PrintToChat(client, "%s %N is already a warden.", WARDEN_PREFIX,global_ctx.warden_id);
 	}
 	
 	return Plugin_Handled;
@@ -829,7 +886,7 @@ public print_warden_commands(int client)
 		PrintToChat(client,"%s!wsd           %s- %sstart sd after %d rounds",color1,color2,color3,ROUND_WARDEN_SD);
 		PrintToChat(client,"%s!wsd_ff           %s- %sstart ff sd after %d rounds",color1,color2,color3,ROUND_WARDEN_SD);
 	}
-	PrintToChat(client,"%s!wd %s- %scall a warday %s",color1,color2,color3, warday_round_counter >= WARDAY_ROUND_COUNT? "ready" : "not ready");
+	PrintToChat(client,"%s!wd %s- %scall a warday %s",color1,color2,color3, global_ctx.warday_round_counter >= WARDAY_ROUND_COUNT? "ready" : "not ready");
 
 
 	if(t_laser)
@@ -863,7 +920,7 @@ public set_warden(int client)
 	PrintToChatAll("%s New Warden: %N", WARDEN_PREFIX, client);
 	
 	// set the actual warden
-	warden_id = client;
+	global_ctx.warden_id = client;
 	
 	if(BaseComm_IsClientMuted(client))
 	{
@@ -876,7 +933,7 @@ public set_warden(int client)
 	PrintToChat(client,"%s Type !wcommands for a full list of commands",JB_PREFIX);
 	
 	// set the warden with special color
-	SetEntityRenderColor(warden_id, 0, 191, 0, 255);
+	SetEntityRenderColor(global_ctx.warden_id, 0, 191, 0, 255);
 
 }
 
@@ -886,13 +943,13 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 	int attacker = GetClientOfUserId(GetEventInt(event, "attacker")); // Get the dead clients id
 
 
-	if(rebel[client] && is_valid_client(attacker) && print_rebel && attacker != client)
+	if(players[client].rebel && is_valid_client(attacker) && print_rebel && attacker != client)
 	{
 		PrintToChatAll("%s %N killed the rebel %N",JB_PREFIX,attacker,client);
 	}
 
 	// if its the warden we need to remove him
-	if(client == warden_id)
+	if(client == global_ctx.warden_id)
 	{
 		remove_warden();
 	}
@@ -905,7 +962,7 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 	// if there is only one ct left alive automatically warden him
 	if(get_alive_team_count(CS_TEAM_CT,new_warden) == 1 && GetClientTeam(client) == CS_TEAM_CT && new_warden != 0)
 	{
-		if(warden_id == WARDEN_INVALID)
+		if(global_ctx.warden_id == WARDEN_INVALID)
 		{
 			if(!is_sudoer(new_warden))
 			{
@@ -913,7 +970,7 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 			}
 
 			// restore hp
-			SetEntityHealth(new_warden,ct_handicap? 130 : 100);
+			SetEntityHealth(new_warden,global_ctx.ct_handicap? 130 : 100);
 			set_warden(new_warden);
 		}
 	}
@@ -924,12 +981,12 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 void override_spawn_block(int client)
 {
 	// if player numbers exceed spawns in block trip no block
-	if(!noblock && !spawn_block_override)
+	if(!noblock && !global_ctx.spawn_block_override)
 	{
 		if(is_stuck_in_player(client))
 		{
 			jb_disable_block_all();
-			spawn_block_override = true;
+			global_ctx.spawn_block_override = true;
 			PrintToChatAll("%s Player stuck on spawn unblocking",JB_PREFIX);
 		}
 	}
@@ -976,7 +1033,7 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 				
 		if(team == CS_TEAM_CT)
 		{
-			if(ct_handicap)
+			if(global_ctx.ct_handicap)
 			{
 				SetEntityHealth(client,130);
 			}
@@ -1013,9 +1070,14 @@ public Action round_end(Handle event, const String:name[], bool dontBroadcast)
 		unmute_all(true);
 	}
 
-	spawn_block_override = false;
+	global_ctx.spawn_block_override = false;
 
-	ct_handicap = false;
+	reset_context();
+
+	for(int i = 1; i <= MAXPLAYERS; i++)
+	{
+		reset_player(i);
+	}
 
 	return Plugin_Continue;
 }
@@ -1024,18 +1086,14 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 {
 	enable_lr();
 
-	z_command_count = 0;
-	warday_active = false;
-	warday_round_counter++;
+	reset_context();
 
 	if(mute)
 	{
 		mute_t();
 	}
 
-	reset_laser_setting();
-	
-	if(!spawn_block_override)
+	if(!global_ctx.spawn_block_override)
 	{
 		// if we are running with block on reset the status on round start
 		if(noblock)
@@ -1052,9 +1110,9 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 	int ct_count = GetTeamClientCount(CS_TEAM_CT);
 	int t_count = GetTeamClientCount(CS_TEAM_T);
 
-	ct_handicap = (ct_count * 3) <= t_count;
+	global_ctx.ct_handicap = (ct_count * 3) <= t_count;
 
-	if(ct_handicap)
+	if(global_ctx.ct_handicap)
 	{
 		for(int i = 1; i <= MAXPLAYERS; i++)
 		{
@@ -1068,11 +1126,6 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 		PrintCenterTextAll("CT's are outnumbered 3 to 1 increasing health to 130");
 	}
 
-	// there is no warden
-	warden_id = -1;
-	
-	laser_kill = false;
-	
 	// 1 ct only on team auto warden them at start of round
 	int client = 0;
 	if(get_alive_team_count(CS_TEAM_CT, client) == 1 && client != 0)
@@ -1082,7 +1135,7 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 	
 	for(int i = 0; i <= MAXPLAYERS; i++)
 	{
-		rebel[i] = false;
+		reset_player(i);
 
 		if(!is_valid_client(i))
 		{
@@ -1095,7 +1148,6 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 			GivePlayerItem(i,"weapon_deagle");
 			GivePlayerItem(i,"weapon_m4a1");
 		}
-
 	}
 
 	return Plugin_Continue;
@@ -1104,7 +1156,7 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 
 public Action fire_warden(client, args)
 {
-	if(warden_id == WARDEN_INVALID)
+	if(global_ctx.warden_id == WARDEN_INVALID)
 	{
 		PrintToChat(client,"%s There is no warden.", WARDEN_PREFIX);
 	}
@@ -1120,27 +1172,27 @@ public Action fire_warden(client, args)
 public remove_warden()
 {
 	// no warden do nothing
-	if(warden_id == WARDEN_INVALID)
+	if(global_ctx.warden_id == WARDEN_INVALID)
 	{
 		return;
 	}
 	
 	// inform players of his death
-	PrintCenterTextAll("%N is no longer warden.", warden_id);
-	PrintToChatAll("%s %N is no longer warden.", WARDEN_PREFIX, warden_id);
+	PrintCenterTextAll("%N is no longer warden.", global_ctx.warden_id);
+	PrintToChatAll("%s %N is no longer warden.", WARDEN_PREFIX, global_ctx.warden_id);
 		
 	// remove warden color
-	SetEntityRenderColor(warden_id, 255, 255, 255, 255); 
+	SetEntityRenderColor(global_ctx.warden_id, 255, 255, 255, 255); 
 	
 	// deregister the warden
-	warden_id = WARDEN_INVALID;
+	global_ctx.warden_id = WARDEN_INVALID;
 }
 
 void set_rebel(int client)
 {
-	if(!warday_active && !in_lr(client))
+	if(!global_ctx.warday_active && !in_lr(client))
 	{
-		rebel[client] = true;
+		players[client].rebel = true;
 	}
 }
 
@@ -1153,7 +1205,7 @@ public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damaget
 		char weapon[64];
 		GetClientWeapon(attacker, weapon, sizeof(weapon) - 1);
 
-		if(ct_handicap && !in_lr(attacker) && (StrEqual(weapon,"weapon_knife") || StrEqual(weapon,"weapon_awp")))
+		if(global_ctx.ct_handicap && !in_lr(attacker) && (StrEqual(weapon,"weapon_knife") || StrEqual(weapon,"weapon_awp")))
 		{
 			// up damage to account for ct handicap
 			damage = damage * 1.3;

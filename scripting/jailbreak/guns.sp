@@ -18,7 +18,7 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 	if(action == MenuAction_Select) 
 	{
 		// if they aernt alive or are not on ct they cant use this
-		if(!(IsPlayerAlive(client) && ((GetClientTeam(client) == CS_TEAM_CT) || warday_active)))
+		if(!(IsPlayerAlive(client) && ((GetClientTeam(client) == CS_TEAM_CT) || global_ctx.warday_active)))
 		{
 			return -1;
 		}
@@ -49,7 +49,7 @@ public Action weapon_menu(int client, int args)
 public empty_handler(Menu menu, MenuAction action, int client, int menu_option) 
 {
 	// only warden can quick empty	
-	if(client == warden_id && empty_uses > 0 ) 
+	if(client == global_ctx.warden_id && empty_uses > 0 ) 
 	{
 		if(action == MenuAction_Select) 
 		{
@@ -80,7 +80,7 @@ public empty_handler(Menu menu, MenuAction action, int client, int menu_option)
 	}
 	
 	
-	else if(client != warden_id)
+	else if(client != global_ctx.warden_id)
 	{
 		PrintToChat(client, "%s Only warden is allowed to quick emtpy guns.", WARDEN_PREFIX);
 	}

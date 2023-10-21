@@ -25,7 +25,7 @@ public jb_enable_block_all()
 public Action disable_block_warden_callback(int client, int args)
 {
 	
-	if(client != warden_id)
+	if(client != global_ctx.warden_id)
 	{
 		return Plugin_Handled;
 	}
@@ -54,7 +54,7 @@ public Action enable_block_admin(int client, int args)
 
 public Action enable_block_warden_callback(int client, int args)
 {
-	if(client != warden_id)
+	if(client != global_ctx.warden_id)
 	{
 		return Plugin_Handled;
 	}

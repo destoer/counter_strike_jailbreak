@@ -9,6 +9,11 @@
 #include "jailbreak/jailbreak.inc"
 
 
+// TODO: if we want to do serious feature work on this we should move it over into a config struct
+// like we have setup for the LR plugin but the plugin is stable for now and i dont see much working being done inside it 
+// so we will leave it be for now
+// if we want to do it at a later time we can factor out vip rando, and weapon restrictions for a start
+
 // need to supply models + audio if these are uncommented
 //#define USE_CUSTOM_ZOMBIE_MODEL
 //#define CUSTOM_ZOMBIE_MUSIC
@@ -25,7 +30,6 @@ public Plugin myinfo = {
 };
 
 // todo
-// ff toggles on individual rounds
 // shotgun wars
 // human only fog on zombies
 

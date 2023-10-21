@@ -9,34 +9,34 @@ void format_warday(int args)
     // no loc passed init to nothing
     if(args == 0)
     {
-        Format(warday_loc,sizeof(warday_loc),"");
+        Format(global_ctx.warday_loc,sizeof(global_ctx.warday_loc),"");
     }
 
     else
     {
-        GetCmdArgString(warday_loc,sizeof(warday_loc));
+        GetCmdArgString(global_ctx.warday_loc,sizeof(global_ctx.warday_loc));
     }
 
 }
 
 public Action warday_callback(int client, int args)
 {
-    if(client != warden_id)
+    if(client != global_ctx.warden_id)
     {
         PrintToChat(client,"%s Only a warden may call a warday!",WARDEN_PREFIX);
         return Plugin_Handled;
     }
 
-    if(!warday_active)
+    if(!global_ctx.warday_active)
     {
-        if(warday_round_counter < WARDAY_ROUND_COUNT)
+        if(global_ctx.warday_round_counter < WARDAY_ROUND_COUNT)
         {
-            PrintToChat(client,"%s please wait %d rounds",WARDEN_PREFIX,WARDAY_ROUND_COUNT - warday_round_counter);
+            PrintToChat(client,"%s please wait %d rounds",WARDEN_PREFIX,WARDAY_ROUND_COUNT - global_ctx.warday_round_counter);
             return Plugin_Handled;
         }
 
         // we have called a warday reset the counter
-        warday_round_counter = 0;
+        global_ctx.warday_round_counter = 0;
 
         format_warday(args);
 
@@ -56,7 +56,7 @@ public Action warday_callback(int client, int args)
 
 void warday_start()
 {
-    warday_active = true;
+    global_ctx.warday_active = true;
 
     disable_lr();
 
