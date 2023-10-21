@@ -24,9 +24,10 @@ void grenade_init()
 {
 	PrintToChatAll("%s grenade day started", SPECIALDAY_PREFIX);
 	CreateTimer(1.0, RemoveGuns);
-	special_day = grenade_day;
+	global_ctx.special_day = grenade_day;
 
-	sd_player_init_fptr = grenade_player_init;
+	global_ctx.player_init = grenade_player_init;
+	global_ctx.weapon_restrict = "weapon_hegrenade";
 }
 
 public void StartGrenade()
@@ -55,7 +56,7 @@ public Action GiveGrenade(Handle timer, any entity)
 
 	// giver person who threw a flash after a second +  set hp to one
 	
-	if(special_day != grenade_day) 
+	if(global_ctx.special_day != grenade_day) 
 	{ 
 		return Plugin_Continue; 
 	}

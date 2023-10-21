@@ -40,14 +40,8 @@ public Action ReviveScout(Handle Timer, int client)
 void scoutknife_init()
 {
 	PrintToChatAll("%s scout knife day started", SPECIALDAY_PREFIX);
-	special_day = scoutknife_day;
-	sd_player_init_fptr = scout_player_init;
-	
-	// reset player kill
-	for (int i = 0; i <= MAXPLAYERS; i++)
-	{
-		player_kills[i] = 0;
-	}
+	global_ctx.special_day = scoutknife_day;
+	global_ctx.player_init = scout_player_init;
 }
 
 public void StartScout()
@@ -64,11 +58,11 @@ void end_scout()
 	{
 		PrintToChatAll("%s %N won scoutknifes", SPECIALDAY_PREFIX, cli);
 	}
-	sd_winner = cli;
+	global_ctx.sd_winner = cli;
 }
 
 void scoutknife_death(int attacker,int victim)
 {
 	CreateTimer(3.0, ReviveScout, victim);
-	player_kills[attacker]++;
+	players[attacker].kills++;
 }

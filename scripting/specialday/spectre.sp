@@ -7,8 +7,6 @@
 #define _SPECTRE_INCLUDE_included
 
 
-int spectre = -1;
-
 void spectre_player_init(int client)
 {
 	WeaponMenu(client);
@@ -17,8 +15,8 @@ void spectre_player_init(int client)
 void spectre_init()
 {
 	PrintToChatAll("%s spectre day started", SPECIALDAY_PREFIX);
-	special_day = spectre_day;
-	sd_player_init_fptr = spectre_player_init;
+	global_ctx.special_day = spectre_day;
+	global_ctx.player_init = spectre_player_init;
 	
 	
 	// save teams so we can swap them back later and select the "spectre"
@@ -27,19 +25,8 @@ void spectre_init()
 	if(validclients == 0)
 	{
 		PrintToChatAll("%s You are all freekillers!", SPECIALDAY_PREFIX);
-		sd_init_failure = true;
+		global_ctx.sd_init_failure = true;
 		return;
-	}
-
-	if(rigged_client == -1)
-	{
-		int rand = GetRandomInt( 0, (validclients-1) );
-		spectre = game_clients[rand]; // select the lucky client
-	}
-
-	else
-	{
-		spectre = rigged_client;
 	}
 }
 
@@ -78,24 +65,16 @@ public void StartSpectre()
 		}
 	}
 	
-	MakeSpectre(spectre);
+	pick_boss();
+	MakeSpectre(global_ctx.boss);
 }
 
 void end_spectre()
 {
 	RestoreTeams();
-	SetEntityRenderColor(spectre,255,255,255, 255)
-	spectre = -1;
+	SetEntityRenderColor(global_ctx.boss,255,255,255, 255)
+	global_ctx.boss = INVALID_BOSS;
 }
-
-public void spectre_discon_started(int client)
-{
-	SaveTeams(true);
-
-	int rand = GetRandomInt( 0, validclients - 1 );
-	spectre = game_clients[rand]; // select the lucky client
-}
-
 
 void spectre_discon_active(int client)
 {
@@ -108,14 +87,7 @@ void spectre_discon_active(int client)
 		}
 	}		
 
-
-
-	// while the current disconnecter
-	while(spectre == client)
-	{
-		int rand = GetRandomInt( 0, (validclients-1) );
-		spectre = game_clients[rand]; // select the lucky client
-	}
+	pick_boss_discon(client)
 	
-	MakeSpectre(spectre);
+	MakeSpectre(global_ctx.boss);
 }

@@ -36,14 +36,9 @@ public Action ReviveDeathMatch(Handle Timer, int client)
 void deathmatch_init()
 {
 	PrintToChatAll("%s deathmatch day started", SPECIALDAY_PREFIX);
-	special_day = deathmatch_day;
-	sd_player_init_fptr = deathmatch_player_init;
+	global_ctx.special_day = deathmatch_day;
+	global_ctx.player_init = deathmatch_player_init;
 	
-	// reset player kill
-	for (int i = 0; i <= MAXPLAYERS; i++)
-	{
-		player_kills[i] = 0;
-	}
 	BalTeams();
 }	
 
@@ -62,12 +57,12 @@ void end_deathmatch()
 	{
 		PrintToChatAll("%s %N won deathmatch", SPECIALDAY_PREFIX, cli);
 	}
-	sd_winner = cli;
+	global_ctx.sd_winner = cli;
 	RestoreTeams();
 }
 
 void deathmatch_death(int attacker, int victim)
 {
 	CreateTimer(3.0, ReviveDeathMatch, victim);
-	player_kills[attacker]++;
+	players[attacker].kills++;
 }

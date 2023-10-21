@@ -10,10 +10,6 @@
 // holds indexes into the gun list so we can randomize what guns are on each sd
 int gungame_gun_idx[GUNS_SIZE] = {0};
 
-// level of progression the player is on
-int gungame_level[MAXPLAYERS+1] =  { 0 };
-
-
 // gun game
 void gun_game_player_init(int client)
 {
@@ -36,13 +32,7 @@ void init_gungame()
 	
 	PrintToChatAll("%s gun game day started", SPECIALDAY_PREFIX);
 	
-	special_day = gungame_day;
-	
-	// reset the gun counter
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		gungame_level[i] = 0;
-	}
+	global_ctx.special_day = gungame_day;
 	
 	// shuffle the game game indexes to randomize weapons
 	for (int i = GUNS_SIZE-1; i >= 0; i--)
@@ -54,7 +44,7 @@ void init_gungame()
 		gungame_gun_idx[idx] = tmp;
 	}
 		
-	sd_player_init_fptr = gun_game_player_init;
+	global_ctx.player_init = gun_game_player_init;
 	BalTeams();
 }
 
@@ -69,23 +59,23 @@ public void GiveGunGameGun(int client)
 	
 	if(game == Engine_CSS)
 	{
-		GivePlayerItem(client, gun_give_list_css[gungame_gun_idx[gungame_level[client]]]);
+		GivePlayerItem(client, gun_give_list_css[gungame_gun_idx[players[client].gungame_level]]);
 	}
 	
-	if(game == Engine_CSGO)
+	else if(game == Engine_CSGO)
 	{
-		GivePlayerItem(client, gun_give_list_csgo[gungame_gun_idx[gungame_level[client]]]);
+		GivePlayerItem(client, gun_give_list_csgo[gungame_gun_idx[players[client].gungame_level]]);
 	}
 	
 	PrintToChat(client, "%s Current level: %s (%d of %d)", 
-		SPECIALDAY_PREFIX, gun_list[gungame_gun_idx[gungame_level[client]]],gungame_level[client]+1,GUNS_SIZE);
+		SPECIALDAY_PREFIX, gun_list[gungame_gun_idx[players[client].gungame_level]],players[client].gungame_level+1,GUNS_SIZE);
 }
 
 
 
 public Action ReviveGunGame(Handle timer, int client)
 {
-	if(special_day != gungame_day)
+	if(global_ctx.special_day != gungame_day)
 	{
 		return Plugin_Continue;
 	}
@@ -125,29 +115,29 @@ void gungame_death(int attacker, int victim)
 
 	if(game == Engine_CSS)
 	{
-		kill_gungame_weapon = StrEqual(weapon_name, gun_give_list_css[gungame_gun_idx[gungame_level[attacker]]]);
+		kill_gungame_weapon = StrEqual(weapon_name, gun_give_list_css[gungame_gun_idx[players[attacker].gungame_level]]);
 	}
 
 	else if(game == Engine_CSGO)
 	{
-		kill_gungame_weapon = StrEqual(weapon_name, gun_give_list_csgo[gungame_gun_idx[gungame_level[attacker]]]);
+		kill_gungame_weapon = StrEqual(weapon_name, gun_give_list_csgo[gungame_gun_idx[players[attacker].gungame_level]]);
 	}
 
 	// kill with current weapon
-	if(gungame_level[attacker] < GUNS_SIZE && kill_gungame_weapon)
+	if(players[attacker].gungame_level < GUNS_SIZE && kill_gungame_weapon)
 	{
-		gungame_level[attacker]++;
-		if(gungame_level[attacker] >= GUNS_SIZE)
+		players[attacker].gungame_level++;
+		if(players[attacker].gungame_level >= GUNS_SIZE)
 		{
 			// end the round
-			gungame_level[attacker] = 0;
+			players[attacker].gungame_level = 0;
 			
 			// renable loss conds
 			enable_round_end();
 			PrintToChatAll("%s %N won gungame", SPECIALDAY_PREFIX, attacker);
 			
 			
-			sd_winner = attacker;
+			global_ctx.sd_winner = attacker;
 			slay_all();
 		}
 		
@@ -162,14 +152,11 @@ void gungame_death(int attacker, int victim)
 	// killed with knife dec the enemies weapon
 	else if(StrEqual(weapon_name,"weapon_knife"))
 	{
-		if(gungame_level[victim] > 0)
+		if(players[victim].gungame_level > 0)
 		{
-			gungame_level[victim]--;
+			players[victim].gungame_level--;
 		}
 	}
-	
-	
-	
 	
 	// start a respawn for the dead player :)
 	CreateTimer(3.0, ReviveGunGame, victim);

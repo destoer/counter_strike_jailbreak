@@ -17,7 +17,7 @@ void vip_player_init(int client)
 public Action ReviveVip(Handle Timer, int client)
 {
     // dont reviive if not active
-	if(sd_state != sd_active || special_day != vip_day)
+	if(global_ctx.sd_state != sd_active || global_ctx.special_day != vip_day)
 	{
 		return Plugin_Continue;
 	}
@@ -36,14 +36,9 @@ void vip_init()
 {
 	PrintToChatAll("%s vip day started", SPECIALDAY_PREFIX);
     PrintToChatAll("%s Protect the vip for your team!",SPECIALDAY_PREFIX);
-	special_day = vip_day;
-	sd_player_init_fptr = vip_player_init;
+	global_ctx.special_day = vip_day;
+	global_ctx.player_init = vip_player_init;
 	
-	// reset player kill
-	for (int i = 0; i <= MAXPLAYERS; i++)
-	{
-		player_kills[i] = 0;
-	}
 	BalTeams();
 }
 

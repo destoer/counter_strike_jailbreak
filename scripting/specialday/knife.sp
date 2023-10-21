@@ -18,8 +18,9 @@ void knife_init()
 {
 	PrintToChatAll("%s knife day started", SPECIALDAY_PREFIX);
 	
-	special_day = knife_day;
-	sd_player_init_fptr = knife_player_init;
+	global_ctx.special_day = knife_day;
+	global_ctx.player_init = knife_player_init;
+	global_ctx.weapon_restrict = "weapon_knife";
 }
 
 public void StartKnife()

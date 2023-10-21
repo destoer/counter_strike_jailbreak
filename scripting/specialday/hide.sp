@@ -28,12 +28,12 @@ void hide_player_init(int client)
 void init_hide()
 {
 	PrintToChatAll("%s Hide and seek day started", SPECIALDAY_PREFIX);
-	PrintToChatAll("Ts must hide while CTs seek");
-	special_day = hide_day;
+	PrintToChatAll("%s Ts must hide while CTs seek",SPECIALDAY_PREFIX);
+	global_ctx.special_day = hide_day;
 	
 	CreateTimer(1.0,MoreTimers);
 	
-	sd_player_init_fptr = hide_player_init;
+	global_ctx.player_init = hide_player_init;
 }
 
 

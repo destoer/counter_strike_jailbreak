@@ -6,14 +6,11 @@
 #endif
 #define _ZOMBIE_INCLUDE_included
 
-
-int patient_zero = -1;
-
 // zombie day
 void zombie_player_init(int client)
 {
 	// not active give guns
-	if(sd_state == sd_started)
+	if(global_ctx.sd_state == sd_started)
 	{
 		WeaponMenu(client);
 	}
@@ -91,21 +88,20 @@ bool CacheCustomZombieModel()
 void end_zombie()
 {
 	RestoreTeams();
-	patient_zero = -1;
 	AcceptEntityInput(fog_ent, "TurnOff");
 }
 
 
 public Action NewZombie(Handle timer, int client)
 {
-	if(special_day != zombie_day || !IsClientInGame(client))
+	if(global_ctx.special_day != zombie_day || !IsClientInGame(client))
 	{
 		return Plugin_Continue;
 	}
 
 	
 	CS_RespawnPlayer(client);
-	TeleportEntity(client, death_cords[client], NULL_VECTOR, NULL_VECTOR);
+	TeleportEntity(client, players[client].death_cords, NULL_VECTOR, NULL_VECTOR);
 	CS_SwitchTeam(client, CS_TEAM_T);
 	MakeZombie(client);
 	EmitSoundToAll("npc/zombie/zombie_voice_idle1.wav");
@@ -115,16 +111,16 @@ public Action NewZombie(Handle timer, int client)
 
 public Action ReviveZombie(Handle timer, int client)
 {
-	if(special_day != zombie_day || !IsClientInGame(client) || IsPlayerAlive(client))
+	if(global_ctx.special_day != zombie_day || !IsClientInGame(client) || IsPlayerAlive(client))
 	{
 		return Plugin_Continue;
 	}
 	
-	if(IsPlayerAlive(patient_zero))
+	if(IsPlayerAlive(global_ctx.boss))
 	{	
 		// pull cords so we can tele player to patient zero
 		float cords[3];
-		GetClientAbsOrigin(patient_zero, cords);
+		GetClientAbsOrigin(global_ctx.boss, cords);
 		CS_RespawnPlayer(client);
 		TeleportEntity(client, cords, NULL_VECTOR, NULL_VECTOR);
 		CS_SwitchTeam(client, CS_TEAM_T);
@@ -140,22 +136,9 @@ void init_zombie()
 
 	PrintToChatAll("%s zombie day started", SPECIALDAY_PREFIX);
 	CreateTimer(1.0, RemoveGuns); 
-	special_day = zombie_day;
+	global_ctx.special_day = zombie_day;
 
-	if(rigged_client == -1)
-	{
-		int rand = GetRandomInt( 0, (validclients-1) );
-		
-		// select the first zombie
-		patient_zero = game_clients[rand]; 
-	}
-
-	else
-	{
-		patient_zero = rigged_client;
-	}
-
-	sd_player_init_fptr = zombie_player_init;
+	global_ctx.player_init = zombie_player_init;
 }
 
 
@@ -209,6 +192,7 @@ public void MakePatientZero(int client)
 
 public void StartZombie()
 {
+	pick_boss();
 
 	// swap everyone other than the patient zero to the t side
 	// if they were allready in ct or t
@@ -223,7 +207,7 @@ public void StartZombie()
 		}
 	}
 
-	MakePatientZero(patient_zero);
+	MakePatientZero(global_ctx.boss);
 
 	AcceptEntityInput(fog_ent, "TurnOn");
 	
@@ -242,15 +226,6 @@ public void StartZombie()
 }
 
 
-public void zombie_discon_started(int client)
-{
-	SaveTeams(false);
-
-	int rand = GetRandomInt( 0, validclients - 1 );
-	patient_zero = game_clients[rand]; // select the lucky client
-}
-
-
 void zombie_discon_active(int client)
 {
 	// restore the hp
@@ -263,14 +238,9 @@ void zombie_discon_active(int client)
 	}
 
 
-	// while the current disconnecter
-	while(patient_zero == client)
-	{
-		int rand = GetRandomInt( 0, (validclients-1) );
-		patient_zero = game_clients[rand]; // select the lucky client
-	}
-	
-	MakePatientZero(patient_zero);
+	pick_boss_discon(client);
+
+	MakePatientZero(global_ctx.boss);
 }
 
 void zombie_death(int victim)
@@ -303,15 +273,15 @@ void zombie_death(int victim)
 		float cords[3];
 		GetClientAbsOrigin(victim, cords);
 		
-		death_cords[victim] = cords;
-		death_cords[victim][2] -= 45.0; // account for player eyesight height
+		players[victim].death_cords = cords;
+		players[victim].death_cords[2] -= 45.0; // account for player eyesight height
 		CreateTimer(0.5,NewZombie, victim)
 	}
 	
 	// if victim is a t -> respawn on 'patient zero' if alive
 	else if(team == CS_TEAM_T)
 	{
-		if(IsPlayerAlive(patient_zero))
+		if(IsPlayerAlive(global_ctx.boss))
 		{
 			CreateTimer(3.0, ReviveZombie, victim);
 		}			

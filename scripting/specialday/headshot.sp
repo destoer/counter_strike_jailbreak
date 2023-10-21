@@ -13,10 +13,11 @@ void StartHeadshot()
 
 void headshot_init()
 {
-	special_day = headshot_day;
+	global_ctx.special_day = headshot_day;
 	PrintToChatAll("%s headshot day started.", SPECIALDAY_PREFIX);
 	
-	sd_player_init_fptr = headshot_player_init;
+	global_ctx.player_init = headshot_player_init;
+	global_ctx.weapon_restrict = "weapon_deagle";
 }
 
 // ffd do a gun menu

@@ -16,11 +16,11 @@ void ffdg_player_init(int client)
 
 void init_ffdg()
 {
-	hp_steal = true; 
-	special_day = juggernaut_day;
+	global_ctx.hp_steal = true; 
+	global_ctx.special_day = juggernaut_day;
 	PrintToChatAll("%s Friendly fire juggernaut day  started.", SPECIALDAY_PREFIX);
 	
-	sd_player_init_fptr = ffdg_player_init;
+	global_ctx.player_init = ffdg_player_init;
 	
 	
 	// allow player to pick for 20 seconds

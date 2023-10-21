@@ -21,9 +21,10 @@ void dodgeball_init()
 {
 	PrintToChatAll("%s Dodgeball day started", SPECIALDAY_PREFIX);
 	CreateTimer(1.0, RemoveGuns);
-	special_day = dodgeball_day;
+	global_ctx.special_day = dodgeball_day;
 
-	sd_player_init_fptr = dodgeball_player_init;
+	global_ctx.player_init = dodgeball_player_init;
+	global_ctx.weapon_restrict = "weapon_flashbang";
 }
 
 
@@ -69,7 +70,7 @@ public Action GiveFlash(Handle timer, int entity)
 	
 
 	// give person who threw a flash after a second +  set hp to one
-	if(special_day != dodgeball_day) 
+	if(global_ctx.special_day != dodgeball_day) 
 	{ 
 		return Plugin_Continue; 
 	}

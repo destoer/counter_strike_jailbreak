@@ -102,7 +102,7 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
     int unused;
     int alive_t = get_alive_team_count(CS_TEAM_T,unused);
 
-    if(alive_t == (LR_SLOTS / 2) && !lr_ready && GetClientTeam(victim) == CS_TEAM_T)
+    if(alive_t == (LR_SLOTS / 2) && !lr_ready && GetClientTeam(victim) == CS_TEAM_T && lr_cvar.IntValue == 1)
     {
         lr_ready = true;
         PrintToChatAll("%s Last request is now ready type !lr",LR_PREFIX);

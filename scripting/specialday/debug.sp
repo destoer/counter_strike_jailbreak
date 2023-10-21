@@ -18,8 +18,8 @@ public Action sd_info_cmd(int client, int args)
 	}
 	
 	PrintToChat(client, "%s SD VERSION: %s",SPECIALDAY_PREFIX, VERSION);
-	PrintToChat(client, "%s SD STATE: %d\n",SPECIALDAY_PREFIX, view_as<int>(sd_state));
-	PrintToChat(client, "%s SD CURRENT: %d\n",SPECIALDAY_PREFIX, view_as<int>(special_day));
+	PrintToChat(client, "%s SD STATE: %d\n",SPECIALDAY_PREFIX, view_as<int>(global_ctx.sd_state));
+	PrintToChat(client, "%s SD CURRENT: %d\n",SPECIALDAY_PREFIX, view_as<int>(global_ctx.special_day));
 	
 	return Plugin_Continue;
 }
@@ -37,9 +37,9 @@ public Action rig_client(int client, int args)
 
 	PrintToChat(client,"%s Rigging next sd for client %s\n",SPECIALDAY_PREFIX,arg);
 
-	rigged_client = FindTarget(client,arg,false,false);
+	global_ctx.rigged_client = FindTarget(client,arg,false,false);
 
-	PrintToChat(client,"%s Rigged to client %d:%N\n",SPECIALDAY_PREFIX,rigged_client,rigged_client);
+	PrintToChat(client,"%s Rigged to client %d:%N\n",SPECIALDAY_PREFIX,global_ctx.rigged_client,global_ctx.rigged_client);
 
 
 	return Plugin_Continue;
@@ -52,7 +52,7 @@ public Action enable_wsd(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	warden_sd_available++;
+	global_ctx.warden_sd_available++;
 	
 	return Plugin_Continue;	
 }

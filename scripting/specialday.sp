@@ -9,11 +9,6 @@
 #include "jailbreak/jailbreak.inc"
 
 
-// TODO: if we want to do serious feature work on this we should move it over into a config struct
-// like we have setup for the LR plugin but the plugin is stable for now and i dont see much working being done inside it 
-// so we will leave it be for now
-// if we want to do it at a later time we can factor out vip rando, and weapon restrictions for a start
-
 // need to supply models + audio if these are uncommented
 //#define USE_CUSTOM_ZOMBIE_MODEL
 //#define CUSTOM_ZOMBIE_MUSIC
@@ -88,8 +83,6 @@ void callback_dummy()
 
 }
 
-SpecialDay special_day = normal_day;
-SdState sd_state = sd_inactive;
 
 typedef SD_INIT_FUNC = function void (int client);
 
@@ -97,14 +90,11 @@ typedef SD_STATE_FUNC = function void();
 
 //typedef SD_
 
+// for some reason we cannot just init these with an initalizer
+// so we do it in a func...
 SD_STATE_FUNC end_fptr[SD_SIZE];
 SD_STATE_FUNC start_fptr[SD_SIZE];
 SD_STATE_FUNC init_fptr[SD_SIZE];
-
-// function pointer set to tell us how to handle initilaze players on sds
-// set back to invalid on endsd to make sure we set it properly for each sd
-SD_INIT_FUNC sd_player_init_fptr;
-
 
 
 // sd modifiers
@@ -114,20 +104,9 @@ Handle g_hFriendlyFire; // mp_friendlyfire var
 Handle g_autokick; // turn auto kick off for friednly fire
 Handle g_ignore_round_win; 
 
-bool fr = false; // are people frozen
-bool ff = false; // is friendly fire on?
-bool no_damage = false; // is damage disabled
-bool hp_steal = false; // is hp steal on
-bool ignore_round_end = false;
 int fog_ent;
 
-
-// round end timer 
-int round_delay_timer = 0;
-
 #define SD_DELAY 15
-
-int sdtimer = SD_DELAY; // timer for sd
 
 
 // team saves
@@ -135,17 +114,104 @@ int validclients = 0; // number of clients able to partake in sd
 int game_clients[MAXPLAYERS+1];
 int teams[MAXPLAYERS+1]; // should store in a C struct but cant
 
-// for scoutknifes
-int player_kills[MAXPLAYERS+1] =  { 0 };
+enum struct Context
+{
+	// are sd's active and if so which one
+	SpecialDay special_day;
+	SdState sd_state;
 
-// for zombies
-float death_cords[MAXPLAYERS+1][3];
+	// function pointer set to tell us how to handle initilaze players on sds
+	// set back to invalid on endsd to make sure we set it properly for each sd
+	SD_INIT_FUNC player_init;
 
+	bool sd_init_failure;
 
-int sd_winner = -1;
+	// how long till sd starts?
+	int sd_timer;
+	
+	// what gun is only allowed
+	// NOTE: we still switch for sds with more complicated logic
+	char weapon_restrict[20];
 
-int rigged_client = -1;
+	// how long does sd last
+	int round_delay_timer;
+	bool ignore_round_end;
 
+	bool fr; // are people frozen
+	bool ff; // is friendly fire on?
+
+	bool no_damage; // damage disable
+	bool hp_steal; // gain hp from kills
+
+	// boss in sd, e.g patient zero, laser, tank, spectre etc
+	int boss;
+	int rigged_client;
+
+	// warden sd
+	int warden_sd_available;
+	int rounds_since_warden_sd;
+	bool wsd_ff;
+
+	int sd_winner;
+}
+
+enum struct Player
+{
+	int kills;
+
+	float death_cords[3];
+
+	// gun game level
+	int gungame_level;
+}
+
+Player players[MAXPLAYERS+1];
+Context global_ctx;
+
+const int INVALID_BOSS = -1;
+
+void reset_context()
+{
+	global_ctx.special_day = normal_day;
+	global_ctx.sd_state = sd_inactive;
+
+	global_ctx.sd_timer = SD_DELAY;
+
+	global_ctx.sd_init_failure = false;
+
+	global_ctx.player_init = sd_player_init_invalid;
+
+	global_ctx.round_delay_timer = 0;
+	global_ctx.ignore_round_end = false;
+
+	global_ctx.fr = false;
+	global_ctx.ff = false;
+	global_ctx.no_damage = false;
+	global_ctx.hp_steal = false;
+
+	global_ctx.boss = INVALID_BOSS;
+	global_ctx.rigged_client = INVALID_BOSS;
+	global_ctx.wsd_ff = false;
+
+	global_ctx.weapon_restrict = "";
+
+	// dont init warden sd rounds
+
+	global_ctx.ignore_round_end = false;
+
+	global_ctx.sd_winner = -1;
+}
+
+void reset_player(int client)
+{
+	players[client].kills = 0;
+	players[client].gungame_level = 0;
+
+	for(int i = 0; i < 3; i++)
+	{
+		players[client].death_cords[i] = 0.0;
+	}
+}
 
 // backups
 // (unused)
@@ -155,11 +221,6 @@ int rigged_client = -1;
 // gun removal
 int g_WeaponParent;
 
-
-int warden_sd_available = 0;
-int rounds_since_warden_sd = 0;
-
-
 // csgo ff
 ConVar convar_mp_teammates_are_enemies;
 bool mp_teammates_are_enemies;
@@ -167,10 +228,6 @@ bool mp_teammates_are_enemies;
 // laser sprites
 int g_lbeam;
 int g_lpoint;
-
-bool sd_init_failure = false;
-
-bool wsd_ff = false;
 
 // split files for sd
 #include "specialday/config.sp"
@@ -197,9 +254,9 @@ bool wsd_ff = false;
 // we can then just call this rather than having to switch on the sds in many places
 void sd_player_init(int client)
 {
-	if(sd_state != sd_inactive && IsClientConnected(client) && IsClientInGame(client) && is_on_team(client))
+	if(global_ctx.sd_state != sd_inactive && IsClientConnected(client) && IsClientInGame(client) && is_on_team(client))
 	{
-		Call_StartFunction(null, sd_player_init_fptr);
+		Call_StartFunction(null, global_ctx.player_init);
 		Call_PushCell(client);
 		Call_Finish();
 	}
@@ -209,28 +266,28 @@ void sd_player_init(int client)
 // (lets us know if we forget to set one)
 void sd_player_init_invalid(int client)
 {
-	ThrowNativeError(SP_ERROR_NATIVE, "invalid sd_init function %d:%d:%d\n", client, sd_state, special_day);
+	ThrowNativeError(SP_ERROR_NATIVE, "invalid sd_init function %d:%d:%d\n", client, global_ctx.sd_state, global_ctx.special_day);
 }
 
 
 public start_round_delay(int seconds)
 {
-	round_delay_timer = seconds;
+	global_ctx.round_delay_timer = seconds;
 	CreateTimer(1.0,round_delay_tick);
 	disable_round_end();
 }
 
 public Action round_delay_tick(Handle Timer)
 {
-	if(round_delay_timer > 0)
+	if(global_ctx.round_delay_timer > 0)
 	{
-		round_delay_timer -= 1;
+		global_ctx.round_delay_timer -= 1;
 		CreateTimer(1.0,round_delay_tick);
 	}
 	
 	else
 	{
-		if(sd_state == sd_active)
+		if(global_ctx.sd_state == sd_active)
 		{
 			enable_round_end();
 			slay_all();
@@ -251,9 +308,35 @@ public Action round_delay_tick(Handle Timer)
 	return Plugin_Continue;
 }
 
+void pick_boss()
+{
+	if(global_ctx.rigged_client == INVALID_BOSS)
+	{
+		int rand = GetRandomInt( 0, (validclients-1) );
+		
+		// select the first zombie
+		global_ctx.boss = game_clients[rand]; 
+	}
+
+	else
+	{
+		global_ctx.boss = global_ctx.rigged_client;
+	}	
+}
+
+void pick_boss_discon(int client)
+{
+	// while the current disconnecter
+	while(global_ctx.boss == client)
+	{
+		int rand = GetRandomInt( 0, (validclients-1) );
+		global_ctx.boss = game_clients[rand]; // select the lucky client
+	}	
+}
+
 void enable_friendly_fire()
 {
-	ff = true;
+	global_ctx.ff = true;
 	SetConVarBool(g_hFriendlyFire, true); 
 
 	if(GetEngineVersion() == Engine_CSGO)
@@ -265,7 +348,7 @@ void enable_friendly_fire()
 
 void disable_friendly_fire()
 {
-	ff = false;
+	global_ctx.ff = false;
 	SetConVarBool(g_hFriendlyFire, false); 	
 
 	if(GetEngineVersion() == Engine_CSGO)
@@ -284,24 +367,24 @@ void disable_round_end()
 		SetConVarInt(store_kill_ammount_cvar, 0); 
 	}
 	
-	ignore_round_end = true;
+	global_ctx.ignore_round_end = true;
 	SetConVarBool(g_ignore_round_win, true);
 }
 
 void enable_round_end()
 {
-	ignore_round_end = false;
+	global_ctx.ignore_round_end = false;
 	SetConVarBool(g_ignore_round_win, false);
 }
 
 public int native_sd_state(Handle plugin, int numParam)
 {
-	return view_as<int>(sd_state);
+	return view_as<int>(global_ctx.sd_state);
 }
 
 public int native_current_day(Handle plugin, int numParam)
 {
-	return view_as<int>(special_day);
+	return view_as<int>(global_ctx.special_day);
 }
 
 
@@ -412,7 +495,7 @@ public OnPluginStart()
 	}
 	
 	//set our initial function pointer
-	sd_player_init_fptr = sd_player_init_invalid;
+	global_ctx.player_init = sd_player_init_invalid;
 	
 	// timer for printing current sd info
 	CreateTimer(1.0, print_specialday_text_all, _, TIMER_REPEAT);
@@ -432,7 +515,7 @@ public OnPluginStart()
 
 public Action weapon_menu(int client, int args)
 {
-	if(sd_state == sd_inactive)
+	if(global_ctx.sd_state == sd_inactive)
 	{
 		return Plugin_Continue;
 	}
@@ -449,7 +532,7 @@ public Action weapon_menu(int client, int args)
 
 public void panic_unimplemented()
 {
-	ThrowNativeError(SP_ERROR_NATIVE, "did not initalize sd %d\n",view_as<int>(special_day));
+	ThrowNativeError(SP_ERROR_NATIVE, "did not initalize sd %d\n",view_as<int>(global_ctx.special_day));
 }
 
 // just sourcemod things
@@ -603,7 +686,7 @@ public Action sd_spawn(int client, int args)
 {
 	// sd not active so we dont care
 	// or player alive so dont care
-	if(sd_state == sd_inactive || IsPlayerAlive(client))
+	if(global_ctx.sd_state == sd_inactive || IsPlayerAlive(client))
 	{
 		return Plugin_Continue;
 	}	
@@ -615,17 +698,17 @@ public Action sd_spawn(int client, int args)
     }	
 	
 	// less than 20 seconds set them up
-	if(sd_state == sd_started)
+	if(global_ctx.sd_state == sd_started)
 	{
 		CS_RespawnPlayer(client);
 		sd_player_init(client);
 	}
 	
 	// sd is running (20 secs in cant join) for most sds
-	else if(sd_state == sd_active)
+	else if(global_ctx.sd_state == sd_active)
 	{
 		
-		switch(special_day)
+		switch(global_ctx.special_day)
 		{
 			case zombie_day:
 			{
@@ -666,14 +749,14 @@ public Action sd_spawn(int client, int args)
 // freeze all players and turn ff on
 public Action Freeze(client,args)
 {
-	if(sd_state != sd_inactive) 
+	if(global_ctx.sd_state != sd_inactive) 
 	{ 
 		PrintToChat(client,"%s Can't freeze players during Special Day", SPECIALDAY_PREFIX);
 		return Plugin_Handled; 
 		
 	} // dont allow freezes during an sd
 
-	fr = true;
+	global_ctx.fr = true;
 	for(int i = 1; i <= MaxClients; i++)
 	{ 
 		if(IsClientInGame(i))
@@ -682,24 +765,28 @@ public Action Freeze(client,args)
 		}
 	
 	}
-	no_damage = true;
+	global_ctx.no_damage = true;
 	return Plugin_Handled;
 }
 
 // unfreeze all players off
 public Action UnFreeze(client,args)
 {
-	if(sd_state != sd_inactive) 
+	if(global_ctx.sd_state != sd_inactive) 
 	{ 
 		PrintToChat(client,"%s Can't unfreeze players during Special Day", SPECIALDAY_PREFIX);
 		return Plugin_Handled; 		
-	} // dont allow freezes during an sd
-	if(fr == false) 
+	}
+	 // dont allow freezes during an sd
+	if(!global_ctx.fr) 
 	{
 		PrintToChat(client,"%s Can't unfreeze if not already frozen", SPECIALDAY_PREFIX);
 		return Plugin_Handled; 
-	} // can only unfreeze if frozen
-	fr = false;
+	} 
+	
+	// can only unfreeze if frozen
+	global_ctx.fr = false;
+
 	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i))
@@ -708,7 +795,7 @@ public Action UnFreeze(client,args)
 		}
 	
 	}
-	no_damage = false;
+	global_ctx.no_damage = false;
 	PrintCenterTextAll("Game play active");
 	return Plugin_Handled;
 }
@@ -752,9 +839,9 @@ int get_client_max_kills()
 	int cli = 1;
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if(player_kills[i] > max)
+		if(players[i].kills > max)
 		{
-			max = player_kills[i];
+			max = players[i].kills;
 			cli = i;
 		}
 	}
@@ -765,7 +852,7 @@ int get_client_max_kills()
 void EndSd(bool forced=false)
 {
 	// no sd running we dont need to do anything
-	if(sd_state == sd_inactive)
+	if(global_ctx.sd_state == sd_inactive)
 	{
 		return;
 	}
@@ -784,7 +871,7 @@ void EndSd(bool forced=false)
 
 
 	// call sd cleanup
-	int idx = view_as<int>(special_day);
+	int idx = view_as<int>(global_ctx.special_day);
 
 	SD_STATE_FUNC end_func = end_fptr[idx];
 
@@ -793,14 +880,8 @@ void EndSd(bool forced=false)
 
 	// just in case
 	enable_round_end();	
-	
-	if(ff == true)
-	{
-		disable_friendly_fire();
-	}	
-	
 
-	if(ff)
+	if(global_ctx.ff)
 	{
 		disable_friendly_fire();
 	}
@@ -808,22 +889,21 @@ void EndSd(bool forced=false)
 	// give winner creds
 	if(store && !forced)
 	{
-		if(sd_winner != -1 && check_command_exists("sm_store"))
+		if(global_ctx.sd_winner != -1 && check_command_exists("sm_store"))
 		{
-			Store_SetClientCredits(sd_winner, Store_GetClientCredits(sd_winner)+20);
-			PrintToChat(sd_winner,"%s you won 20 credits for winning the sd!",SPECIALDAY_PREFIX)
+			Store_SetClientCredits(global_ctx.sd_winner, Store_GetClientCredits(global_ctx.sd_winner)+20);
+			PrintToChat(global_ctx.sd_winner,"%s you won 20 credits for winning the sd!",SPECIALDAY_PREFIX)
 		}
 	}
 
-	special_day = normal_day;
-	sd_state = sd_inactive;
-	hp_steal = false;
-	fr = false;
-	no_damage = false;
-	tank = -1;
-	patient_zero = -1;
-	sd_winner = -1;
-	
+	// purge global sd state
+	reset_context();
+
+	for(int i = 1; i <= MAXPLAYERS; i++)
+	{
+		reset_player(i);
+	}
+
 	// reset the store kill ammount
 	if(store && store_kill_ammount_cvar != null)
 	{
@@ -856,10 +936,9 @@ void EndSd(bool forced=false)
 			set_client_speed(i, 1.0);
 		}
 	}	
-	// reset our function pointer
-	sd_player_init_fptr = sd_player_init_invalid;
 
-	rigged_client = -1;
+	// reset our function pointer
+	global_ctx.player_init = sd_player_init_invalid;
 }
 
 
@@ -883,57 +962,57 @@ public Action print_specialday_text_all(Handle timer)
 	
 
 
-	if(sd_state == sd_inactive)
+	if(global_ctx.sd_state == sd_inactive)
 	{
 		return Plugin_Continue;
 	}
 
 	// active show current states
-	else if(sd_state == sd_active)
+	else if(global_ctx.sd_state == sd_active)
 	{	
-		switch(special_day)
+		switch(global_ctx.special_day)
 		{
 			case tank_day:
 			{
-				Format(buf, sizeof(buf), "current tank: %N", tank);
+				Format(buf, sizeof(buf), "current tank: %N", global_ctx.boss);
 			}
 			
 			case zombie_day:
 			{
 				if(standalone)
 				{
-					Format(buf, sizeof(buf), "patient zero %d: %N",round_delay_timer, patient_zero);
+					Format(buf, sizeof(buf), "patient zero %d: %N",global_ctx.round_delay_timer, global_ctx.boss);
 				}
 
 				else
 				{
-					Format(buf, sizeof(buf), "patient zero %N",patient_zero);
+					Format(buf, sizeof(buf), "patient zero %N",global_ctx.boss);
 				}
 			}
 			
 			case scoutknife_day:
 			{
-				Format(buf, sizeof(buf), "scout knife: %d", round_delay_timer);
+				Format(buf, sizeof(buf), "scout knife: %d", global_ctx.round_delay_timer);
 			}
 
 			case deathmatch_day:
 			{
-				Format(buf, sizeof(buf), "death match: %d", round_delay_timer);	
+				Format(buf, sizeof(buf), "death match: %d", global_ctx.round_delay_timer);	
 			}			
 			
 			case laser_day:
 			{
-				Format(buf, sizeof(buf), "laser: %N", laser_tank);	
+				Format(buf, sizeof(buf), "laser: %N", global_ctx.boss);	
 			}
 		
 			case spectre_day:
 			{
-				Format(buf, sizeof(buf), "spectre: %N", spectre);
+				Format(buf, sizeof(buf), "spectre: %N", global_ctx.boss);
 			}
 
 			default:
 			{
-				Format(buf, sizeof(buf), "%s", sd_list[special_day]);
+				Format(buf, sizeof(buf), "%s", sd_list[global_ctx.special_day]);
 			}
 		}
 	}
@@ -941,7 +1020,7 @@ public Action print_specialday_text_all(Handle timer)
 	// sd_started just show current
 	else
 	{	
-		Format(buf, sizeof(buf), "%s", sd_list[special_day]);	
+		Format(buf, sizeof(buf), "%s", sd_list[global_ctx.special_day]);	
 	}
 	
 	
@@ -967,8 +1046,8 @@ public Action print_specialday_text_all(Handle timer)
 
 void warden_sd_internal(int client)
 {
-	if(warden_sd_available > 0 && client == get_warden_id()
-		&& sd_state == sd_inactive)
+	if(global_ctx.warden_sd_available > 0 && client == get_warden_id()
+		&& global_ctx.sd_state == sd_inactive)
 	{
 		// randomize the sd (unused)
 		//(client, GetRandomInt(0, view_as<int>(normal_day) - 1));
@@ -980,7 +1059,7 @@ void warden_sd_internal(int client)
 
 public Action command_warden_special_day(int client,int args)
 {
-	wsd_ff = false;
+	global_ctx.wsd_ff = false;
 	warden_sd_internal(client);
 
 	return Plugin_Continue;
@@ -988,7 +1067,7 @@ public Action command_warden_special_day(int client,int args)
 
 public Action command_warden_special_day_ff(int client,int args)
 {
-	wsd_ff = true;
+	global_ctx.wsd_ff = true;
 	warden_sd_internal(client);
 
 	return Plugin_Continue;
@@ -1049,12 +1128,13 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 	if(action == MenuAction_Select && IsPlayerAlive(client)) 
 	{
 		// if sd is now inactive dont give any guns
-		if(sd_state == sd_inactive)
+		if(global_ctx.sd_state == sd_inactive)
 		{
 			return -1;
 		}
 		
 		weapon_handler_generic(client,param2);
+		GivePlayerItem(client, "item_assaultsuit");
 	}
 
 	
@@ -1249,7 +1329,7 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 
 public int sd_select(int client, int sd)
 {
-	if(sd_state != sd_inactive) // if sd is active dont allow two
+	if(global_ctx.sd_state != sd_inactive) // if sd is active dont allow two
 	{
 		if(client != 0)
 		{
@@ -1260,10 +1340,10 @@ public int sd_select(int client, int sd)
 
 
 
-	sdtimer = SD_DELAY;
+	global_ctx.sd_timer = SD_DELAY;
 
 	// special done begun but not active
-	sd_state = sd_started; 
+	global_ctx.sd_state = sd_started; 
 
 
 	if(standalone)
@@ -1287,11 +1367,11 @@ public int sd_select(int client, int sd)
 		// invoked by a warden reset the round limit
 		if(client == get_warden_id())
 		{
-			if(wsd_ff)
+			if(global_ctx.wsd_ff)
 			{
 				PrintToChatAll("%s Special day started (friendly fire enabled)", SPECIALDAY_PREFIX);
 				enable_friendly_fire();
-				wsd_ff = false;
+				global_ctx.wsd_ff = false;
 			}
 
 			else
@@ -1299,7 +1379,7 @@ public int sd_select(int client, int sd)
 				PrintToChatAll("%s Special day started", SPECIALDAY_PREFIX);
 			}
 
-			warden_sd_available -= 1;
+			global_ctx.warden_sd_available -= 1;
 		}
 
 		// sd is started so dont have a warden 
@@ -1328,15 +1408,13 @@ public int sd_select(int client, int sd)
 	}
 	
 	// turn off damage until sd starts
-	no_damage = true;
+	global_ctx.no_damage = true;
 	
 	
 	// turn off collison if its allready on this function
 	// will just ignore the request
 	unblock_all_clients(SetCollisionGroup);
 	
-	sd_init_failure = false;
-
 	// init_func
 
 	SD_STATE_FUNC init_func = init_fptr[sd];
@@ -1344,7 +1422,7 @@ public int sd_select(int client, int sd)
 	Call_StartFunction(null, init_func);
 	Call_Finish();
 
-	if(sd_init_failure)
+	if(global_ctx.sd_init_failure)
 	{
 		return -1;
 	}
@@ -1372,21 +1450,21 @@ public int sd_select(int client, int sd)
 public Action MoreTimers(Handle timer)
 {
 	
-	if(sd_state != sd_started)
+	if(global_ctx.sd_state != sd_started)
 	{
 		return Plugin_Handled;
 	}
 	
-	sdtimer -= 1;
-	PrintCenterTextAll("Special day (%s) begins in %d",sd_list[special_day], sdtimer); 
-	if(sdtimer > 0)
+	global_ctx.sd_timer -= 1;
+	PrintCenterTextAll("Special day (%s) begins in %d",sd_list[global_ctx.special_day], global_ctx.sd_timer); 
+	if(global_ctx.sd_timer > 0)
 	{
 		CreateTimer(1.0, MoreTimers);
 	}
 
 	else 
 	{ 
-		sdtimer = SD_DELAY; 
+		global_ctx.sd_timer = SD_DELAY; 
 		
 		
 		
@@ -1399,7 +1477,7 @@ public Action MoreTimers(Handle timer)
 			}
 		}			
 			
-		no_damage = false;
+		global_ctx.no_damage = false;
 		
 		
 		StartSD(); 				
@@ -1429,12 +1507,12 @@ public StartSD()
 
 
 	// incase we cancel our sd
-	if(sd_state == sd_inactive)
+	if(global_ctx.sd_state == sd_inactive)
 	{
 		return;
 	}
 	
-	sd_state = sd_active;
+	global_ctx.sd_state = sd_active;
 
 	if(gangs)
 	{
@@ -1450,7 +1528,7 @@ public StartSD()
 		disable_lr();
 	}
 
-	int idx = view_as<int>(special_day);
+	int idx = view_as<int>(global_ctx.special_day);
 	SD_STATE_FUNC start_func = start_fptr[idx];
 
 	Call_StartFunction(null, start_func);
@@ -1462,7 +1540,7 @@ public StartSD()
 
 public Action RemoveGuns(Handle timer)
 {	
-	if(sd_state != sd_active)
+	if(global_ctx.sd_state != sd_active)
 	{
 		return Plugin_Handled;
 	}

@@ -17,7 +17,7 @@ void client_fly(int client)
 void flying_player_init(int client)
 {
 	// give player guns if we are just starting
-	if(sd_state == sd_started)
+	if(global_ctx.sd_state == sd_started)
 	{
 		WeaponMenu(client);
 	}
@@ -28,9 +28,9 @@ void flying_player_init(int client)
 
 void init_skywars()
 {
-	special_day = fly_day;
+	global_ctx.special_day = fly_day;
 	PrintToChatAll("%s Sky wars started, press e to toggle flying", SPECIALDAY_PREFIX);
-	sd_player_init_fptr = flying_player_init;
+	global_ctx.player_init = flying_player_init;
 }
 
 public void StartFly()

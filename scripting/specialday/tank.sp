@@ -6,10 +6,6 @@
 #endif
 #define _TANK_INCLUDE_included
 
-
-
-int tank = -1; // hold client id of the tank
-
 // tank give a gun menu
 void tank_player_init(int client)
 {
@@ -23,33 +19,21 @@ void init_tank()
 	if(validclients == 0)
 	{
 		PrintToChatAll("%s You are all freekillers!", SPECIALDAY_PREFIX);
-		sd_init_failure = true;
+		global_ctx.sd_init_failure = true;
 		return;
 	}
 	
-	special_day = tank_day;
+	global_ctx.special_day = tank_day;
 	PrintToChatAll("%s Tank day started", SPECIALDAY_PREFIX);
 	
-	sd_player_init_fptr = tank_player_init;
-
-	if(rigged_client == -1)
-	{
-		int rand = GetRandomInt( 0, (validclients-1) );
-		tank = game_clients[rand]; // select the lucky client
-	}
-
-	else
-	{
-		tank = rigged_client;
-	}
+	global_ctx.player_init = tank_player_init;
 }
 
 void end_tank()
 {
 	PrintToChatAll("%s Tank day over", SPECIALDAY_PREFIX);
 	RestoreTeams();
-	SetEntityRenderColor(tank, 255, 255, 255, 255);
-	tank = -1;	
+	SetEntityRenderColor(global_ctx.boss, 255, 255, 255, 255);
 }
 
 
@@ -81,7 +65,9 @@ public void StartTank()
 		}
 	}
 	
-	MakeTank(tank);
+	pick_boss();
+
+	MakeTank(global_ctx.boss);
 }
 
 
@@ -97,21 +83,7 @@ void tank_discon_active(int client)
 	}
 
 
-	// while the current disconnecter
-	while(tank == client)
-	{
-		int rand = GetRandomInt( 0, (validclients-1) );
-		tank = game_clients[rand]; // select the lucky client
-	}
+	pick_boss_discon(client);
 	
-	
-	MakeTank(tank);		
-}
-
-public void tank_discon_started(int client)
-{
-	SaveTeams(true);
-
-	int rand = GetRandomInt( 0, validclients - 1 );
-	tank = game_clients[rand]; // select the lucky client
+	MakeTank(global_ctx.boss);		
 }

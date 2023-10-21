@@ -20,13 +20,13 @@ public void OnClientPutInServer(int client)
 //remove damage and aimpunch
 public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3]) 
 {
-		if(no_damage)
-		{
-			return Plugin_Handled;
-		}
-		
-		
-		return Plugin_Continue;
+	if(global_ctx.no_damage)
+	{
+		return Plugin_Handled;
+	}
+	
+	
+	return Plugin_Continue;
 }
 
 public Action PlayerDisconnect_Event(Handle event, const String:name[], bool dontBroadcast)
@@ -34,97 +34,36 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 
 	int client = GetClientOfUserId(GetEventInt(event,"userid"));
 
-
-	if(sd_state == sd_started)
+	if(global_ctx.sd_state == sd_active)
 	{
-		switch(special_day)
+		bool boss_discon = global_ctx.boss == client;
+
+		if(!boss_discon)
 		{
-			case tank_day:
-			{
-				if(client == tank)
-				{
-					tank_discon_started(client);
-				}
-			}
-			
-			case spectre_day:
-			{
-				if(client == spectre)
-				{
-					spectre_discon_started(client);
-				}
-			}
-			
-			
-			case zombie_day:
-			{
-				if(client == patient_zero)
-				{
-					zombie_discon_started(client);
-				}
-			}
-
-
-			case laser_day:
-			{
-				if(client == laser_tank)
-				{
-					laser_discon_started(client);
-				}
-			}
-/*
-			case vip_day:
-			{
-				if(client == t_vip)
-				{
-					pick_t_vip();
-				}
-
-				else if(client == ct_vip)
-				{
-					pick_ct_vip();
-				}
-			}
-*/			
-			default: {}
+			return Plugin_Continue;
 		}
-	}
-	
-	else if(sd_state == sd_active)
-	{
-		switch(special_day)
+
+		switch(global_ctx.special_day)
 		{
 			case tank_day:
 			{	
-				if(client == tank)
-				{
-					tank_discon_active(client);
-				}
+				tank_discon_active(client);	
 			}
 			
 			case spectre_day:
 			{
-				if(client == spectre)
-				{
-					spectre_discon_active(client);
-				}
+				spectre_discon_active(client);
 			}
 			
 			
 			case zombie_day:
 			{
-				if(client == patient_zero)
-				{
-					zombie_discon_active(client);
-				}
+				zombie_discon_active(client);
 			}
 
 			case laser_day:
 			{
-				if(client == laser_tank)
-				{
-					laser_discon_active(client);
-				}
+				laser_discon_active(client);
 			}
 
 /*
@@ -170,12 +109,10 @@ public OnMapStart()
 	g_lbeam = PrecacheModel("materials/sprites/laserbeam.vmt");
 	g_lpoint = PrecacheModel("materials/sprites/glow07.vmt");	
 	
-	sd_state = sd_inactive;
-	special_day = normal_day;
+	global_ctx.sd_state = sd_inactive;
+	global_ctx.special_day = normal_day;
 	disable_friendly_fire();
-	tank = -1;
-	patient_zero = -1;
-	
+
 	gun_menu = build_gun_menu(WeaponHandler,false);
 	sd_menu = build_sd_menu(SdHandler); // real sd select
 	sd_list_menu = build_sd_menu(SdListHandler); // dummy sd menu for people to see sds
@@ -242,32 +179,31 @@ public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 
 #else
 	// if we have the required players and can still add rounds to the stockpile
-	if(GetClientCount(true) >= ROUND_PLAYER_REQ && warden_sd_available < ROUND_STACK_LIM)
+	if(GetClientCount(true) >= ROUND_PLAYER_REQ && global_ctx.warden_sd_available < ROUND_STACK_LIM)
 	{
-		rounds_since_warden_sd += 1;
+		global_ctx.rounds_since_warden_sd += 1;
 		// inc availiable reset round counter
-		if(rounds_since_warden_sd >= ROUND_WARDEN_SD)
+		if(global_ctx.rounds_since_warden_sd >= ROUND_WARDEN_SD)
 		{
-			rounds_since_warden_sd = 0;
-			warden_sd_available += 1;
+			global_ctx.rounds_since_warden_sd = 0;
+			global_ctx.warden_sd_available += 1;
 		}
 	}	
 
 
-	if(warden_sd_available > 0)
+	if(global_ctx.warden_sd_available > 0)
 	{
-		PrintToChatAll("%s Warden sd available !wsd(%d)",SPECIALDAY_PREFIX,warden_sd_available);
+		PrintToChatAll("%s Warden sd available !wsd(%d)",SPECIALDAY_PREFIX,global_ctx.warden_sd_available);
 	}
 #endif
 	
 #if defined GANGS	
-	if(sd_state == sd_active && check_command_exists("sm_gang"))
+	if(global_ctx.sd_state == sd_active && check_command_exists("sm_gang"))
 	{
 		ServerCommand("sm plugins load hl_gangs.smx")
 	}
 #endif
-	fr = false;
-	no_damage = false;
+	
 	EndSd();
 	return Plugin_Handled;
 }
@@ -278,7 +214,7 @@ public Action OnPlayerHurt(Handle event, const String:name[], bool dont_broadcas
 {
 	int hitgroup = GetEventInt(event, "hitgroup");
 
-	if(sd_state == sd_active && special_day == headshot_day)
+	if(global_ctx.sd_state == sd_active && global_ctx.special_day == headshot_day)
 	{
 		// if not a headshot cancel out damage
 		if(hitgroup != HITGROUP_HEAD)
@@ -299,15 +235,14 @@ public Action OnPlayerHurt(Handle event, const String:name[], bool dont_broadcas
 
 public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
 {
-
-	if(no_damage)
+	if(global_ctx.no_damage)
 	{
 		damage = 0.0;
 		return Plugin_Changed;
 	}
 
 	// scale ff damage so its the same as standard dmg
-	else if(ff)
+	else if(global_ctx.ff)
 	{
 		if (is_ffa(victim, attacker) && inflictor == attacker)
 		{
@@ -316,9 +251,9 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 	}
 
 	// hook any sd damage modifications here
-	if(sd_state != sd_inactive)
+	if(global_ctx.sd_state != sd_inactive)
 	{
-		switch(special_day)
+		switch(global_ctx.special_day)
 		{
 		
 			case dodgeball_day:
@@ -341,7 +276,7 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 				
 
 				// patient zero instantly kills
-				else if(attacker == patient_zero)
+				else if(attacker == global_ctx.boss)
 				{
 					damage = 120.0;
 				}
@@ -351,7 +286,7 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 			// spectre instant kills everyone
 			case spectre_day:
 			{
-				if(attacker == spectre)
+				if(attacker == global_ctx.boss)
 				{
 					damage = 120.0;
 				}	
@@ -365,13 +300,10 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 	return Plugin_Continue;
 }
 
-
-//float death_cords[MAXPLAYERS+1][3];
-// int player_kills[MAXPLAYERS+1] =  { 0 }; ^ defined above
 public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcast)
 {
 
-	if(hp_steal)
+	if(global_ctx.hp_steal)
 	{
 		int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
 		// give the killer +100 hp
@@ -380,7 +312,7 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 		SetEntityHealth(attacker, health);
 	}
 	
-	if(sd_state == sd_inactive)
+	if(global_ctx.sd_state == sd_inactive)
 	{
 		return Plugin_Continue;
 	}
@@ -397,7 +329,7 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 		SetEntProp(attacker, Prop_Data, "m_iFrags", frags + 2);
 	}
 
-	switch(special_day)
+	switch(global_ctx.special_day)
 	{
 		case zombie_day:
 		{
@@ -436,12 +368,12 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 public OnEntityCreated(int entity, const String:classname[])
 {
 	
-	if(sd_state == sd_inactive)
+	if(global_ctx.sd_state == sd_inactive)
 	{
 		return;
 	}	
 	
-	switch(special_day)
+	switch(global_ctx.special_day)
 	{
 	
 		case dodgeball_day:
@@ -466,7 +398,7 @@ public OnEntityCreated(int entity, const String:classname[])
 public Action OnWeaponEquip(int client, int weapon) 
 {
 
-	if(sd_state == sd_inactive)
+	if(global_ctx.sd_state == sd_inactive)
 	{
 		return Plugin_Continue;
 	}
@@ -485,34 +417,8 @@ public Action OnWeaponEquip(int client, int weapon)
 	}
 #endif
 
-	switch(special_day)
+	switch(global_ctx.special_day)
 	{
-		
-	
-		case dodgeball_day:
-		{
-			if(!StrEqual(weapon_string,"weapon_flashbang"))
-			{
-				return Plugin_Handled;
-			}
-		}
-		
-		case grenade_day:
-		{
-			if(!StrEqual(weapon_string,"weapon_hegrenade"))
-			{
-				return Plugin_Handled;
-			}
-		}
-		
-		case knife_day:
-		{
-			if(!StrEqual(weapon_string,"weapon_knife"))
-			{
-				return Plugin_Handled;
-			}
-		}
-	
 		case scoutknife_day:
 		{
 			// need to check for ssg08 incase we are oncsgo
@@ -524,7 +430,7 @@ public Action OnWeaponEquip(int client, int weapon)
 	
 		case zombie_day:
 		{
-			if(sd_state == sd_active)
+			if(global_ctx.sd_state == sd_active)
 			{
 				if(GetClientTeam(client) == CS_TEAM_T)
 				{
@@ -539,9 +445,9 @@ public Action OnWeaponEquip(int client, int weapon)
 		// spectre can only use knife
 		case spectre_day:
 		{
-			if(sd_state == sd_active)
+			if(global_ctx.sd_state == sd_active)
 			{
-				if(client == spectre)
+				if(client == global_ctx.boss)
 				{
 					if(!StrEqual(weapon_string,"weapon_knife"))
 					{
@@ -550,22 +456,20 @@ public Action OnWeaponEquip(int client, int weapon)
 				}				
 			}
 		}
-		
-		
-		case headshot_day:
+
+		default:
 		{
-			if(sd_state != sd_inactive)
+			// no restrict
+			if(StrEqual(global_ctx.weapon_restrict,""))
 			{
-				if(!StrEqual(weapon_string,"weapon_deagle"))
-				{
-					return Plugin_Handled;
-				}					
-									
+				return Plugin_Continue;
+			}
+
+			if(!StrEqual(weapon_string,global_ctx.weapon_restrict))
+			{
+				return Plugin_Handled;
 			}
 		}
-
-		default: {}
-	
 	}
 	return Plugin_Continue;
 }
@@ -580,7 +484,7 @@ MoveType player_last_movement_type[MAXPLAYERS+1] = {MOVETYPE_WALK};
 public Action check_movement(Handle Timer)
 {
 	// no sd running dont care
-	if(sd_state == sd_inactive)
+	if(global_ctx.sd_state == sd_inactive)
 	{
 		return Plugin_Continue;
 	}
@@ -600,12 +504,12 @@ public Action check_movement(Handle Timer)
 			MoveType old_type = player_last_movement_type[client];
 			if(cur_type != old_type && old_type == MOVETYPE_LADDER)
 			{
-				switch(special_day)
+				switch(global_ctx.special_day)
 				{
 					
 					case zombie_day:
 					{
-						if(GetClientTeam(client) == CS_TEAM_T && sd_state == sd_active)
+						if(GetClientTeam(client) == CS_TEAM_T && global_ctx.sd_state == sd_active)
 						{
 							set_zombie_speed(client);
 						}
@@ -668,7 +572,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	}
 	
 	// if not an sd we dont care
-	if(sd_state == sd_inactive)	
+	if(global_ctx.sd_state == sd_inactive)	
 	{
 		return Plugin_Continue;
 	}
@@ -676,13 +580,13 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	bool in_use = (buttons & IN_USE) == IN_USE;
 	
 	// kill laser
-	if(in_use && special_day == laser_day && sd_state == sd_active && client == laser_tank)
+	if(in_use && global_ctx.special_day == laser_day && global_ctx.sd_state == sd_active && client == global_ctx.boss)
 	{
 		setup_laser(client,{ 1, 153, 255, 255 },g_lbeam,g_lpoint,true);
 	}	
 
 	// use key press toggle fly day move type
-	else if(in_use && !use_key[client] && special_day == fly_day)
+	else if(in_use && !use_key[client] && global_ctx.special_day == fly_day)
 	{
 		if(GetEntityMoveType(client) == MOVETYPE_FLY)
 		{
