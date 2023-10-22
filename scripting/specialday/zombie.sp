@@ -89,6 +89,7 @@ void end_zombie()
 {
 	RestoreTeams();
 	AcceptEntityInput(fog_ent, "TurnOff");
+	AcceptEntityInput(no_fog, "TurnOff");
 }
 
 
