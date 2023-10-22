@@ -312,10 +312,13 @@ void pick_boss()
 {
 	if(global_ctx.rigged_client == INVALID_BOSS)
 	{
-		int rand = GetRandomInt( 0, (validclients-1) );
-		
-		// select the first zombie
-		global_ctx.boss = game_clients[rand]; 
+		while(!is_valid_client(global_ctx.boss))
+		{
+			int rand = GetRandomInt( 0, (validclients-1) );
+			
+			// select the first zombie
+			global_ctx.boss = game_clients[rand];
+		} 
 	}
 
 	else
@@ -327,7 +330,7 @@ void pick_boss()
 void pick_boss_discon(int client)
 {
 	// while the current disconnecter
-	while(global_ctx.boss == client)
+	while(global_ctx.boss == client && !is_valid_client(global_ctx.boss))
 	{
 		int rand = GetRandomInt( 0, (validclients-1) );
 		global_ctx.boss = game_clients[rand]; // select the lucky client
@@ -511,6 +514,7 @@ public OnPluginStart()
 
 	init_function_pointers();
 	
+	reset_context();
 }
 
 public Action weapon_menu(int client, int args)
@@ -1255,9 +1259,8 @@ public SaveTeams(bool onlyct)
 	
 	for(int i = 1; i <= MaxClients; i++)
 	{
-		if(IsClientInGame(i))
+		if(is_valid_client(i))
 		{
-			
 			bool valid;
 			
 			// if ct bans active they can only stay on t anyways

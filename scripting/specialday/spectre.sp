@@ -73,7 +73,6 @@ void end_spectre()
 {
 	RestoreTeams();
 	SetEntityRenderColor(global_ctx.boss,255,255,255, 255)
-	global_ctx.boss = INVALID_BOSS;
 }
 
 void spectre_discon_active(int client)

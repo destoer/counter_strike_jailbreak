@@ -192,8 +192,6 @@ public void MakePatientZero(int client)
 
 public void StartZombie()
 {
-	pick_boss();
-
 	// swap everyone other than the patient zero to the t side
 	// if they were allready in ct or t
 	for(int i = 1; i <= MaxClients; i++)
@@ -207,6 +205,7 @@ public void StartZombie()
 		}
 	}
 
+	pick_boss();
 	MakePatientZero(global_ctx.boss);
 
 	AcceptEntityInput(fog_ent, "TurnOn");
