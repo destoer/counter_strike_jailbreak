@@ -837,9 +837,9 @@ public SetupFog()
 		DispatchKeyValue(fog_ent, "fogblend", "0");
 		DispatchKeyValue(fog_ent, "fogcolor", "0 0 0");
 		DispatchKeyValue(fog_ent, "fogcolor2", "0 0 0");
-		DispatchKeyValueFloat(fog_ent, "fogstart", 350.0);
-		DispatchKeyValueFloat(fog_ent, "fogend", 750.0);
-		DispatchKeyValueFloat(fog_ent, "fogmaxdensity", 50.0);	
+		DispatchKeyValueFloat(fog_ent, "fogstart", 325.0);
+		DispatchKeyValueFloat(fog_ent, "fogend", 550.0);
+		DispatchKeyValueFloat(fog_ent, "fogmaxdensity", 1.0);	
 	}
 
 	no_fog = CreateEntityByName("env_fog_controller");
