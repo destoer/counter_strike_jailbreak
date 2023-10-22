@@ -34,7 +34,7 @@ TODO make all names consistent
 //#define VOICE_ANNOUNCE_HOOK
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi"
-#define PLUGIN_VERSION "V3.7 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.8 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)

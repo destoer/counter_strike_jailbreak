@@ -32,8 +32,8 @@ void init_ffd()
 	global_ctx.player_init = ffd_player_init;
 	
 	
-	// allow player to pick for 20 seconds
-	PrintToChatAll("%s Please wait 20 seconds for friendly fire to be enabled", SPECIALDAY_PREFIX);
+	// allow player to pick for 15 seconds
+	PrintToChatAll("%s Please 15 seconds for friendly fire to be enabled", SPECIALDAY_PREFIX);
 }
 
 public void StartFFD()

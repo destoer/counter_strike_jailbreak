@@ -58,6 +58,16 @@ public void OnClientCookiesCached(int client)
 
 	players[client].laser_color = color;
 	
+#if defined DRAW_CUSTOM_FLAGS 
+
+#else
+	// default draw laser to on if we dont have flag restrictions
+	GetClientCookie(client, client_laser_draw_pref, cookie_str, sizeof(cookie_str));
+	if(StrEqual(cookie_str,""))
+	{
+		set_cookie_int(client,1,client_laser_draw_pref);
+	}
+#endif
 
 	int draw = get_cookie_int(client,client_laser_draw_pref);
 	players[client].draw_laser = draw > 0;
