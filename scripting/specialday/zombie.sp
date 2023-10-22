@@ -176,6 +176,10 @@ public void MakeZombie(int client)
 	}
 	#endif
 	
+	// disable fog
+	SetVariantString("no_fog");
+	AcceptEntityInput(client,"SetFogController");
+
 	// fix no block issues on respawn
 	// really did not want to resort to this sigh...
 	unblock_client(client,SetCollisionGroup);
@@ -196,8 +200,12 @@ public void StartZombie()
 	// if they were allready in ct or t
 	for(int i = 1; i <= MaxClients; i++)
 	{
-		if(IsClientInGame(i))
+		if(is_valid_client(i))
 		{
+			// enable fog
+			SetVariantString("zom_fog");
+			AcceptEntityInput(i,"SetFogController");
+
 			if(is_on_team(i))
 			{
 				CS_SwitchTeam(i,CS_TEAM_CT);
@@ -209,6 +217,7 @@ public void StartZombie()
 	MakePatientZero(global_ctx.boss);
 
 	AcceptEntityInput(fog_ent, "TurnOn");
+	AcceptEntityInput(no_fog, "TurnOn");
 	
 #if defined CUSTOM_ZOMBIE_MUSIC
 	EmitSoundToAll("music/HLA.mp3");

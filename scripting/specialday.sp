@@ -104,7 +104,8 @@ Handle g_hFriendlyFire; // mp_friendlyfire var
 Handle g_autokick; // turn auto kick off for friednly fire
 Handle g_ignore_round_win; 
 
-int fog_ent;
+int no_fog = -1;
+int fog_ent = -1;
 
 #define SD_DELAY 15
 
@@ -821,17 +822,42 @@ public int SdListHandler(Menu menu, MenuAction action, int client, int param2)
 
 public SetupFog()
 {
-	int ent = fog_ent;
-	
-	if(ent != -1)
+
+	fog_ent = FindEntityByClassname(-1, "env_fog_controller");
+
+	if(fog_ent == -1)
 	{
-		DispatchKeyValue(ent, "fogblend", "0");
-		DispatchKeyValue(ent, "fogcolor", "0 0 0");
-		DispatchKeyValue(ent, "fogcolor2", "0 0 0");
-		DispatchKeyValueFloat(ent, "fogstart", 350.0);
-		DispatchKeyValueFloat(ent, "fogend", 750.0);
-		DispatchKeyValueFloat(ent, "fogmaxdensity", 50.0);	
+		fog_ent = CreateEntityByName("env_fog_controller");
+		DispatchSpawn(fog_ent); 
+	}	
+	
+	if(fog_ent != -1)
+	{
+		DispatchKeyValue(fog_ent, "targetname", "zom_fog");
+		DispatchKeyValue(fog_ent, "fogblend", "0");
+		DispatchKeyValue(fog_ent, "fogcolor", "0 0 0");
+		DispatchKeyValue(fog_ent, "fogcolor2", "0 0 0");
+		DispatchKeyValueFloat(fog_ent, "fogstart", 350.0);
+		DispatchKeyValueFloat(fog_ent, "fogend", 750.0);
+		DispatchKeyValueFloat(fog_ent, "fogmaxdensity", 50.0);	
 	}
+
+	no_fog = CreateEntityByName("env_fog_controller");
+
+	if(no_fog != -1)
+	{
+		DispatchSpawn(no_fog); 
+		DispatchKeyValue(no_fog, "targetname", "no_fog");
+		DispatchKeyValue(no_fog, "fogblend", "0");
+		DispatchKeyValue(no_fog, "fogcolor", "0 0 0");
+		DispatchKeyValue(no_fog, "fogcolor2", "0 0 0");
+		DispatchKeyValueFloat(no_fog, "fogstart", 0.0);
+		DispatchKeyValueFloat(no_fog, "fogend", 0.0);
+		DispatchKeyValueFloat(no_fog, "fogmaxdensity", 0.0);
+	}
+
+	AcceptEntityInput(fog_ent, "TurnOff");
+	AcceptEntityInput(no_fog, "TurnOff");	
 }
 
 

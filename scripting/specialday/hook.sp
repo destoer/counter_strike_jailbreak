@@ -138,20 +138,7 @@ public OnMapStart()
 #endif
 
 	
-	// create fog controller
-	int ent;
-
-	ent = FindEntityByClassname(-1, "env_fog_controller");
-
-	if(ent == -1)
-	{
-		ent = CreateEntityByName("env_fog_controller");
-		DispatchSpawn(ent); 
-	}	
-	
-	fog_ent = ent;
 	SetupFog();
-	AcceptEntityInput(fog_ent, "TurnOff");
 }
 
 public OnMapEnd()
