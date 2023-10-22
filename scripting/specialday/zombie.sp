@@ -244,6 +244,12 @@ void zombie_discon_active(int client)
 
 void zombie_death(int victim)
 {
+	// only revive when sd is active
+	if(global_ctx.sd_state != sd_active)
+	{
+		return;
+	}
+
 	static int ct_count = 0;
 	
 	// test that first time hitting one ct
