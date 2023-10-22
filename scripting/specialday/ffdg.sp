@@ -24,7 +24,7 @@ void init_ffdg()
 	
 	
 	// allow player to pick for 20 seconds
-	PrintToChatAll("%s Please wait 20 seconds for friendly fire to be enabled", SPECIALDAY_PREFIX);
+	PrintToChatAll("%s Please 15 seconds for friendly fire to be enabled", SPECIALDAY_PREFIX);
 	
 }
 

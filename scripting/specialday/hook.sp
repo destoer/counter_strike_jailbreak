@@ -271,7 +271,20 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 				// knockback is way to overkill on csgo
 				if(GetClientTeam(victim) == CS_TEAM_T && GetEngineVersion() == Engine_CSS)
 				{
-					CreateKnockBack(victim, attacker, damage);
+
+					char weapon_name[64];
+					GetClientWeapon(attacker, weapon_name, sizeof(weapon_name));
+
+					// knife gives extra knockback
+					if(StrEqual(weapon_name,"weapon_knife"))
+					{
+						CreateKnockBack(victim, attacker, damage * 25);
+					}
+
+					else
+					{
+						CreateKnockBack(victim, attacker, damage);
+					}
 				}
 				
 
