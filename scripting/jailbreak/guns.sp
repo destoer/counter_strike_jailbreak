@@ -159,7 +159,7 @@ public Action OnWeaponEquip(int client, int weapon)
 	// weapon not picked up
 	if((global_ctx.weapon_picked[idx] & mask) == 0)
 	{
-		PrintToChatAll("pickup count: %d\n",players[client].pickup_count);
+		//PrintToChatAll("pickup count: %d\n",players[client].pickup_count);
 
 		global_ctx.weapon_picked[idx] |= mask;
 		players[client].pickup_count += 1;
