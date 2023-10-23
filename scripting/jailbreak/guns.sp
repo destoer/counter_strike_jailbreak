@@ -107,7 +107,7 @@ public Action empty_menu(client,args)
 	return Plugin_Handled;	
 }
 
-const int PICKUP_LIMIT = 25;
+const int PICKUP_LIMIT = 20;
 
 public Action:Command_Drop(int client, const char[] command, int args)
 { 
