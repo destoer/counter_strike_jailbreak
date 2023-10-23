@@ -106,3 +106,64 @@ public Action empty_menu(client,args)
 			
 	return Plugin_Handled;	
 }
+
+const int PICKUP_LIMIT = 25;
+
+public Action:Command_Drop(int client, const char[] command, int args)
+{ 
+	// can only minipulate 15 weapons
+	if(players[client].pickup_count >= PICKUP_LIMIT)
+	{
+		// only print this message once
+		if(players[client].pickup_count < PICKUP_LIMIT * 2)
+		{
+			PrintToServer("%N may be gun spamming they are over the limit %d : %d\n",client,players[client].pickup_count,PICKUP_LIMIT);
+
+			PrintToChat(client,"%s Anti gun spam: you cannot pickup more than %d unique guns a round\n",JB_PREFIX,PICKUP_LIMIT);
+
+			players[client].pickup_count = PICKUP_LIMIT * 2;
+
+			// give them plenty of ammo as they wont be able to get any more guns
+			int weapon = GetPlayerWeaponSlot(client, CS_SLOT_SECONDARY);
+			set_reserve_ammo(client, weapon, 999);
+			
+
+			// give them plenty of primary ammo
+			weapon = GetPlayerWeaponSlot(client, CS_SLOT_PRIMARY);
+			set_reserve_ammo(client, weapon, 999);	
+		}
+
+		// if we have an external LR we will log only
+		if(!internal_lr())
+		{
+			return Plugin_Continue;
+		}
+
+		// allow drop in lr
+		if(!in_lr(client))
+		{
+			return Plugin_Handled;
+		}
+	}
+
+	return Plugin_Continue;
+}
+
+public Action OnWeaponEquip(int client, int weapon) 
+{
+	int idx = weapon / 32;
+	int bit = weapon % 32;
+
+	int mask = (1 << bit);
+
+	// weapon not picked up
+	if((global_ctx.weapon_picked[idx] & mask) == 0)
+	{
+		PrintToChatAll("pickup count: %d\n",players[client].pickup_count);
+
+		global_ctx.weapon_picked[idx] |= mask;
+		players[client].pickup_count += 1;
+	}
+
+	return Plugin_Continue;
+}

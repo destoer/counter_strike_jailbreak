@@ -359,7 +359,7 @@ stock bool noblock_enabled(int client = -1)
 
 stock void set_clip_ammo(int client, int weapon, int ammo)
 {
-	if(weapon != -1)
+	if(IsValidEntity(weapon))
 	{
 		SetEntProp(weapon, Prop_Send, "m_iClip1", ammo);
 		SetEntProp(weapon, Prop_Send, "m_iClip2", ammo);
@@ -369,11 +369,11 @@ stock void set_clip_ammo(int client, int weapon, int ammo)
 
 stock void set_reserve_ammo(int client, int weapon, int ammo)
 {
-	if(weapon != -1)
+	if(IsValidEntity(weapon))
 	{
 		int g_offset_ammo = FindSendPropInfo("CCSPlayer", "m_iAmmo");
 		int ammo_type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
-		SetEntData(client, g_offset_ammo+(ammo_type*4), ammo, _, true);
+		SetEntData(client, g_offset_ammo+(ammo_type*4), ammo, 4, true);
 	}
 }
 
@@ -714,6 +714,13 @@ stock void enable_lr()
 	{
 		lr_enabled.IntValue = 1;
 	}	
+}
+
+stock bool internal_lr()
+{
+	ConVar destoer_lr = FindConVar("destoer_lr");
+
+	return destoer_lr != null;
 }
 
 stock void disable_lr()

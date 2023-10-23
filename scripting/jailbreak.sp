@@ -78,6 +78,10 @@ enum struct Context
 	bool stuck_timer;
 
 	bool laser_kill;
+
+	// 2048 / 32
+	// bitset weapon picked up this round
+	int weapon_picked[64];
 }
 
 // player configs
@@ -91,6 +95,9 @@ enum struct Player
 	int laser_color;
 	float prev_pos[3];
 	bool t_laser;
+
+	// how many guns has the player picked up
+	int pickup_count;
 }
 
 Player players[MAXPLAYERS + 1];
@@ -109,6 +116,11 @@ void reset_context()
 	global_ctx.stuck_timer = false;
 
 	global_ctx.laser_kill = false;
+
+	for(int i = 0; i < 64; i++)
+	{
+		global_ctx.weapon_picked[i] = 0;
+	}
 }
 
 void init_context()
@@ -141,6 +153,8 @@ void reset_player(int client)
 	{
 		players[client].prev_pos[i] = 0.0;
 	}
+
+	players[client].pickup_count = 0;
 }
 
 #include <sourcemod>
@@ -405,6 +419,7 @@ public void OnClientPutInServer(int client)
 	}
 
 	SDKHook(client, SDKHook_OnTakeDamage, take_damage);
+	SDKHook(client, SDKHook_WeaponEquip, OnWeaponEquip); 
 }
 
 // If the Warden leaves
@@ -610,6 +625,8 @@ public OnPluginStart()
 	HookEvent("player_team", player_team);
 	HookEvent("weapon_fire",OnWeaponFire,EventHookMode_Post);
 	
+	AddCommandListener(Command_Drop, "drop");
+
 	// create a timer for a the warden text
 	CreateTimer(1.0, print_warden_text_all, _, TIMER_REPEAT);
 	
