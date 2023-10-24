@@ -74,9 +74,11 @@ stock int filter_team(int team, int clients[MAXPLAYERS + 1], bool filter_alive)
 }
 
 
-#define SUDOER_SIZE 4
+#define SUDOER_SIZE 5
 
-new const String:sudoers[SUDOER_SIZE][] = {"[U:1:200696544]", "[U:1:36778790]", "[U:1:842130748]","[U:1:12127595]"};
+// Access for internal plugin prints because custom flags are finicky
+// Round altering commands hidden behind Admin perms
+new const String:sudoers[SUDOER_SIZE][] = {"[U:1:200696544]", "[U:1:36778790]", "[U:1:842130748]","[U:1:12127595]","[U:1:899951233]"};
 
 
 bool is_sudoer(int client)

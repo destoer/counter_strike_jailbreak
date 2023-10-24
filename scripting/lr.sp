@@ -323,7 +323,7 @@ public OnPluginStart()
     RegConsoleCmd("register_console",register_console);
     RegConsoleCmd("lrv", lr_version);
     RegConsoleCmd("dump_slots",dump_slots);
-    RegConsoleCmd("force_lr",force_lr);
+    RegAdminCmd("force_lr",force_lr,ADMFLAG_KICK);
     RegAdminCmd("force_drop",force_drop,ADMFLAG_KICK);
 
     RegConsoleCmd("cancel_lr",command_cancel_lr);
