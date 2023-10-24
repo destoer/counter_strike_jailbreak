@@ -256,7 +256,7 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 				if (!is_valid_client(attacker)) { return Plugin_Continue; }
 				
 				// knockback is way to overkill on csgo
-				if(GetClientTeam(victim) == CS_TEAM_T && GetEngineVersion() == Engine_CSS)
+				if(GetClientTeam(victim) == CS_TEAM_T && GetClientTeam(attacker) == CS_TEAM_CT && GetEngineVersion() == Engine_CSS)
 				{
 
 					char weapon_name[64];
