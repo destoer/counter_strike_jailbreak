@@ -126,6 +126,16 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 
 }
 
+public Action kill_delay(Handle timer, int client)
+{
+    if(is_valid_client(client) && in_lr(client))
+    {
+        ForcePlayerSuicide(client);
+    }
+
+    return Plugin_Continue;
+}
+
 public Action OnWeaponFire(Handle event, const String:name[], bool dontBroadcast)
 {
     int client = GetClientOfUserId(GetEventInt(event,"userid"));
@@ -170,7 +180,9 @@ public Action OnWeaponFire(Handle event, const String:name[], bool dontBroadcast
                 if(slots[id].chamber == slots[id].bullet_chamber)
                 {
                     PrintToChatAll("%s BANG!",LR_PREFIX);
-                    ForcePlayerSuicide(client);
+
+                    // delay the player slay to make sure that they die after all bullets have hit
+                    CreateTimer(0.5,kill_delay,client,TIMER_FLAG_NO_MAPCHANGE);
                     return Plugin_Handled;
                 }
 
@@ -184,6 +196,7 @@ public Action OnWeaponFire(Handle event, const String:name[], bool dontBroadcast
                 int partner = slots[id].partner;
 
                 slots[partner].chamber = (slots[partner].chamber + 1) % 6;
+                return Plugin_Handled;
             }
         }
     }

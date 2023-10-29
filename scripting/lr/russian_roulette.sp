@@ -2,7 +2,7 @@ void russian_roulette_player_init(int id, int starting_chamber, int bullet)
 {
     int client = slots[id].client;
 
-    SetEntityHealth(client,100);
+    SetEntityHealth(client,999);
     strip_all_weapons(client); // remove all the players weapons
     int weapon =  GivePlayerItem(client, "weapon_deagle");
     empty_weapon(client,weapon);
