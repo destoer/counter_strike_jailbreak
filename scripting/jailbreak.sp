@@ -1129,6 +1129,9 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 
 	global_ctx.ct_handicap = (ct_count * 3) <= t_count;
 
+	// next round
+	global_ctx.warday_round_counter += 1;
+
 	if(global_ctx.ct_handicap)
 	{
 		for(int i = 1; i <= MAXPLAYERS; i++)
