@@ -212,6 +212,8 @@ bool knife_rebel_active = false;
 
 bool lr_ready = false;
 
+bool lr_sound_cached = false;
+
 bool use_key[MAXPLAYERS+1] = {false};
 
 // handle for sdkcall

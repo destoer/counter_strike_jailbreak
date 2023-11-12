@@ -107,8 +107,11 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
         lr_ready = true;
         PrintToChatAll("%s Last request is now ready type !lr",LR_PREFIX);
 
-        EmitSoundToAll("lr/lr_enabled.mp3");
-
+        if(lr_sound_cached)
+        {
+            EmitSoundToAll("lr/lr_enabled.mp3");
+        }
+        
         int clients[MAXPLAYERS + 1];
 
         int count = filter_team(CS_TEAM_T,clients,true);
@@ -768,7 +771,7 @@ public OnMapStart()
     purge_state();
 
     AddFileToDownloadsTable("sound/lr/lr_enabled.mp3");
-    PrecacheSound("lr/lr_enabled.mp3");
+    lr_sound_cached = PrecacheSound("lr/lr_enabled.mp3");
     PrecacheSound("buttons/blip1.wav");
 }
 
