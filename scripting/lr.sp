@@ -199,6 +199,8 @@ enum struct LrTimer
     int slot;
 }
 
+Handle round_start_timer = null;
+
 
 Choice lr_choice[MAXPLAYERS + 1]
 
@@ -334,6 +336,7 @@ public OnPluginStart()
 
     HookEvent("player_death", OnPlayerDeath,EventHookMode_Post);
     HookEvent("round_end", OnRoundEnd);
+    HookEvent("round_start", OnRoundStart);
 
     // hook disonnect incase a vital member leaves
     HookEvent("player_disconnect", PlayerDisconnect_Event, EventHookMode_Pre);
@@ -862,6 +865,12 @@ bool command_lr_internal(int client)
     {
         PrintToChat(client,"%s Lr is currently disabled!",LR_PREFIX);
         return true;
+    }
+
+    if(round_start_timer != null)
+    {
+        PrintToChat(client,"%s Please wait 15 seconds into a round to start an lr!",LR_PREFIX);
+        return true;       
     }
 
     if(!is_valid_t(client))

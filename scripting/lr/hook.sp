@@ -30,15 +30,26 @@ void purge_state()
 }
 
 
+public Action round_timer_timer_callback(Handle timer, int boop)
+{
+    round_start_timer = null;
+    return Plugin_Continue;
+}
 
 public Action OnRoundStart(Handle event, const String:name[], bool dontBroadcast)
 {
+    kill_handle(round_start_timer);
+
+    round_start_timer = CreateTimer(15.0,round_timer_timer_callback,0,TIMER_FLAG_NO_MAPCHANGE);
+
     purge_state();
     return Plugin_Continue;
 }
 
 public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 {
+    kill_handle(round_start_timer);
+
     if(rebel_lr_active)
     {
         int player;
