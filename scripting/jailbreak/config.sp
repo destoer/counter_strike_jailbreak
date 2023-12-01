@@ -20,6 +20,8 @@ ConVar print_rebel_cvar;
 ConVar guns_cvar;
 ConVar helmet_cvar;
 ConVar admin_laser_cvar;
+ConVar warday_cvar;
+ConVar warday_gun_cvar;
 
 #define PREFIX_SIZE 128
 
@@ -40,6 +42,9 @@ bool print_rebel;
 bool guns;
 bool helmet;
 bool admin_laser;
+
+bool warday_enable;
+bool warday_gun_enable;
 
 void create_jb_convar()
 {
@@ -70,6 +75,8 @@ void create_jb_convar()
     print_rebel_cvar = CreateConVar("jb_rebel","1","print rebels being killed");
 
     guns_cvar = CreateConVar("jb_guns","1","give ct's guns at round start");
+    warday_cvar = CreateConVar("jb_warday","1","enable the warday command");
+    warday_gun_cvar = CreateConVar("jb_warday_guns","1","enable the warday guns");
 
     admin_laser_cvar = CreateConVar("jb_admin_laser","0","enable admin laser");
 }
@@ -113,6 +120,8 @@ void setup_jb_convar()
     guns = guns_cvar.IntValue > 0;
     admin_laser = GetConVarInt(admin_laser_cvar) > 0;
 
+    warday_enable = warday_cvar.IntValue > 0;
+    warday_gun_enable = warday_gun_cvar.IntValue > 0;
 
     if(game == Engine_CSGO)
     {

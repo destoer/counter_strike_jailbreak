@@ -21,6 +21,12 @@ void format_warday(int args)
 
 public Action warday_callback(int client, int args)
 {
+    if(!warday_enable)
+    {	
+        PrintToChat(client,"%s Warday is disabled",WARDEN_PREFIX);
+        return Plugin_Handled;
+    }
+
     if(client != global_ctx.warden_id)
     {
         PrintToChat(client,"%s Only a warden may call a warday!",WARDEN_PREFIX);
@@ -62,13 +68,15 @@ void warday_start()
 
     PrintToChatAll("%s war day started doors will auto open in 20 seconds", WARDEN_PREFIX);
 
-
-    // give every ct a gun
-    for(int i = 0; i <= MAXPLAYERS; i++)
+    if(warday_gun_enable)
     {
-        if(is_valid_client(i) && IsPlayerAlive(i) && GetClientTeam(i) == CS_TEAM_CT)
+        // give every ct a gun
+        for(int i = 0; i <= MAXPLAYERS; i++)
         {
-            gun_menu.Display(i,20);
+            if(is_valid_client(i) && IsPlayerAlive(i) && GetClientTeam(i) == CS_TEAM_CT)
+            {
+                gun_menu.Display(i,20);
+            }
         }
     }
 
@@ -78,15 +86,17 @@ void warday_start()
 
 public Action start_warday(Handle timer)
 {
-    // give every t a gun
-    for(int i = 0; i <= MAXPLAYERS; i++)
+    if(warday_gun_enable)
     {
-        if(is_valid_client(i) && IsPlayerAlive(i) && GetClientTeam(i) == CS_TEAM_T)
+        // give every t a gun
+        for(int i = 0; i <= MAXPLAYERS; i++)
         {
-            gun_menu.Display(i,20);
+            if(is_valid_client(i) && IsPlayerAlive(i) && GetClientTeam(i) == CS_TEAM_T)
+            {
+                gun_menu.Display(i,20);
+            }
         }
     }
-
 
     force_open();
     return Plugin_Handled;
