@@ -35,6 +35,8 @@ void create_sd_convar()
     standalone_cvar = CreateConVar("sd_standalone","0","make plugin operate without jailbreak");
     freeze_cvar = CreateConVar("sd_freeze","0","enable freeze commands");
     lr_cvar = CreateConVar("sd_lr","1","disable lr on sd");
+
+    AutoExecConfig(true,"specialday","jail");
 }
 
 void setup_sd_convar()

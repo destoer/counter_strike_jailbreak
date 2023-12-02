@@ -79,6 +79,8 @@ void create_jb_convar()
     warday_gun_cvar = CreateConVar("jb_warday_guns","1","enable the warday guns");
 
     admin_laser_cvar = CreateConVar("jb_admin_laser","0","enable admin laser");
+
+    AutoExecConfig(true,"jail","jail");
 }
 
 void setup_jb_convar()
