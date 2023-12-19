@@ -364,8 +364,10 @@ public OnMapStart()
 	// laser draw timer
 	CreateTimer(0.01, laser_draw, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 
-
-	CreateTimer(RING_LIFTEIME,beacon_callback , _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+	if(warden_ring)
+	{
+		CreateTimer(RING_LIFTEIME,beacon_callback , _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+	}
 	CreateTimer(0.3, rainbow_timer, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 
 	// clear info
@@ -982,7 +984,7 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 	// if there is only one ct left alive automatically warden him
 	if(get_alive_team_count(CS_TEAM_CT,new_warden) == 1 && GetClientTeam(client) == CS_TEAM_CT && new_warden != 0)
 	{
-		if(global_ctx.warden_id == WARDEN_INVALID)
+		if(global_ctx.warden_id == WARDEN_INVALID && auto_warden)
 		{
 			if(!is_sudoer(new_warden))
 			{
@@ -1135,7 +1137,7 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 	// next round
 	global_ctx.warday_round_counter += 1;
 
-	if(global_ctx.ct_handicap)
+	if(global_ctx.ct_handicap && handicap_enable)
 	{
 		for(int i = 1; i <= MAXPLAYERS; i++)
 		{
@@ -1153,7 +1155,10 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 	int client = 0;
 	if(get_alive_team_count(CS_TEAM_CT, client) == 1 && client != 0)
 	{
-		set_warden(client);
+		if(auto_warden)
+		{
+			set_warden(client);
+		}
 	}
 	
 	for(int i = 0; i <= MAXPLAYERS; i++)

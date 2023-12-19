@@ -9,6 +9,7 @@ ConVar store_cvar;
 ConVar standalone_cvar;
 ConVar freeze_cvar;
 ConVar lr_cvar;
+ConVar sd_delay_cvar;
 
 
 bool ct_ban;
@@ -17,6 +18,8 @@ bool gangs;
 bool standalone;
 bool freeze;
 bool lr;
+
+int SD_DELAY = 15;
 
 #define PREFIX_SIZE 128
 
@@ -32,6 +35,7 @@ void create_sd_convar()
     ctban_cvar = CreateConVar("sd_ctban","1","enable ctban support");
     gangs_cvar = CreateConVar("sd_gangs","0","enable gangs support");
     store_cvar = CreateConVar("sd_store","1","enable store support");
+    sd_delay_cvar = CreateConVar("sd_delay","15","How long before an sd starts");
     standalone_cvar = CreateConVar("sd_standalone","0","make plugin operate without jailbreak");
     freeze_cvar = CreateConVar("sd_freeze","0","enable freeze commands");
     lr_cvar = CreateConVar("sd_lr","1","disable lr on sd");
@@ -66,4 +70,5 @@ void setup_sd_convar()
     standalone = GetConVarInt(standalone_cvar) > 0;
     freeze = GetConVarInt(freeze_cvar) > 0;  
     lr = GetConVarInt(lr_cvar) > 0;  
+    SD_DELAY = GetConVarInt(sd_delay_cvar);
 }

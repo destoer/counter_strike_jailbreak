@@ -22,6 +22,9 @@ ConVar helmet_cvar;
 ConVar admin_laser_cvar;
 ConVar warday_cvar;
 ConVar warday_gun_cvar;
+ConVar auto_warden_cvar;
+ConVar handicap_enable_cvar;
+ConVar warden_ring_cvar;
 
 #define PREFIX_SIZE 128
 
@@ -46,6 +49,12 @@ bool admin_laser;
 bool warday_enable;
 bool warday_gun_enable;
 
+bool auto_warden;
+
+bool handicap_enable;
+
+bool warden_ring;
+
 void create_jb_convar()
 {
     // css
@@ -69,6 +78,9 @@ void create_jb_convar()
     armor_cvar = CreateConVar("jb_armor","1","give ct armor on spawn");
     helmet_cvar = CreateConVar("jb_helmet","1","give ct helmet+kevlar on spawn");
     warden_block_cvar = CreateConVar("jb_warden_block","1","enable warden block commands");
+    auto_warden_cvar = CreateConVar("jb_auto_warden","1","enable auto warden on last alive");
+    handicap_enable_cvar = CreateConVar("jb_handicap","1","enable handicap on bad ct ratio");
+    warden_ring_cvar = CreateConVar("jb_warden_ring","1","enable warden ring");
 
     // used for hosties replacment
     mute_cvar = CreateConVar("jb_mute","1","mute t's at round start");
@@ -121,6 +133,9 @@ void setup_jb_convar()
     print_rebel = GetConVarInt(print_rebel_cvar) > 0;
     guns = guns_cvar.IntValue > 0;
     admin_laser = GetConVarInt(admin_laser_cvar) > 0;
+    auto_warden = GetConVarInt(auto_warden_cvar) > 0;
+    handicap_enable = GetConVarInt(handicap_enable_cvar) > 0;
+    warden_ring = GetConVarInt(warden_ring_cvar) > 0;
 
     warday_enable = warday_cvar.IntValue > 0;
     warday_gun_enable = warday_gun_cvar.IntValue > 0;

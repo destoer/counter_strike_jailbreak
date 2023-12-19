@@ -107,8 +107,6 @@ Handle g_ignore_round_win;
 int no_fog = -1;
 int fog_ent = -1;
 
-#define SD_DELAY 15
-
 
 // team saves
 int validclients = 0; // number of clients able to partake in sd
@@ -176,7 +174,7 @@ void reset_context()
 	global_ctx.special_day = normal_day;
 	global_ctx.sd_state = sd_inactive;
 
-	global_ctx.sd_timer = SD_DELAY;
+	global_ctx.sd_timer = 15;
 
 	global_ctx.sd_init_failure = false;
 
