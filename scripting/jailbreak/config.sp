@@ -25,12 +25,18 @@ ConVar warday_gun_cvar;
 ConVar auto_warden_cvar;
 ConVar handicap_enable_cvar;
 ConVar warden_ring_cvar;
+ConVar ct_primary_cvar;
+ConVar ct_secondary_cvar;
 
 #define PREFIX_SIZE 128
 
 char JB_PREFIX[PREFIX_SIZE];
 char WARDEN_PREFIX[PREFIX_SIZE];
 char WARDEN_PLAYER_PREFIX[PREFIX_SIZE];
+
+#define WEAPON_SIZE 128
+char CT_PRIMARY[WEAPON_SIZE] = "weapon_m4a1";
+char CT_SECONDARY[WEAPON_SIZE] = "weapon_deagle";
 
 bool noblock;
 bool laser_death;
@@ -81,6 +87,9 @@ void create_jb_convar()
     auto_warden_cvar = CreateConVar("jb_auto_warden","1","enable auto warden on last alive");
     handicap_enable_cvar = CreateConVar("jb_handicap","1","enable handicap on bad ct ratio");
     warden_ring_cvar = CreateConVar("jb_warden_ring","1","enable warden ring");
+
+    ct_secondary_cvar = CreateConVar("jb_ct_secondary","weapon_deagle","default ct secondary");
+    ct_primary_cvar = CreateConVar("jb_ct_primary","weapon_m4a1","default ct primary");
 
     // used for hosties replacment
     mute_cvar = CreateConVar("jb_mute","1","mute t's at round start");
@@ -154,5 +163,6 @@ void setup_jb_convar()
         warden_player_prefix_css.GetString(WARDEN_PLAYER_PREFIX,PREFIX_SIZE);
     }
 
-
+    ct_primary_cvar.GetString(CT_PRIMARY,WEAPON_SIZE);
+    ct_secondary_cvar.GetString(CT_SECONDARY,WEAPON_SIZE);
 }

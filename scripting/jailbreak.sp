@@ -1173,8 +1173,8 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 		// give ct's guns
 		if(guns && GetClientTeam(i) == CS_TEAM_CT)
 		{
-			GivePlayerItem(i,"weapon_deagle");
-			GivePlayerItem(i,"weapon_m4a1");
+			GivePlayerItem(i,CT_SECONDARY);
+			GivePlayerItem(i,CT_PRIMARY);
 		}
 	}
 
