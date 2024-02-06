@@ -1,11 +1,7 @@
 
-ConVar jb_prefix_css;
-ConVar warden_prefix_css;
-ConVar warden_player_prefix_css;
-
-ConVar jb_prefix_csgo;
-ConVar warden_prefix_csgo;
-ConVar warden_player_prefix_csgo;
+ConVar jb_prefix;
+ConVar warden_prefix;
+ConVar warden_player_prefix;
 
 ConVar noblock_cvar;
 ConVar laser_cvar;
@@ -64,15 +60,9 @@ bool warden_ring;
 void create_jb_convar()
 {
     // css
-    jb_prefix_css = CreateConVar("jb_prefix_css","\x04[Jailbreak]\x07F8F8FF","prefix for plugin info");
-    warden_prefix_css = CreateConVar("warden_prefix_css","\x04[Warden]\x07F8F8FF","prefix for warden info");
-    warden_player_prefix_css = CreateConVar("warden_player_prefix_css","\x04[Warden]\x0700BFFF","prefix for warden typing in chat");
-
-
-    // csgo
-    jb_prefix_csgo = CreateConVar("jb_prefix_csgo","\x07[Jailbreak]\x07","prefix for plugin info");
-    warden_prefix_csgo = CreateConVar("warden_prefix_csgo","\x07[Warden]\x07","prefix for warden info");
-    warden_player_prefix_csgo = CreateConVar("warden_player_prefix_csgo","\x07[Warden]\x07","prefix for warden typing in chat");
+    jb_prefix = CreateConVar("jb_prefix_css","[Jailbreak]","prefix for plugin info");
+    warden_prefix = CreateConVar("warden_prefix_css","[Warden]","prefix for warden info");
+    warden_player_prefix = CreateConVar("warden_player_prefix_css","[Warden]","prefix for warden typing in chat");
 
     // common
     noblock_cvar = CreateConVar("jb_noblock","0","players pass through eachover");
@@ -149,18 +139,22 @@ void setup_jb_convar()
     warday_enable = warday_cvar.IntValue > 0;
     warday_gun_enable = warday_gun_cvar.IntValue > 0;
 
+    jb_prefix.GetString(JB_PREFIX,PREFIX_SIZE);
+    warden_prefix.GetString(WARDEN_PREFIX,PREFIX_SIZE);
+    warden_player_prefix.GetString(WARDEN_PLAYER_PREFIX,PREFIX_SIZE);
+
     if(game == Engine_CSGO)
     {
-        jb_prefix_csgo.GetString(JB_PREFIX,PREFIX_SIZE);
-        warden_prefix_csgo.GetString(WARDEN_PREFIX,PREFIX_SIZE);
-        warden_player_prefix_csgo.GetString(WARDEN_PLAYER_PREFIX,PREFIX_SIZE);        
+        Format(JB_PREFIX,PREFIX_SIZE,"\x04%s\x07",JB_PREFIX);
+        Format(WARDEN_PREFIX,PREFIX_SIZE,"\x04%s\x07",WARDEN_PREFIX);
+        Format(WARDEN_PLAYER_PREFIX,PREFIX_SIZE,"\x04%s\x07",WARDEN_PLAYER_PREFIX);
     }
 
     else if(game == Engine_CSS)
     {
-        jb_prefix_css.GetString(JB_PREFIX,PREFIX_SIZE);
-        warden_prefix_css.GetString(WARDEN_PREFIX,PREFIX_SIZE);
-        warden_player_prefix_css.GetString(WARDEN_PLAYER_PREFIX,PREFIX_SIZE);
+        Format(JB_PREFIX,PREFIX_SIZE,"\x04%s\x07F8F8FF",JB_PREFIX);
+        Format(WARDEN_PREFIX,PREFIX_SIZE,"\x04%s\x07F8F8FF",WARDEN_PREFIX);
+        Format(WARDEN_PLAYER_PREFIX,PREFIX_SIZE,"\x04%s\x0700BFFF",WARDEN_PLAYER_PREFIX);
     }
 
     ct_primary_cvar.GetString(CT_PRIMARY,WEAPON_SIZE);

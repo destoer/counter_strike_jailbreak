@@ -1,6 +1,5 @@
 
-ConVar sd_prefix_css_cvar;
-ConVar sd_prefix_csgo_cvar;
+ConVar sd_prefix_cvar;
 
 // common
 ConVar ctban_cvar;
@@ -28,8 +27,7 @@ char SPECIALDAY_PREFIX[PREFIX_SIZE];
 
 void create_sd_convar()
 {
-    sd_prefix_css_cvar = CreateConVar("sd_prefix_css","\x04[Special Day]\x07F8F8FF","sd prefix for css");
-    sd_prefix_csgo_cvar = CreateConVar("sd_prefix_csgo","\x04[Special Day]\x02","sd prefix for csgo");
+    sd_prefix_cvar = CreateConVar("sd_prefix_css","[Special Day]","sd prefix for");
 
     // common
     ctban_cvar = CreateConVar("sd_ctban","1","enable ctban support");
@@ -51,15 +49,16 @@ void setup_sd_convar()
         SetFailState("This plugin is for CSGO/CSS only.");	
     }
 
+    sd_prefix_cvar.GetString(SPECIALDAY_PREFIX,PREFIX_SIZE);
 
     if(game == Engine_CSGO)
     {
-        sd_prefix_csgo_cvar.GetString(SPECIALDAY_PREFIX,PREFIX_SIZE);
+        Format(SPECIALDAY_PREFIX,PREFIX_SIZE,"\x04%s\x02",SPECIALDAY_PREFIX);
     }
 
     else if(game == Engine_CSS)
     {
-        sd_prefix_css_cvar.GetString(SPECIALDAY_PREFIX,PREFIX_SIZE);
+        Format(SPECIALDAY_PREFIX,PREFIX_SIZE,"\x04%s\x07F8F8FF",SPECIALDAY_PREFIX);
     }
 
 
