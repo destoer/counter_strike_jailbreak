@@ -199,9 +199,6 @@ enum struct LrTimer
     int slot;
 }
 
-Handle round_start_timer = null;
-
-
 Choice lr_choice[MAXPLAYERS + 1]
 
 Menu gun_menu;
@@ -221,6 +218,7 @@ bool use_key[MAXPLAYERS+1] = {false};
 // handle for sdkcall
 Handle SetCollisionGroup;
 
+int start_timestamp = 0;
 
 public int WeaponHandler(Menu menu, MenuAction action, int client, int param2) 
 {
@@ -867,9 +865,11 @@ bool command_lr_internal(int client)
         return true;
     }
 
-    if(round_start_timer != null)
+    if(GetTime() - start_timestamp < 15)
     {
-        PrintToChat(client,"%s Please wait 15 seconds into a round to start an lr!",LR_PREFIX);
+        int remain = 15 - (GetTime() - start_timestamp);
+
+        PrintToChat(client,"%s Round has just started, please wait %d seconds to start an lr!",LR_PREFIX,remain);
         return true;       
     }
 
