@@ -34,7 +34,7 @@ TODO make all names consistent
 //#define VOICE_ANNOUNCE_HOOK
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi"
-#define PLUGIN_VERSION "V3.8 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.8.1 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -65,6 +65,7 @@ enum struct Context
 
 	// currernt warden
 	int warden_id;
+	bool tmp_warden_mute_used;
 	bool ct_handicap;
 	bool spawn_block_override;
 
@@ -539,7 +540,6 @@ public OnPluginStart()
 	// user commands
 	RegConsoleCmd("wd", warday_callback);
 	RegConsoleCmd("warday", warday_callback);
-	
 
 	RegConsoleCmd("lenny_count",lenny_count_cmd);
 
@@ -552,6 +552,8 @@ public OnPluginStart()
 
 	RegConsoleCmd("w", become_warden);
 	RegConsoleCmd("uw", leave_warden);
+
+	RegConsoleCmd("wm",tmp_warden_mute);
 
 	if(gun_commands)
 	{
@@ -1092,7 +1094,10 @@ public Action round_end(Handle event, const String:name[], bool dontBroadcast)
 		unmute_all(true);
 	}
 
+	kill_handle(tmp_mute_timer);
+
 	global_ctx.spawn_block_override = false;
+	global_ctx.tmp_warden_mute_used = false;
 
 	reset_context();
 
@@ -1205,6 +1210,9 @@ public remove_warden()
 		return;
 	}
 	
+	// make sure any tmp mutes get cleared
+	unmute_all(false);
+
 	// inform players of his death
 	PrintCenterTextAll("%N is no longer warden.", global_ctx.warden_id);
 	PrintToChatAll("%s %N is no longer warden.", WARDEN_PREFIX, global_ctx.warden_id);
