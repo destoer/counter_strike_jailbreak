@@ -41,15 +41,19 @@ public Action unmute_tmp(Handle timer)
 
 public Action tmp_warden_mute(int client, int args)
 {
+    // make sure we are actually the warden
     if(client != global_ctx.warden_id)
     {
         PrintToChat(client,"%s You must be the warden to use !wm",WARDEN_PREFIX);
         return Plugin_Continue;
     }
 
-    if(global_ctx.tmp_warden_mute_used)
+    int remain = 60 - (GetTime() - global_ctx.tmp_mute_timestamp);
+
+    // make sure we cant spam this
+    if(remain > 0)
     {
-        PrintToChat(client,"%s Warden mute has allready been used this round",WARDEN_PREFIX);
+        PrintToChat(client,"%s Warden mute cannot be used for another %d seconds",WARDEN_PREFIX,remain);
         return Plugin_Continue;
     }
 
@@ -65,7 +69,7 @@ public Action tmp_warden_mute(int client, int args)
     PrintToChatAll("%s everyone apart from the warden is muted for 10 seconds!",JB_PREFIX);
 
     tmp_mute_timer = CreateTimer(10.0,unmute_tmp);  
-    global_ctx.tmp_warden_mute_used = true;
+    global_ctx.tmp_mute_timestamp = GetTime();
 
     return Plugin_Continue;
 }
@@ -92,6 +96,8 @@ void unmute_all(bool round_end)
 
 public Action unmute_t(Handle timer)
 {
+    // make sure this happens before unmute_all
+    // as it wont unmute t's while the timers are still active
     mute_timer = null;
 
     unmute_all(false);

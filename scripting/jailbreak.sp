@@ -65,7 +65,7 @@ enum struct Context
 
 	// currernt warden
 	int warden_id;
-	bool tmp_warden_mute_used;
+	int tmp_mute_timestamp;
 	bool ct_handicap;
 	bool spawn_block_override;
 
@@ -1097,7 +1097,6 @@ public Action round_end(Handle event, const String:name[], bool dontBroadcast)
 	kill_handle(tmp_mute_timer);
 
 	global_ctx.spawn_block_override = false;
-	global_ctx.tmp_warden_mute_used = false;
 
 	reset_context();
 
