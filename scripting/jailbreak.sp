@@ -893,6 +893,8 @@ public print_warden_commands(int client)
 	PrintToChat(client,"%s!w           %s- %sbecome warden",color1,color2,color3);
 	PrintToChat(client,"%s!uw         %s- %sexit warden",color1,color2,color3);
 
+	PrintToChat(client,"%s!wm        %s- %smute everyone else for 10 seconds (60 second cooldown)",color1,color2,color3);
+
 	if(warden_block)
 	{
 		PrintToChat(client,"%s!wb         %s- %sturn on block",color1,color2,color3);
