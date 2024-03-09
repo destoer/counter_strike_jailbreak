@@ -36,7 +36,7 @@ public Action unmute_tmp(Handle timer)
     unmute_all(false);
     tmp_mute_timer = null;
 
-    // increase the cooldown
+    // re grab the timestmap for the cooldown
     global_ctx.tmp_mute_timestamp = GetTime();
 
     return Plugin_Continue;
@@ -44,6 +44,12 @@ public Action unmute_tmp(Handle timer)
 
 public Action tmp_warden_mute(int client, int args)
 {
+    if(tmp_mute_timer != null)
+    {
+        PrintToChat(client,"%s mute is already active",WARDEN_PREFIX);
+        return Plugin_Continue;
+    }
+
     // make sure we are actually the warden
     if(client != global_ctx.warden_id)
     {
