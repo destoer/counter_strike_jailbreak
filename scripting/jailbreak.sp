@@ -1100,6 +1100,9 @@ public Action round_end(Handle event, const String:name[], bool dontBroadcast)
 
 	global_ctx.spawn_block_override = false;
 
+	// reset the mute cooldown for new round
+	global_ctx.tmp_mute_timestamp = 0;
+
 	reset_context();
 
 	for(int i = 1; i <= MAXPLAYERS; i++)
