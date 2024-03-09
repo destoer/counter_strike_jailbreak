@@ -36,6 +36,9 @@ public Action unmute_tmp(Handle timer)
     unmute_all(false);
     tmp_mute_timer = null;
 
+    // increase the cooldown
+    global_ctx.tmp_mute_timestamp = GetTime();
+
     return Plugin_Continue;
 }
 
@@ -69,8 +72,7 @@ public Action tmp_warden_mute(int client, int args)
     PrintToChatAll("%s everyone apart from the warden is muted for 10 seconds!",JB_PREFIX);
 
     tmp_mute_timer = CreateTimer(10.0,unmute_tmp);  
-    global_ctx.tmp_mute_timestamp = GetTime();
-
+    
     return Plugin_Continue;
 }
 
