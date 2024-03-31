@@ -83,6 +83,8 @@ enum struct Context
 	// 2048 / 32
 	// bitset weapon picked up this round
 	int weapon_picked[64];
+
+	Handle command_end_timer;
 }
 
 // player configs
@@ -122,6 +124,8 @@ void reset_context()
 	{
 		global_ctx.weapon_picked[i] = 0;
 	}
+
+	kill_handle(global_ctx.command_end_timer);
 }
 
 void init_context()
@@ -946,7 +950,10 @@ public set_warden(int client)
 	
 	// set the actual warden
 	global_ctx.warden_id = client;
-	
+
+	// warden has been taken old orders stand!
+	kill_handle(global_ctx.command_end_timer);
+
 	if(BaseComm_IsClientMuted(client))
 	{
 		PrintToChatAll("%s Warden %N is muted\n",WARDEN_PREFIX,client);
@@ -960,6 +967,15 @@ public set_warden(int client)
 	// set the warden with special color
 	SetEntityRenderColor(global_ctx.warden_id, 0, 191, 0, 255);
 
+}
+
+public Action warden_command_end(Handle timer)
+{
+	global_ctx.command_end_timer = null;
+
+	PrintToChatAll("%s %d seconds have passed! Previous orders are no longer valid...",WARDEN_PREFIX,warden_command_end_delay);
+
+	return Plugin_Continue;
 }
 
 public Action player_death(Handle event, const String:name[], bool dontBroadcast) 
@@ -977,6 +993,11 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 	// if its the warden we need to remove him
 	if(client == global_ctx.warden_id)
 	{
+		if(warden_command_end_delay != 0)
+		{
+			global_ctx.command_end_timer = CreateTimer(float(warden_command_end_delay),warden_command_end);
+		}
+
 		remove_warden();
 	}
 

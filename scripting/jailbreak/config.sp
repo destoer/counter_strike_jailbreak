@@ -23,6 +23,7 @@ ConVar handicap_enable_cvar;
 ConVar warden_ring_cvar;
 ConVar ct_primary_cvar;
 ConVar ct_secondary_cvar;
+ConVar warden_command_end_delay_cvar;
 
 #define PREFIX_SIZE 128
 
@@ -57,6 +58,9 @@ bool handicap_enable;
 
 bool warden_ring;
 
+int warden_command_end_delay = 0;
+
+
 void create_jb_convar()
 {
     // css
@@ -90,6 +94,8 @@ void create_jb_convar()
     warday_gun_cvar = CreateConVar("jb_warday_guns","1","enable the warday guns");
 
     admin_laser_cvar = CreateConVar("jb_admin_laser","0","enable admin laser");
+
+    warden_command_end_delay_cvar = CreateConVar("warden_command_end_delay","0","delay for print to say orders are no longer active");
 
     AutoExecConfig(true,"jail","jail");
 }
@@ -159,4 +165,6 @@ void setup_jb_convar()
 
     ct_primary_cvar.GetString(CT_PRIMARY,WEAPON_SIZE);
     ct_secondary_cvar.GetString(CT_SECONDARY,WEAPON_SIZE);
+    
+    warden_command_end_delay = GetConVarInt(warden_command_end_delay_cvar);
 }
