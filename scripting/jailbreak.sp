@@ -112,7 +112,6 @@ void reset_context()
 
 	global_ctx.warden_id = WARDEN_INVALID;
 	global_ctx.ct_handicap = false;
-	global_ctx.spawn_block_override = false;
 
 	global_ctx.warday_active = false;
 
@@ -134,6 +133,7 @@ void init_context()
 
 	global_ctx.warday_round_counter = 0;
 
+	global_ctx.spawn_block_override = false;
 	global_ctx.lenny_rand = 0;
 	global_ctx.lenny_count = 0;
 }
@@ -1119,6 +1119,9 @@ public Action round_end(Handle event, const String:name[], bool dontBroadcast)
 
 	kill_handle(tmp_mute_timer);
 
+	// only reset this here and not in round start
+	// otherwhise it will clobber it, as spawns happen before
+	// the start
 	global_ctx.spawn_block_override = false;
 
 	// reset the mute cooldown for new round
@@ -1157,6 +1160,11 @@ public Action round_start(Handle event, const String:name[], bool dontBroadcast)
 		{
 			jb_enable_block_all();
 		}
+	}
+
+	else
+	{
+		jb_disable_block_all();
 	}
 
 	int ct_count = GetTeamClientCount(CS_TEAM_CT);
