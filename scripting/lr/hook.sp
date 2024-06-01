@@ -105,6 +105,10 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 
     if(alive_t == (LR_SLOTS / 2) && !lr_ready && GetClientTeam(victim) == CS_TEAM_T && lr_cvar.IntValue == 1)
     {
+        // inform that lr is now enabled
+        Call_StartForward(lr_enabled_forward);
+        Call_Finish(unused);
+
         lr_ready = true;
         PrintToChatAll("%s Last request is now ready type !lr",LR_PREFIX);
 

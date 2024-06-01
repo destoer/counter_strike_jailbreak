@@ -80,6 +80,10 @@ enum struct Context
 
 	bool laser_kill;
 
+	bool first_warden;
+
+	Handle warden_to_lr_forward;
+
 	// 2048 / 32
 	// bitset weapon picked up this round
 	int weapon_picked[64];
@@ -123,6 +127,8 @@ void reset_context()
 	{
 		global_ctx.weapon_picked[i] = 0;
 	}
+
+	global_ctx.first_warden = true;
 
 	kill_handle(global_ctx.command_end_timer);
 }
@@ -225,6 +231,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	MarkNativeAsOptional("sd_current_state");
 	MarkNativeAsOptional("sd_current_day");
 	MarkNativeAsOptional("in_lr");
+
+	global_ctx.warden_to_lr_forward = CreateGlobalForward("OnWardenToLR",ET_Ignore,Param_Cell);
 
 	return APLRes_Success;
 }
@@ -1235,7 +1243,7 @@ public Action fire_warden(client, args)
 	return Plugin_Handled;
 }
 
-public remove_warden()
+public void remove_warden()
 {
 	// no warden do nothing
 	if(global_ctx.warden_id == WARDEN_INVALID)
@@ -1243,6 +1251,8 @@ public remove_warden()
 		return;
 	}
 	
+	global_ctx.first_warden = false;
+
 	// make sure any tmp mutes get cleared
 	unmute_all(false);
 
@@ -1257,9 +1267,26 @@ public remove_warden()
 	global_ctx.warden_id = WARDEN_INVALID;
 }
 
+public void OnLREnabled() 
+{
+	if(is_valid_client(global_ctx.warden_id) && global_ctx.first_warden)
+	{
+		// inform that lr is now enabled
+		Call_StartForward(global_ctx.warden_to_lr_forward);
+		Call_PushCell(global_ctx.warden_id);
+		int unused;
+		Call_Finish(unused);
+	}
+}
+
+public void OnWardenToLR(int client)
+{
+	PrintToChatAll("%s %N Was warden till LR!",WARDEN_PREFIX,client);
+}
+
 void set_rebel(int client)
 {
-	if(!global_ctx.warday_active && !in_lr(client))
+	if(!global_ctx.warday_active && !is_in_lr(client))
 	{
 		players[client].rebel = true;
 	}
@@ -1274,7 +1301,7 @@ public Action take_damage(victim, &attacker, &inflictor, &Float:damage, &damaget
 		char weapon[64];
 		GetClientWeapon(attacker, weapon, sizeof(weapon) - 1);
 
-		if(global_ctx.ct_handicap && !in_lr(attacker) && (StrEqual(weapon,"weapon_knife") || StrEqual(weapon,"weapon_awp")))
+		if(global_ctx.ct_handicap && !is_in_lr(attacker) && (StrEqual(weapon,"weapon_knife") || StrEqual(weapon,"weapon_awp")))
 		{
 			// up damage to account for ct handicap
 			damage = damage * 1.3;

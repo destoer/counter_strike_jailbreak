@@ -35,29 +35,7 @@ public Plugin:myinfo =
 
 #define LR_PREFIX "\x04[Last Request]\x07F8F8FF"
 
-
-enum lr_type
-{
-    knife_fight,
-    dodgeball,
-    grenade,
-    no_scope,
-    gun_toss,
-    crash,
-    shot_for_shot,
-    mag_for_mag,
-    shotgun_war,
-    russian_roulette,
-    headshot_only,
-    sumo,
-    scout_knife,
-    custom,
-    rebel,
-    knife_rebel,
-
-    // this is an invalid entry if we get this we have trouble
-    slot_error,
-}
+#include "lr/lr.inc"
 
 const int LR_SIZE = 17;
 #define LR_SIZE_ACTUAL 16
@@ -220,6 +198,9 @@ Handle SetCollisionGroup;
 
 int start_timestamp = 0;
 
+Handle lr_win_forward = null;
+Handle lr_enabled_forward = null;
+
 public int WeaponHandler(Menu menu, MenuAction action, int client, int param2) 
 {
 	if(action == MenuAction_Select) 
@@ -293,7 +274,7 @@ void reset_use_key()
 	}
 }
 
-public int native_in_lr(Handle plugin, int num_param)
+public int native_is_in_lr(Handle plugin, int num_param)
 {
     int client = GetNativeCell(1);
     return in_lr(client);
@@ -303,9 +284,19 @@ public int native_in_lr(Handle plugin, int num_param)
 // register our call
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-    CreateNative("in_lr", native_in_lr);
+    CreateNative("is_in_lr", native_is_in_lr);
+
+    lr_win_forward = CreateGlobalForward("OnWinLR",ET_Ignore,Param_Cell,Param_Cell);
+    lr_enabled_forward = CreateGlobalForward("OnLREnabled",ET_Ignore);
+
 
     return APLRes_Success;
+}
+
+
+public void OnWinLR(int client, lr_type type) 
+{
+    PrintToConsole(client,"You won the lr!");
 }
 
 #undef REQUIRE_PLUGIN

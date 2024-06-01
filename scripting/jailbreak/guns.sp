@@ -140,7 +140,7 @@ public Action:Command_Drop(int client, const char[] command, int args)
 		}
 
 		// allow drop in lr
-		if(!in_lr(client))
+		if(!is_in_lr(client))
 		{
 			return Plugin_Handled;
 		}

@@ -264,6 +264,14 @@ void lr_win(int client, lr_type type)
     int idx = view_as<int>(type);
     stats[client].lr_win[idx] += 1;
 
+    // inform clients of lr win!
+    Call_StartForward(lr_win_forward);
+    Call_PushCell(client);
+    Call_PushCell(type);
+    int unused;
+    Call_Finish(unused);
+    
+
     win_db(client,type);
 }
 
