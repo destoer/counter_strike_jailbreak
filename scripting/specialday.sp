@@ -123,6 +123,8 @@ enum struct Context
 	// set back to invalid on endsd to make sure we set it properly for each sd
 	SD_INIT_FUNC player_init;
 
+	Handle sd_win_forward;
+
 	bool sd_init_failure;
 
 	// how long till sd starts?
@@ -409,6 +411,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 	CreateNative("sd_current_state", native_sd_state);
 	CreateNative("sd_current_day", native_current_day);
+
+	global_ctx.sd_win_forward = CreateGlobalForward("OnWinSD",ET_Ignore,Param_Cell,Param_Cell);
+
 	return APLRes_Success;
 }
 
@@ -917,10 +922,20 @@ void EndSd(bool forced=false)
 	// give winner creds
 	if(store && !forced)
 	{
-		if(global_ctx.sd_winner != -1 && check_command_exists("sm_store"))
+		if(global_ctx.sd_winner != -1)
 		{
-			Store_SetClientCredits(global_ctx.sd_winner, Store_GetClientCredits(global_ctx.sd_winner)+20);
-			PrintToChat(global_ctx.sd_winner,"%s you won 20 credits for winning the sd!",SPECIALDAY_PREFIX)
+			if(check_command_exists("sm_store"))
+			{
+				Store_SetClientCredits(global_ctx.sd_winner, Store_GetClientCredits(global_ctx.sd_winner)+20);
+				PrintToChat(global_ctx.sd_winner,"%s you won 20 credits for winning the sd!",SPECIALDAY_PREFIX);
+			}
+
+			// inform clients of sd win!
+			Call_StartForward(global_ctx.sd_win_forward);
+			Call_PushCell(global_ctx.sd_winner);
+			Call_PushCell(global_ctx.special_day);
+			int unused;
+			Call_Finish(unused);
 		}
 	}
 

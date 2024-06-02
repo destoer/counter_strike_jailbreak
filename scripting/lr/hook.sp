@@ -54,7 +54,7 @@ public Action OnRoundEnd(Handle event, const String:name[], bool dontBroadcast)
 
             if(won)
             {
-                lr_win(player,type);
+                lr_win(player,-1,type);
             }
 
             else
@@ -87,7 +87,7 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
             int partner = slots[slot.partner].client;
 
             lr_lose(victim,slot.type);
-            lr_win(partner,slot.type);
+            lr_win(partner,victim,slot.type);
 
             int idx = view_as<int>(slot.type);
 

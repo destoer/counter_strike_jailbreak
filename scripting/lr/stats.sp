@@ -259,7 +259,7 @@ void lose_db(int client, lr_type type)
     SQL_TQuery(database,T_QueryGeneric,query,client);  
 }
 
-void lr_win(int client, lr_type type)
+void lr_win(int client,int partner, lr_type type)
 {
     int idx = view_as<int>(type);
     stats[client].lr_win[idx] += 1;
@@ -267,6 +267,7 @@ void lr_win(int client, lr_type type)
     // inform clients of lr win!
     Call_StartForward(lr_win_forward);
     Call_PushCell(client);
+    Call_PushCell(partner);
     Call_PushCell(type);
     int unused;
     Call_Finish(unused);

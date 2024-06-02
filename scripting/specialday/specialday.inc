@@ -39,6 +39,8 @@ enum SdState
 native SdState sd_current_state();
 native SpecialDay sd_current_day();
 
+forward void OnWinSD(int client, SpecialDay type);
+
 
 #define ROUND_WARDEN_SD 50
 #define ROUND_STACK_LIM 1

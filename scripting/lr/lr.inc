@@ -29,7 +29,35 @@ enum lr_type
 }
 
 
+const int LR_SIZE = 17;
+#define LR_SIZE_ACTUAL 16
+new const String:lr_list[LR_SIZE][] =
+{	
+    "Knife fight",
+    "Dodgeball",
+    "Nade war",
+    "No scope",
+    "Gun toss",
+    "Crash",
+    "Shot for shot",
+    "Mag for Mag",
+    "Shotgun war",
+    "Russian roulette",
+    "Headshot only",
+    "Sumo",
+    "Scout knife",
+    "Custom",
+    "Rebel",
+    "Knife rebel",
+    "Error"
+/*
+    "Race",
+    "Rock paper scissors",
+*/
+};
+
 native bool is_in_lr(int client);
 
-forward void OnWinLR(int client, lr_type type);
+// NOTE: partner may not be valid
+forward void OnWinLR(int client,int partner, lr_type type);
 forward void OnLREnabled(int client);

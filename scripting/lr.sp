@@ -37,32 +37,6 @@ public Plugin:myinfo =
 
 #include "lr/lr.inc"
 
-const int LR_SIZE = 17;
-#define LR_SIZE_ACTUAL 16
-new const String:lr_list[LR_SIZE][] =
-{	
-    "Knife fight",
-    "Dodgeball",
-    "Nade war",
-    "No scope",
-    "Gun toss",
-    "Crash",
-    "Shot for shot",
-    "Mag for Mag",
-    "Shotgun war",
-    "Russian roulette",
-    "Headshot only",
-    "Sumo",
-    "Scout knife",
-    "Custom",
-    "Rebel",
-    "Knife rebel",
-    "Error"
-/*
-    "Race",
-    "Rock paper scissors",
-*/
-};
 
 new const String:lr_win_field[LR_SIZE_ACTUAL][] =
 {	
@@ -294,9 +268,17 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 }
 
 
-public void OnWinLR(int client, lr_type type) 
+public void OnWinLR(int client,int rival, lr_type type) 
 {
-    PrintToConsole(client,"You won the lr!");
+    if(is_valid_client(rival))
+    {
+        PrintToConsole(client,"You won the lr against %N!",rival);
+    }
+
+    else
+    {
+        PrintToConsole(client,"You won the lr!");
+    }
 }
 
 #undef REQUIRE_PLUGIN
