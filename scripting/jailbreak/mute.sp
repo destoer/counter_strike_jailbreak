@@ -21,6 +21,12 @@ void mute_t()
 
 public Action mute_death(Handle timer, int client)
 {
+    // Ignore mute during SD
+    if(sd_enabled() && sd_current_state() != sd_inactive)
+    {
+        return Plugin_Continue;
+    }
+
     if(is_valid_client(client))
     {
         PrintToChat(client,"%s You are muted until the start of the round\n",JB_PREFIX);
