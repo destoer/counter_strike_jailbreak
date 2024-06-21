@@ -21,8 +21,10 @@ new const SHOT_FOR_SHOT_MAG_SIZE[SHOT_FOR_SHOT_WEAPON_SIZE] =
 
 void shot_for_shot_player_init(int id, bool mag)
 {
+
     int client = slots[id].client;
 
+    SetEntityHealth(client,100); 
     strip_all_weapons(client); // remove all the players weapons
     
     SetEntProp(client, Prop_Data, "m_ArmorValue", 0.0);
