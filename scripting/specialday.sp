@@ -1230,8 +1230,6 @@ public CreateKnockBack(int client, int attacker, float damage)
 	set_player_velocity(client,new_vel);
 }
 
-
-
 public BalTeams()
 {
     int unused = 0;

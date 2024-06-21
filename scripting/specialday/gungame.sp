@@ -134,6 +134,7 @@ void gungame_death(int attacker, int victim)
 			
 			// renable loss conds
 			enable_round_end();
+			PrintCenterTextAll("%N won gungame",  attacker);
 			PrintToChatAll("%s %N won gungame", SPECIALDAY_PREFIX, attacker);
 			
 			

@@ -55,6 +55,7 @@ void end_deathmatch()
 	
 	if(IsClientConnected(cli) && IsClientInGame(cli) && is_on_team(cli))
 	{
+		PrintCenterTextAll("%N won deathmatch",  cli);
 		PrintToChatAll("%s %N won deathmatch", SPECIALDAY_PREFIX, cli);
 	}
 	global_ctx.sd_winner = cli;

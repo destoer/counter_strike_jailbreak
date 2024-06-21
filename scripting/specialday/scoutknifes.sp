@@ -56,6 +56,7 @@ void end_scout()
 	
 	if(IsClientConnected(cli) && IsClientInGame(cli) && is_on_team(cli))
 	{
+		PrintCenterTextAll("%N won scoutknifes", cli);
 		PrintToChatAll("%s %N won scoutknifes", SPECIALDAY_PREFIX, cli);
 	}
 	global_ctx.sd_winner = cli;
