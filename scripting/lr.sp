@@ -260,7 +260,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 {
     CreateNative("is_in_lr", native_is_in_lr);
 
-    lr_win_forward = CreateGlobalForward("OnWinLR",ET_Ignore,Param_Cell,Param_Cell);
+    lr_win_forward = CreateGlobalForward("OnWinLR",ET_Ignore,Param_Cell,Param_Cell,Param_Cell);
     lr_enabled_forward = CreateGlobalForward("OnLREnabled",ET_Ignore);
 
 
@@ -611,6 +611,11 @@ void init_slot(int id, int client, int partner, lr_type type, int option)
 
 public Action start_lr_callback(Handle timer, int id)
 {
+    if(!slots[id].active)
+    {
+        slots[id].timer = null;
+        return Plugin_Handled;
+    }
 
     // by convention the t triggers the lr
     int t_slot = id;

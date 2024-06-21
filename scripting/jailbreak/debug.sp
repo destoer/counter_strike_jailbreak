@@ -136,7 +136,7 @@ public Action is_stuck_cmd(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	PrintToChat(client,"%s stuck %s",JB_PREFIX,is_stuck_in_player(client)? "true" : "false");
+	PrintToChat(client,"%s stuck %s , %s",JB_PREFIX,is_stuck_in_player(client)? "true" : "false",is_player_stuck(client)? "true" : "false");
 	
 	return Plugin_Continue;		
 }

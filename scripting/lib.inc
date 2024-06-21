@@ -685,6 +685,30 @@ stock bool is_ent_stuck_in_player(int entity,float origin[3], float min[3], floa
 	return TR_DidHit();
 }
 
+// https://forums.alliedmods.net/showthread.php?t=182953
+stock bool trace_ray_dont_hit_player_and_world(int entityhit, int mask) 
+{
+    return entityhit>MaxClients
+}
+
+stock bool is_player_stuck(int client)
+{
+	if(!is_valid_client(client))
+	{
+		return false;
+	}
+
+	float min[3]; float max[3]; float origin[3];
+
+	GetClientMins(client, min);
+	GetClientMaxs(client, max);
+
+	GetClientAbsOrigin(client, origin);
+
+	TR_TraceHullFilter(origin, origin, min, max, MASK_PLAYERSOLID, trace_ray_dont_hit_player_and_world);
+	return TR_DidHit();
+}
+
 
 stock bool is_stuck_in_player(int client)
 {

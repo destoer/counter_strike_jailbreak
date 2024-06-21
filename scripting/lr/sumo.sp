@@ -78,6 +78,14 @@ void sumo_startup(int t_slot, int ct_slot)
 
     // teleport ct
     TeleportEntity(slots[ct_slot].client,slots[t_slot].pos,NULL_VECTOR,NULL_VECTOR);
+
+    if(is_player_stuck(slots[ct_slot].client))
+    {
+        CS_RespawnPlayer(slots[ct_slot].client);
+        PrintToChatAll("%s CT is stuck, ending LR",LR_PREFIX);
+        end_lr_pair(t_slot,ct_slot);
+    }
+
 }
 
 void start_sumo(int t_slot, int ct_slot)
