@@ -201,6 +201,9 @@ native int CTBan_GetTimeRemaining(int iClient);
  */
 native bool CTBan_GetOverrideStatus(int iClient);
 
+// custom override setter
+native bool CTBan_SetGlobalOverride(bool override);
+
 /**
  * Retrieve information on a CT Ban based on client index. The results are returned in the CTBan_GetBanInfoReturn forward.
  * The matching client index will be returned in the CTBan_GetBanInfoReturn forward.

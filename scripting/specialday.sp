@@ -406,6 +406,11 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 		MarkNativeAsOptional("CTBan_IsClientBanned");
 	}
 
+	if(ct_ban_override)
+	{
+		MarkNativeAsOptional("CTBan_SetGlobalOverride");
+	}
+
 	MarkNativeAsOptional("get_warden_id");
 	MarkNativeAsOptional("remove_warden");
 
@@ -884,6 +889,12 @@ int get_client_max_kills()
 
 void EndSd(bool forced=false)
 {
+	if(ct_ban_override)
+	{
+		// disable ct ban exception
+		CTBan_SetGlobalOverride(false);
+	}
+
 	// no sd running we dont need to do anything
 	if(global_ctx.sd_state == sd_inactive)
 	{
@@ -1378,7 +1389,10 @@ public int sd_select(int client, int sd)
 		return -1;
 	}
 
-
+	if(ct_ban_override)
+	{
+		CTBan_SetGlobalOverride(true);
+	}
 
 	global_ctx.sd_timer = SD_DELAY;
 
