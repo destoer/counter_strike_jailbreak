@@ -56,3 +56,6 @@ which uses SetCollisionGroup rather than SetEntProp to prevent physics breaking
     //"timeout"			"0"
     //"port"			"0"
 }
+
+# credits
+Ships with modified ct bans by databomb and markers by shavit see thirdparty for source code!
