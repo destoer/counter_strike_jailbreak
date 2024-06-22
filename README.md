@@ -57,5 +57,18 @@ which uses SetCollisionGroup rather than SetEntProp to prevent physics breaking
     //"port"			"0"
 }
 
+
+"cell_door"
+{
+    "driver"			"default"
+    "host"				"127.0.0.1"
+    "database"			"cell_door"
+    "user"				"root"
+    "pass"				"boop"
+    //"timeout"			"0"
+    "port"			    "3306"
+}
+
+
 # credits
 Ships with modified ct bans by databomb and markers by shavit see thirdparty for source code!
