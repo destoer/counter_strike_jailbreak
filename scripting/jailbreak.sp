@@ -84,6 +84,8 @@ enum struct Context
 
 	Handle warden_to_lr_forward;
 
+	int cell_door_hammer_id;
+
 	// 2048 / 32
 	// bitset weapon picked up this round
 	int weapon_picked[64];
@@ -138,6 +140,7 @@ void init_context()
 	reset_context();
 
 	global_ctx.warday_round_counter = 0;
+	global_ctx.cell_door_hammer_id = -1;
 
 	global_ctx.spawn_block_override = false;
 	global_ctx.lenny_rand = 0;
@@ -193,6 +196,7 @@ void reset_player(int client)
 #include "jailbreak/warday.sp"
 #include "jailbreak/circle.sp"
 #include "jailbreak/mute.sp"
+#include "jailbreak/door_control.sp"
 
 
 
@@ -405,6 +409,8 @@ public OnMapStart()
 	}
 
 	mute_timer = null;
+
+	database_connect();
 
 	// enable a warday on map start
 	global_ctx.warday_round_counter = WARDAY_ROUND_COUNT;	
@@ -635,6 +641,9 @@ public OnPluginStart()
 
 	RegConsoleCmd("wcommands",warden_commands);
 	
+	RegConsoleCmd("open_cell",force_cell_doors_cmd);
+	RegAdminCmd("set_cell_button",set_cell_button_cmd,ADMFLAG_KICK);
+
 	// hooks
 	HookEvent("round_start", round_start); // For the round start
 	HookEvent("round_end", round_end); // For the round start
@@ -643,6 +652,8 @@ public OnPluginStart()
 	HookEvent("player_team", player_team);
 	HookEvent("weapon_fire",OnWeaponFire,EventHookMode_Post);
 	
+	HookEntityOutput("func_button", "OnPressed", OnButtonPressed);
+
 	AddCommandListener(Command_Drop, "drop");
 
 	// create a timer for a the warden text
@@ -1131,6 +1142,7 @@ public Action round_end(Handle event, const String:name[], bool dontBroadcast)
 		unmute_all(true);
 	}
 
+	kill_handle(cell_auto_timer);
 	kill_handle(tmp_mute_timer);
 
 	// only reset this here and not in round start
@@ -1153,6 +1165,14 @@ public Action round_end(Handle event, const String:name[], bool dontBroadcast)
 
 public Action round_start(Handle event, const String:name[], bool dontBroadcast) 
 {
+	// setup auto open
+	if(global_ctx.cell_door_hammer_id != -1)
+	{
+		PrintToChatAll("%s Auto opening cell doors in 30 seconds",JB_PREFIX);
+		PrintCenterTextAll("Auto opening cell doors in 30 seconds");
+		cell_auto_timer = CreateTimer(30.0,auto_open_cell_callback);
+	}
+
 	enable_lr();
 
 	reset_context();
