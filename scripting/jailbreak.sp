@@ -988,6 +988,12 @@ public Action warden_command_end(Handle timer)
 
 public Action player_death(Handle event, const String:name[], bool dontBroadcast) 
 {
+	// we don't care about this on SD
+	if(sd_enabled() && sd_current_state() != sd_inactive)
+	{
+		return Plugin_Continue;
+	}
+
 	int client = GetClientOfUserId(GetEventInt(event, "userid")); // Get the dead clients id
 	int attacker = GetClientOfUserId(GetEventInt(event, "attacker")); // Get the dead clients id
 
