@@ -944,6 +944,7 @@ public print_warden_commands(int client)
 
 	PrintToChat(client,"%s!color           %s- %scolor players'",color1,color2,color3);	
 	PrintToChat(client,"%s!reset_color           %s- %sreset player colors'",color1,color2,color3);	
+	PrintToChat(client,"%s!open_cell           %s- %sopen cell doors'",color1,color2,color3);	
 	
 
 }
