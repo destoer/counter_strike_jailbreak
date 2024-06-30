@@ -10,6 +10,7 @@ ConVar standalone_cvar;
 ConVar freeze_cvar;
 ConVar lr_cvar;
 ConVar sd_delay_cvar;
+ConVar map_time_minute_restrict_cvar;
 
 
 bool ct_ban;
@@ -19,6 +20,7 @@ bool gangs;
 bool standalone;
 bool freeze;
 bool lr;
+int map_time_minute_restrict = 4;
 
 int SD_DELAY = 15;
 
@@ -39,6 +41,7 @@ void create_sd_convar()
     sd_delay_cvar = CreateConVar("sd_delay","15","How long before an sd starts");
     standalone_cvar = CreateConVar("sd_standalone","0","make plugin operate without jailbreak");
     freeze_cvar = CreateConVar("sd_freeze","0","enable freeze commands");
+    map_time_minute_restrict_cvar = CreateConVar("sd_map_minute_restrict","4","How many minutes left in map before sd is enabled (0 allways enabled)");
     lr_cvar = CreateConVar("sd_lr","1","disable lr on sd");
 
     AutoExecConfig(true,"specialday","jail");
@@ -74,4 +77,5 @@ void setup_sd_convar()
     freeze = GetConVarInt(freeze_cvar) > 0;  
     lr = GetConVarInt(lr_cvar) > 0;  
     SD_DELAY = GetConVarInt(sd_delay_cvar);
+    map_time_minute_restrict = GetConVarInt(map_time_minute_restrict_cvar);
 }

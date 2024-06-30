@@ -1127,9 +1127,34 @@ public Action command_warden_special_day_ff(int client,int args)
 	return Plugin_Continue;
 }
 
+bool is_time_restricted(int client) 
+{
+	// no restriction
+	if(map_time_minute_restrict == 0)
+	{
+		return false;
+	}
+
+	int time_left = 0;
+	GetMapTimeLeft(time_left);
+
+	if(time_left > map_time_minute_restrict	* 60)
+	{
+		PrintToChat(client,"%s SD can only be started in last 4 minutes of the round",SPECIALDAY_PREFIX)
+		return true;
+	}
+
+	return false;
+}
+
 // TODO: maybe expand this into an options menu
 public Action command_ff_special_day(int client, int args)
 {
+	if(is_time_restricted(client))
+	{
+		return Plugin_Handled;
+	}
+
 	PrintToChatAll("%s Special day started (friendly fire enabled)", SPECIALDAY_PREFIX);
 	enable_friendly_fire();
 
@@ -1142,6 +1167,11 @@ public Action command_ff_special_day(int client, int args)
 
 public Action command_special_day(int client,int args)  
 {
+	if(is_time_restricted(client))
+	{
+		return Plugin_Handled;
+	}
+
 	PrintToChatAll("%s Special day started", SPECIALDAY_PREFIX);
 
 	// open a selection menu for 20 seconds
