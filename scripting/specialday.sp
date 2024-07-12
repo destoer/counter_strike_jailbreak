@@ -1002,7 +1002,10 @@ public Menu build_sd_menu(MenuHandler handler)
 
 	for (int i = 0; i < SD_SIZE; i++)
 	{
-		menu.AddItem(sd_list[i], sd_list[i]);
+		if(sd_enable[i])
+		{
+			menu.AddItem(sd_list[i], sd_list[i]);
+		}
 	}
 	menu.SetTitle("Special Days");
 	return menu;
@@ -1397,7 +1400,19 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 {
 	if(action == MenuAction_Select)
 	{
-		return sd_select(client,param2);
+		char item[64];
+		menu.GetItem(param2, item, sizeof(item));
+
+		// scan for the right SD
+		for(int i = 0; i < SD_SIZE; i++)
+		{
+			if(StrEqual(sd_list[i],item))
+			{
+				return sd_select(client,i);
+			}
+		}
+
+		PrintToChat(client,"%s Invalid sd selected",SPECIALDAY_PREFIX);
 	}
 	
 	else if (action == MenuAction_Cancel) 
