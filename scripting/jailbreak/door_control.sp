@@ -5,9 +5,11 @@ int get_hammer_id(int entity)
     return GetEntProp(entity, Prop_Data, "m_iHammerID");
 }
 
+bool fake_press = false;
+
 public void OnButtonPressed(const char[] output, int button, int activator, float delay)
 {
-    if(!IsValidEntity(button))
+    if(!IsValidEntity(button) || fake_press)
     {
         return;
     }
@@ -17,16 +19,22 @@ public void OnButtonPressed(const char[] output, int button, int activator, floa
 
 
     // button log
-    if(is_valid_client(activator))
-    {
-        for(int i = 1; i <= MaxClients; i++)
-        {   
-            if(is_valid_client(i))
+    for(int i = 1; i <= MaxClients; i++)
+    {   
+        if(is_valid_client(i))
+        {
+            if(is_valid_client(activator))
             {
                 PrintToConsole(i,"[BUTTON LOG]: %N Pushed %d %d '%s'",activator,button,get_hammer_id(button),name);
             }
+
+            else 
+            {
+                PrintToConsole(i,"[BUTTON LOG]: invalid ent %d Pushed %d %d '%s'",activator,button,get_hammer_id(button),name);
+            }
         }
     }
+    
 }
 
 void force_cell_doors()
@@ -42,12 +50,23 @@ void force_cell_doors()
     {
         if (get_hammer_id(entity) == global_ctx.cell_door_hammer_id)
         {
-            AcceptEntityInput(entity,"Use");
-            PrintCenterTextAll("Opening cell doors");
-            PrintToChatAll("%s Opening cell doors",JB_PREFIX);
-            return;
+            for(int i = 1; i <= MaxClients; i++) 
+            {
+                // Find a player to fake press this button 
+                if(is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT)
+                {
+                    fake_press = true;
+                    AcceptEntityInput(entity,"Use",1);
+                    PrintCenterTextAll("Opening cell doors");
+                    PrintToChatAll("%s Opening cell doors",JB_PREFIX);  
+                    fake_press = false;
+                    return;  
+                }
+            }
         }
     }
+
+    PrintToChatAll("%s No CT to fake press the cell button\n", JB_PREFIX);
 }
 
 public Action auto_open_cell_callback(Handle timer)
