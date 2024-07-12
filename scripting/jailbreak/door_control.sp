@@ -42,7 +42,7 @@ void force_cell_doors()
     {
         if (get_hammer_id(entity) == global_ctx.cell_door_hammer_id)
         {
-            AcceptEntityInput(entity,"Press");
+            AcceptEntityInput(entity,"Use");
             PrintCenterTextAll("Opening cell doors");
             PrintToChatAll("%s Opening cell doors",JB_PREFIX);
             return;
@@ -133,6 +133,9 @@ public void T_Connect(DBDriver driver,Database db, const char[] error, any data)
 
     else if(db)
     {
+        // active setup db, just grab the door
+        setup_door_id();
+
         delete db;
         return;
     }
