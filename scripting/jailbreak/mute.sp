@@ -57,9 +57,9 @@ public Action tmp_warden_mute(int client, int args)
     }
 
     // make sure we are actually the warden
-    if(client != global_ctx.warden_id)
+    if(client != global_ctx.warden_id && !is_admin(client))
     {
-        PrintToChat(client,"%s You must be the warden to use !wm",WARDEN_PREFIX);
+        PrintToChat(client,"%s You must be the warden or admin to use !wm",WARDEN_PREFIX);
         return Plugin_Continue;
     }
 
