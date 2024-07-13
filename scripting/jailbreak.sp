@@ -143,8 +143,6 @@ void init_context()
 	global_ctx.cell_door_hammer_id = -1;
 
 	global_ctx.spawn_block_override = false;
-	global_ctx.lenny_rand = 0;
-	global_ctx.lenny_count = 0;
 }
 
 void init_player(int client)
@@ -546,6 +544,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 // init the plugin
 public OnPluginStart()
 {
+	global_ctx.lenny_count = 0;
 	global_ctx.lenny_rand = GetRandomInt(global_ctx.lenny_count,global_ctx.lenny_count + 10000);
 
 	create_jb_convar();
