@@ -63,10 +63,13 @@ void force_cell_doors()
                     return;  
                 }
             }
+
+            PrintToChatAll("%s No CT to fake press the cell button\n", JB_PREFIX);
+            return;
         }
     }
 
-    PrintToChatAll("%s No CT to fake press the cell button\n", JB_PREFIX);
+    PrintToChatAll("%s Could not find cell button\n", JB_PREFIX); 
 }
 
 public Action auto_open_cell_callback(Handle timer)

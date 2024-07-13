@@ -5,6 +5,7 @@ void race_player_init(int id)
 
     if(!is_valid_client(client))
     {
+        end_lr_pair(id,slots[id].partner);
         return;
     }
 
