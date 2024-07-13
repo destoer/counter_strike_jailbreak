@@ -271,12 +271,11 @@ public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &
                 return Plugin_Handled;
             }
         }
-    /*
+
         case race:
         {
             return Plugin_Handled;
-        }
-    */        
+        }    
     }
     
 
@@ -754,6 +753,19 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
             if(!intersects_circle_origin(slots[id].pos,SUMO_RADIUS,vec))
             {
                 ForcePlayerSuicide(slots[id].client);
+            }
+        }
+
+        case race:
+        {
+            float vec[3];
+            GetClientAbsOrigin(slots[id].client,vec);
+
+            // player is inside end, slay the other player
+            if(intersects_circle_origin(slots[id].race_end,RACE_RADIUS,vec))
+            {
+                int partner = slots[id].partner;
+                ForcePlayerSuicide(slots[partner].client);
             }
         }
     }

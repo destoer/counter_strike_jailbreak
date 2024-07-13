@@ -8,14 +8,13 @@ void sumo_player_init(int id)
 
     slots[id].weapon_string = "weapon_knife";
     
-    unblock_client(client,SetCollisionGroup);
-
     // unstuck the player
     PrintToChat(client,"%s Fight!",LR_PREFIX);
     SetEntityMoveType(client, MOVETYPE_WALK);
+    unblock_client(client,SetCollisionGroup);
 }
 
-float CIRCLE_TIMER = 0.1;
+float SUMO_CIRCLE_TIMER = 0.1;
 
 float SUMO_RADIUS = 215.0;
 
@@ -28,7 +27,7 @@ public Action draw_circle(Handle timer, int id)
         return Plugin_Stop;
     }
 
-    TE_SetupBeamRingPoint(slots[id].pos, SUMO_RADIUS, SUMO_RADIUS + 0.1, g_lbeam, g_lhalo, 0, 5, CIRCLE_TIMER, 5.2, 0.0, { 1, 153, 255, 255 }, 1000, 0);
+    TE_SetupBeamRingPoint(slots[id].pos, SUMO_RADIUS, SUMO_RADIUS + 0.1, g_lbeam, g_lhalo, 0, 5, SUMO_CIRCLE_TIMER, 5.2, 0.0, { 1, 153, 255, 255 }, 1000, 0);
     TE_SendToAll();
 
     return Plugin_Continue;
@@ -64,7 +63,7 @@ void sumo_startup(int t_slot, int ct_slot)
         slots[ct_slot].pos[i] = slots[t_slot].pos[i];
     }
 
-    slots[t_slot].timer = CreateTimer(CIRCLE_TIMER,draw_circle,t_slot,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+    slots[t_slot].timer = CreateTimer(SUMO_CIRCLE_TIMER,draw_circle,t_slot,TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
     slots[ct_slot].timer = CreateTimer(28.0,enable_sumo_damage,ct_slot,TIMER_FLAG_NO_MAPCHANGE);
 
     float zero[3] = {0.0,0.0,0.0};

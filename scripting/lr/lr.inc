@@ -10,6 +10,7 @@ enum lr_type
     knife_fight,
     dodgeball,
     grenade,
+    race,
     no_scope,
     gun_toss,
     crash,
@@ -29,13 +30,14 @@ enum lr_type
 }
 
 
-const int LR_SIZE = 17;
-#define LR_SIZE_ACTUAL 16
+const int LR_SIZE = 18;
+#define LR_SIZE_ACTUAL 17
 new const String:lr_list[LR_SIZE][] =
 {	
     "Knife fight",
     "Dodgeball",
     "Nade war",
+    "Race",
     "No scope",
     "Gun toss",
     "Crash",

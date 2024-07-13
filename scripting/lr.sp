@@ -43,6 +43,7 @@ new const String:lr_win_field[LR_SIZE_ACTUAL][] =
     "Knife_fight_Win",
     "Dodgeball_Win",
     "Nade_war_Win",
+    "Race_Win",
     "No_scope_Win",
     "Gun_toss_Win",
     "Crash_Win",
@@ -64,6 +65,7 @@ new const String:lr_loss_field[LR_SIZE_ACTUAL][] =
     "Knife_fight_Loss",
     "Dodgeball_Loss",
     "Nade_war_Loss",
+    "Race_Loss",
     "No_scope_Loss",
     "Gun_toss_Loss",
     "Crash_Loss",
@@ -110,6 +112,9 @@ enum struct LrSlot
 
     bool failsafe;
 
+    float race_start[3];
+    float race_end[3];
+
     // this is the slot to our partner
     int partner;
 
@@ -140,6 +145,9 @@ enum struct Choice
     
     // basic menu option
     int option;
+
+    float race_start[3];
+    float race_end[3];
 }
 
 enum struct LrTimer
@@ -212,7 +220,7 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 #include "lr/russian_roulette.sp"
 #include "lr/headshot_only.sp"
 #include "lr/scout_knife.sp"
-//#include "lr/race.sp"
+#include "lr/race.sp"
 #include "lr/sumo.sp"
 #include "lr/rebel.sp"
 #include "lr/crash.sp"
@@ -718,12 +726,12 @@ public Action start_lr_callback(Handle timer, int id)
         {
             start_crash(t_slot,ct_slot);
         }
-/*
+
         case race:
         {
             start_race(t_slot,ct_slot);
         }
-*/
+
         case slot_error:
         {
             PrintToConsole(console,"%s An error has occured in picking an lr");
@@ -752,8 +760,11 @@ void start_lr_internal(int t, int ct, lr_type type)
     init_slot(ct_slot,ct,t_slot,type, lr_choice[t].option);
 
 
-    // only really need one of these to draw
-    start_line(t_slot);
+    // only really need one of these to draw, but don't do it on race its distracting
+    if(type != race)
+    {
+        start_line(t_slot);
+    }
 
     strip_all_weapons(t);
     strip_all_weapons(ct);
@@ -764,6 +775,11 @@ void start_lr_internal(int t, int ct, lr_type type)
         case sumo:
         {
             sumo_startup(t_slot,ct_slot);
+        }
+
+        case race:
+        {
+            race_startup(t_slot,ct_slot);
         }
 
         case crash:
@@ -1055,12 +1071,12 @@ public int lr_select(int client, int lr)
         {
             knife_fight_menu(client);
         }
-/*
+
         case race:
         {
             race_menu(client);
         }
-*/
+
         default:
         {
             pick_partner(client);            
