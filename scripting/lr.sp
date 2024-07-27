@@ -7,7 +7,7 @@
 #include "lib.inc"
 
 #define PLUGIN_AUTHOR "destoer(organ harvester)"
-#define PLUGIN_VERSION "V0.3.5 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V0.3.6 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -1091,7 +1091,19 @@ public int lr_handler(Menu menu, MenuAction action, int client, int param2)
 {
 	if(action == MenuAction_Select)
 	{
-		return lr_select(client,param2);
+		char item[64];
+		menu.GetItem(param2, item, sizeof(item));
+
+		// scan for the right LR
+		for(int i = 0; i < LR_SIZE; i++)
+		{
+			if(StrEqual(lr_list[i],item))
+			{
+				return lr_select(client,i);
+			}
+		}
+
+		PrintToChat(client,"%s Invalid sd selected",LR_PREFIX);
 	}
 	
 	else if (action == MenuAction_Cancel) 
@@ -1109,7 +1121,10 @@ public Menu build_lr_menu()
     // Ignore the error choice
 	for (int i = 0; i < LR_SIZE - 1; i++)
 	{
-		menu.AddItem(lr_list[i], lr_list[i]);
+		if(lr_enable[i])
+        {
+		    menu.AddItem(lr_list[i], lr_list[i]);
+        }
 	}
 
 	menu.SetTitle("Last Request");
