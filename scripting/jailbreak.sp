@@ -86,6 +86,8 @@ enum struct Context
 
 	int cell_door_hammer_id;
 
+	int warden_command_countdown;
+
 	// 2048 / 32
 	// bitset weapon picked up this round
 	int weapon_picked[64];
@@ -129,6 +131,8 @@ void reset_context()
 	{
 		global_ctx.weapon_picked[i] = 0;
 	}
+
+	global_ctx.warden_command_countdown = 0;
 
 	global_ctx.first_warden = true;
 
@@ -990,9 +994,20 @@ public set_warden(int client)
 
 public Action warden_command_end(Handle timer)
 {
-	global_ctx.command_end_timer = null;
+	global_ctx.warden_command_countdown -= 1;
+	if(global_ctx.warden_command_countdown <= 0)
+	{
+		global_ctx.command_end_timer = null;
 
-	PrintToChatAll("%s %d seconds have passed! Previous orders are no longer valid...",WARDEN_PREFIX,warden_command_end_delay);
+		PrintToChatAll("%s %d seconds have passed! Previous orders are no longer valid...",WARDEN_PREFIX,warden_command_end_delay);
+	}
+
+	else
+	{
+		PrintCenterTextAll("Wardens orders are no longer valid in %d seconds",global_ctx.warden_command_countdown);
+		global_ctx.command_end_timer = CreateTimer(1.0,warden_command_end);
+	}
+
 
 	return Plugin_Continue;
 }
@@ -1018,9 +1033,11 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 	// if its the warden we need to remove him
 	if(client == global_ctx.warden_id)
 	{
-		if(warden_command_end_delay != 0)
+		if(warden_command_end_delay > 0)
 		{
-			global_ctx.command_end_timer = CreateTimer(float(warden_command_end_delay),warden_command_end);
+			global_ctx.warden_command_countdown = warden_command_end_delay;
+			PrintCenterTextAll("Wardens orders are no longer valid in %d seconds",global_ctx.warden_command_countdown);
+			global_ctx.command_end_timer = CreateTimer(1.0,warden_command_end);
 		}
 
 		remove_warden();
