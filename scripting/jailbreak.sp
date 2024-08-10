@@ -201,6 +201,7 @@ void reset_player(int client)
 #include "jailbreak/door_control.sp"
 
 
+int g_ExplosionSprite = -1;
 
 public Plugin:myinfo = 
 {
@@ -379,6 +380,8 @@ public OnMapStart()
 
 	PrecacheSound("bot\\what_have_you_done.wav");
 	PrecacheSound("bot\\its_all_up_to_you_sir.wav");
+	PrecacheSound("ambient/explosions/explode_8.wav", true);
+	g_ExplosionSprite = PrecacheModel("sprites/sprite_fire01.vmt");
 	
 	// laser draw timer
 	CreateTimer(0.01, laser_draw, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
@@ -680,11 +683,45 @@ public OnPluginStart()
 			OnClientPutInServer(i);
 		}
 	}
-	
-	// Start a circle timer
-	PrecacheSound("bot\\what_have_you_done.wav");
-	
+
+	if(explode_kill_enable)
+	{
+		AddCommandListener(kill_command,"explode");
+		AddCommandListener(kill_command,"kill");
+	}
+
 	register_cookies();
+}
+
+
+
+void explode(int client)
+{
+	if(!is_valid_client(client))
+	{
+		return;
+	}
+
+	float origin[3];
+	GetClientAbsOrigin(client, origin);
+
+	EmitSoundToAll("ambient/explosions/explode_8.wav",SOUND_FROM_WORLD,SNDCHAN_AUTO,SNDLEVEL_NORMAL,SND_NOFLAGS,SNDVOL_NORMAL,SNDPITCH_NORMAL,-1,origin,NULL_VECTOR,true,0.0);
+	TE_SetupExplosion(origin, g_ExplosionSprite, 10.0, 1, 0, 600, 5000);
+	TE_SendToAll();
+	ForcePlayerSuicide(client);
+}
+
+public Action kill_command(int client, const char[] command, int args) 
+{
+	if(!is_valid_client(client) || !IsPlayerAlive(client))
+	{
+		return Plugin_Handled;
+	}
+
+	PrintToChatAll("%s %N exit(1);",JB_PREFIX,client);
+	explode(client);
+
+	return Plugin_Handled;
 }
 
 

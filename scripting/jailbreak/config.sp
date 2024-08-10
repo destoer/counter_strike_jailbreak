@@ -24,6 +24,7 @@ ConVar warden_ring_cvar;
 ConVar ct_primary_cvar;
 ConVar ct_secondary_cvar;
 ConVar warden_command_end_delay_cvar;
+ConVar explode_kill_cvar;
 
 #define PREFIX_SIZE 128
 
@@ -60,6 +61,7 @@ bool warden_ring;
 
 int warden_command_end_delay = 0;
 
+bool explode_kill_enable;
 
 void create_jb_convar()
 {
@@ -96,6 +98,8 @@ void create_jb_convar()
     admin_laser_cvar = CreateConVar("jb_admin_laser","0","enable admin laser");
 
     warden_command_end_delay_cvar = CreateConVar("warden_command_end_delay","0","delay for print to say orders are no longer active");
+
+    explode_kill_cvar = CreateConVar("explode_kill","0","create explosion when kill is used");
 
     AutoExecConfig(true,"jail","jail");
 }
@@ -167,4 +171,6 @@ void setup_jb_convar()
     ct_secondary_cvar.GetString(CT_SECONDARY,WEAPON_SIZE);
     
     warden_command_end_delay = GetConVarInt(warden_command_end_delay_cvar);
+
+    explode_kill_enable = GetConVarInt(explode_kill_cvar) > 0;
 }
