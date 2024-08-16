@@ -692,23 +692,37 @@ public void OnClientPutInServer(int client)
 }
 
 
-bool intersects_circle_origin(float origin[3], float radius, float pos[3])
+bool intersects_circle_origin(float origin[3], float radius, float pos[3], bool ignore_z)
 {
     float v2[3]
     float v1[3]
 
-    for(int i = 0; i < 2 ;i++)
+    for(int i = 0; i < 3; i++)
     {
         v1[i] = origin[i];
         v2[i] = pos[i];
     }
 
-    // ignore z
-    v2[2] = 0.0;
-    v1[2] = 0.0;
+    bool z_matches = false;
+
+    if(!ignore_z)
+    {
+        z_matches = FloatAbs(v1[2] - v2[2]) < 40.0;
+    }
+
+    else 
+    {
+        v1[2] = 0.0;
+        v2[2] = 0.0;
+        z_matches = true;
+    }
+
+
 
     // why is this / 2!?
-    return GetVectorDistance(v1, v2,false) <= radius / 2;
+    bool in_circle = GetVectorDistance(v1, v2,false) <= radius / 2;
+
+    return in_circle && z_matches;
 }
 
 public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon)
@@ -746,26 +760,32 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 
         case sumo:
         {
-            float vec[3];
-            GetClientAbsOrigin(slots[id].client,vec);
-
-            // player is outside of ring kill them
-            if(!intersects_circle_origin(slots[id].pos,SUMO_RADIUS,vec))
+            if(slots[id].state == lr_active)
             {
-                ForcePlayerSuicide(slots[id].client);
+                float vec[3];
+                GetClientAbsOrigin(slots[id].client,vec);
+
+                // player is outside of ring kill them
+                if(!intersects_circle_origin(slots[id].pos,SUMO_RADIUS,vec,true))
+                {
+                    ForcePlayerSuicide(slots[id].client);
+                }
             }
         }
 
         case race:
         {
-            float vec[3];
-            GetClientAbsOrigin(slots[id].client,vec);
-
-            // player is inside end, slay the other player
-            if(intersects_circle_origin(slots[id].race_end,RACE_RADIUS,vec))
+            if(slots[id].state == lr_active)
             {
-                int partner = slots[id].partner;
-                ForcePlayerSuicide(slots[partner].client);
+                float vec[3];
+                GetClientAbsOrigin(slots[id].client,vec);
+
+                // player is inside end, slay the other player
+                if(intersects_circle_origin(slots[id].race_end,RACE_RADIUS,vec,false))
+                {
+                    int partner = slots[id].partner;
+                    ForcePlayerSuicide(slots[partner].client);
+                }
             }
         }
     }

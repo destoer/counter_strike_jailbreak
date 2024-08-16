@@ -81,9 +81,16 @@ new const String:lr_loss_field[LR_SIZE_ACTUAL][] =
     "Knife_rebel_Loss",
 };
 
+enum lr_state 
+{
+    lr_inactive,
+    lr_starting,
+    lr_active,
+}
+
 enum struct LrSlot  
 {
-    bool active;
+    lr_state state;
     int client;
     lr_type type;
     int option;
@@ -433,7 +440,7 @@ void end_lr(LrSlot slot)
     }
 
     slot.type = slot_error;
-    slot.active = false;
+    slot.state = lr_inactive;
     slot.failsafe = false;
     slot.client = -1;
     slot.option = 0;
@@ -492,9 +499,9 @@ int get_inactive_slot()
 {
     for(int i = 0; i < LR_SLOTS; i++)
     {
-        if(!slots[i].active)
+        if(slots[i].state == lr_inactive)
         {
-            slots[i].active = true;
+            slots[i].state = lr_starting;
             return i;
         }
     }
@@ -511,7 +518,7 @@ public Action draw_line(Handle timer,int id)
     slot = slots[id];
 
 
-    if(!slot.active || !is_valid_client(slot.client))
+    if(slots[id].state == lr_inactive || !is_valid_client(slot.client))
     {
         return Plugin_Continue;
     }
@@ -605,7 +612,7 @@ void init_slot(int id, int client, int partner, lr_type type, int option)
     
     slots[id].client = client;
     slots[id].type = type;
-    slots[id].active = true;
+    slots[id].state = lr_starting;
     slots[id].partner = partner;
     slots[id].option = option;
 
@@ -619,7 +626,7 @@ void init_slot(int id, int client, int partner, lr_type type, int option)
 
 public Action start_lr_callback(Handle timer, int id)
 {
-    if(!slots[id].active)
+    if(slots[id].state == lr_inactive)
     {
         slots[id].timer = null;
         return Plugin_Handled;
@@ -650,6 +657,9 @@ public Action start_lr_callback(Handle timer, int id)
     {
         slots[id].timer = null;
     }
+
+    slots[t_slot].state = lr_active;
+    slots[ct_slot].state = lr_active;
 
 
     PrintCenterText(t,"Go!");

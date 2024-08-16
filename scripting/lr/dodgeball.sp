@@ -53,7 +53,7 @@ public Action dodgeball_failsafe(Handle timer,int t_slot)
 	LrSlot slot;
 	slot = slots[t_slot];
 
-	if(!is_valid_client(slot.client) || !slot.active || slots[t_slot].type != dodgeball)
+	if(!is_valid_client(slot.client) || slots[t_slot].state == lr_inactive || slots[t_slot].type != dodgeball)
 	{
 		return Plugin_Continue;
 	}

@@ -71,7 +71,7 @@ public Action grenade_failsafe(Handle timer,int t_slot)
 	LrSlot slot;
 	slot = slots[t_slot];
 
-	if(!is_valid_client(slot.client) || !slot.active || slots[t_slot].type != grenade)
+	if(!is_valid_client(slot.client) || slots[t_slot].state == lr_inactive || slots[t_slot].type != grenade)
 	{
 		return Plugin_Continue;
 	}

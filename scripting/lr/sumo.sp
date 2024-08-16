@@ -21,7 +21,7 @@ float SUMO_RADIUS = 215.0;
 public Action draw_circle(Handle timer, int id)
 {
 
-    if(!slots[id].active || !is_valid_client(slots[id].client) || slots[id].type != sumo)
+    if(slots[id].state == lr_inactive || !is_valid_client(slots[id].client) || slots[id].type != sumo)
     {
         slots[id].timer = null;
         return Plugin_Stop;
@@ -35,7 +35,7 @@ public Action draw_circle(Handle timer, int id)
 
 public Action enable_sumo_damage(Handle timer,int ct_slot)
 {
-    if(!slots[ct_slot].active || !is_valid_client(slots[ct_slot].client))
+    if(slots[ct_slot].state == lr_inactive || !is_valid_client(slots[ct_slot].client))
     {
         return Plugin_Continue;
     }

@@ -87,7 +87,7 @@ void draw_race_player_line(int client, float end[3])
 
 public Action draw_race(Handle timer, int id)
 {
-    if(!slots[id].active || !is_valid_client(slots[id].client) || slots[id].type != race)
+    if(slots[id].state == lr_inactive || !is_valid_client(slots[id].client) || slots[id].type != race)
     {
         slots[id].timer = null;
         return Plugin_Stop;

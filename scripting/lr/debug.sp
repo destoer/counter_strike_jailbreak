@@ -11,7 +11,7 @@ void print_slot(int id)
 
     PrintToConsole(console,"--- slot : %d --- ",id);
     PrintToConsole(console,"LR: %s",lr_list[slots[id].type]);
-    PrintToConsole(console,"active: %s",slots[id].active? "true" : "false");
+    PrintToConsole(console,"state: %d",slots[id].state);
 
     int partner = slots[id].partner;
 
