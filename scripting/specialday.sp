@@ -427,11 +427,7 @@ public OnPluginStart()
 	create_sd_convar();
 	setup_sd_convar();
 
-
 	SetCollisionGroup = init_set_collision();
-	
-		
-	
 	
 	HookEvent("player_death", OnPlayerDeath,EventHookMode_Post);
 	HookEvent("player_hurt", OnPlayerHurt); 

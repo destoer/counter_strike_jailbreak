@@ -810,6 +810,8 @@ public OnMapStart()
     AddFileToDownloadsTable("sound/lr/lr_enabled.mp3");
     lr_sound_cached = PrecacheSound("lr/lr_enabled.mp3");
     PrecacheSound("buttons/blip1.wav");
+
+    setup_config();
 }
 
 public OnMapEnd()

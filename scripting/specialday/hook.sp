@@ -136,8 +136,9 @@ public OnMapStart()
 	// dont know if we should loop this
 	PrecacheSound("music/ravenholm_1.mp3");
 #endif
-
 	
+	setup_sd_convar();
+
 	SetupFog();
 }
 

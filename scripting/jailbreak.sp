@@ -417,6 +417,8 @@ public OnMapStart()
 
 	database_connect();
 
+	setup_jb_convar();
+
 	// enable a warday on map start
 	global_ctx.warday_round_counter = WARDAY_ROUND_COUNT;	
 }
@@ -555,7 +557,6 @@ public OnPluginStart()
 	global_ctx.lenny_rand = GetRandomInt(global_ctx.lenny_count,global_ctx.lenny_count + 10000);
 
 	create_jb_convar();
-
 	setup_jb_convar();
 	
 	SetCollisionGroup = init_set_collision();
