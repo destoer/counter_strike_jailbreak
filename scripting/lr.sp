@@ -643,18 +643,18 @@ public Action start_lr_callback(Handle timer, int id)
 
     if(slots[t_slot].delay)
     {
+        slots[id].delay -= 1;
+
         // Suggestion: fearless print lr in countdown
         PrintCenterText(t,"lr %s starting in %d seconds against %N!",lr_list[type],slots[id].delay,ct);
         PrintCenterText(ct,"lr %s starting in %d seconds against %N!",lr_list[type],slots[id].delay,t);
 
-        slots[id].timer = CreateTimer(1.0,start_lr_callback,id,TIMER_FLAG_NO_MAPCHANGE);
-        slots[id].delay -= 1;
+        if(slots[id].delay)
+        {
+            slots[id].timer = CreateTimer(1.0,start_lr_callback,id,TIMER_FLAG_NO_MAPCHANGE);
+            return Plugin_Handled;
+        }
 
-        return Plugin_Handled;
-    }
-
-    else
-    {
         slots[id].timer = null;
     }
 
@@ -779,6 +779,8 @@ void start_lr_internal(int t, int ct, lr_type type)
     strip_all_weapons(t);
     strip_all_weapons(ct);
 
+    slots[t_slot].delay = 3; 
+
     // do some initial setup before the timer starts
     switch(type)
     {
@@ -790,6 +792,7 @@ void start_lr_internal(int t, int ct, lr_type type)
         case race:
         {
             race_startup(t_slot,ct_slot);
+            slots[t_slot].delay = 6;
         }
 
         case crash:
@@ -799,9 +802,10 @@ void start_lr_internal(int t, int ct, lr_type type)
         }        
     }
 
-
-    slots[t_slot].timer = CreateTimer(1.0,start_lr_callback,t_slot,TIMER_FLAG_NO_MAPCHANGE);
-    slots[t_slot].delay = 3;    
+    // Suggestion: fearless print lr in countdown
+    PrintCenterText(t,"lr %s starting in %d seconds against %N!",lr_list[type],slots[t_slot].delay,ct);
+    PrintCenterText(ct,"lr %s starting in %d seconds against %N!",lr_list[type],slots[t_slot].delay,t);
+    slots[t_slot].timer = CreateTimer(1.0,start_lr_callback,t_slot,TIMER_FLAG_NO_MAPCHANGE);   
 }
 
 void start_lr(int t, int ct, lr_type type)

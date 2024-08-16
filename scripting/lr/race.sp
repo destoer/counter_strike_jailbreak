@@ -42,9 +42,28 @@ void race_player_startup(int slot,float race_start[3], float race_end[3])
     set_player_velocity(slots[slot].client,zero);
     SetEntityMoveType(slots[slot].client, MOVETYPE_NONE);
 
-    // teleport player to start
-    TeleportEntity(slots[slot].client,slots[slot].race_start,NULL_VECTOR,NULL_VECTOR);
+    // teleport player to end
+    TeleportEntity(slots[slot].client,slots[slot].race_end,NULL_VECTOR,NULL_VECTOR);
+    CreateTimer(3.0,race_tp_start,slot,TIMER_FLAG_NO_MAPCHANGE);
 }
+
+public Action race_tp_start(Handle timer, int id)
+{
+    if(slots[id].state != lr_starting || !is_valid_client(slots[id].client) || slots[id].type != race)
+    {
+        return Plugin_Stop;
+    }
+
+
+    int partner_slot = slots[id].partner;
+
+    // teleport players to start
+    TeleportEntity(slots[id].client,slots[id].race_start,NULL_VECTOR,NULL_VECTOR);
+    TeleportEntity(slots[partner_slot].client,slots[partner_slot].race_start,NULL_VECTOR,NULL_VECTOR);
+
+    return Plugin_Continue;
+}
+
 
 void race_startup(int t_slot, int ct_slot)
 {
@@ -102,7 +121,6 @@ public Action draw_race(Handle timer, int id)
 
     return Plugin_Continue;
 }
-
 
 void start_race(int t_slot, int ct_slot)
 {
