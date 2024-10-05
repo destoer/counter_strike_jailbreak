@@ -463,7 +463,6 @@ public Action OnWeaponEquip(int client, int weapon)
 
 public Action OnWeaponCanUse(int client, int weapon) 
 {
-
     if(!is_valid_client(client))
     {
         return Plugin_Continue;
@@ -506,8 +505,6 @@ public Action OnWeaponCanUse(int client, int weapon)
                 }
             }
         }
-
-        return Plugin_Continue;
     }
 
     if(id == INVALID_SLOT)
