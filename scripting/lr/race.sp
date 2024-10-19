@@ -139,6 +139,13 @@ public int race_end_cord_handler(Menu end_menu, MenuAction action, int client, i
             GetClientAbsOrigin(client,lr_choice[client].race_end);
             draw_race_circle(lr_choice[client].race_end,{ 255, 0, 0, 255 },10.0);
 
+            // If the distance between these is < rad * 2 then they will be overlapping.
+            // This check is will give a few false +ve's but any race this close is not worth running anyways.
+            if(GetVectorDistance(lr_choice[client].race_end,lr_choice[client].race_start) <= RACE_RADIUS * 2) {
+                PrintToChat(client,"%s Start and end point are too close together",LR_PREFIX);
+                return 0;
+            }
+
             pick_partner(client);
         }
 
