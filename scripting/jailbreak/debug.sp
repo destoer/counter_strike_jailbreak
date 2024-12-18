@@ -64,7 +64,7 @@ public Action is_rebel_cmd(int client, int args)
 	{
 		if(is_valid_client(i))
 		{
-			PrintToConsole(client, "rebel: %N %s", i, players[i].rebel ? "true" : "false");
+			PrintToConsole(client, "rebel: %N %s", i, jb_players[i].rebel ? "true" : "false");
 		}
 	}
 

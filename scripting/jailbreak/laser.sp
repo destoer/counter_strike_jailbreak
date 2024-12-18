@@ -69,9 +69,9 @@ public int color_handler(Menu menu, MenuAction action, int client, int choice)
 {
 	if(action == MenuAction_Select) 
 	{
-		players[client].laser_color = choice - 1;
+		jb_players[client].laser_color = choice - 1;
 		
-		set_cookie_int(client,players[client].laser_color,client_laser_color_pref);
+		set_cookie_int(client,jb_players[client].laser_color,client_laser_color_pref);
 	}
 
 	
@@ -139,7 +139,7 @@ public t_laser_handler(Menu menu, MenuAction action, int param1, int param2)
 
     if (action == MenuAction_Select)
     {
-		players[t_client_list[param2]].t_laser = !players[t_client_list[param2]].t_laser;
+		jb_players[t_client_list[param2]].t_laser = !jb_players[t_client_list[param2]].t_laser;
     }
 
     else if (action == MenuAction_Cancel)
@@ -175,9 +175,9 @@ public laser_handler(Menu menu, MenuAction action, int client, int param2)
 {
 	if(action == MenuAction_Select) 
 	{
-		players[client].draw_laser = param2 == 2;
+		jb_players[client].draw_laser = param2 == 2;
 		
-		set_cookie_int(client,players[client].draw_laser,client_laser_draw_pref);
+		set_cookie_int(client,jb_players[client].draw_laser,client_laser_draw_pref);
 	}
 	
 	else if (action == MenuAction_Cancel) 
@@ -190,7 +190,7 @@ public laser_handler(Menu menu, MenuAction action, int client, int param2)
 // timer here to draw connected points
 public Action laser_draw(Handle timer)
 {
-	if(global_ctx.warden_id != WARDEN_INVALID && players[global_ctx.warden_id].draw_laser && players[global_ctx.warden_id].laser_use)
+	if(global_ctx.warden_id != WARDEN_INVALID && jb_players[global_ctx.warden_id].draw_laser && jb_players[global_ctx.warden_id].laser_use)
 	{
 		do_draw(global_ctx.warden_id, {1, 153, 255, 255} );
 	}
@@ -203,7 +203,7 @@ public Action laser_draw(Handle timer)
 			continue;
 		}
 		
-		if(players[i].t_laser)
+		if(jb_players[i].t_laser)
 		{
 			do_draw(i, {255,0,0,255} );
 		}
@@ -221,8 +221,8 @@ void do_draw(int client, int color[4])
 	get_client_sight_end(client, cur_pos);
 	
 	// check we are not on the first laser shine
-	bool initial_draw = players[client].prev_pos[0] == 0.0 && players[client].prev_pos[1] == 0.0 
-		&& players[client].prev_pos[2] == 0.0;
+	bool initial_draw = jb_players[client].prev_pos[0] == 0.0 && jb_players[client].prev_pos[1] == 0.0 
+		&& jb_players[client].prev_pos[2] == 0.0;
 	
 
 	// we only want to allow drawing on a wall or floor not lines between
@@ -236,7 +236,7 @@ void do_draw(int client, int color[4])
 
 	for(int i = 0; i < 3; i++)
 	{
-		float change = FloatAbs(cur_pos[i] - players[client].prev_pos[i]);
+		float change = FloatAbs(cur_pos[i] - jb_players[client].prev_pos[i]);
 
 		//PrintToChatAll("change %d : %f",i,change);
 
@@ -248,27 +248,27 @@ void do_draw(int client, int color[4])
 
 	// additonally cut off lines that are too long
 	float distance_vec[3];
-	SubtractVectors(cur_pos,players[client].prev_pos,distance_vec);
+	SubtractVectors(cur_pos,jb_players[client].prev_pos,distance_vec);
 
 	float length = GetVectorLength(distance_vec);
 
 	if(initial_draw)
 	{
-		players[client].prev_pos = cur_pos;	
+		jb_players[client].prev_pos = cur_pos;	
 	}
 
 	else if(change_count < 3 && length <= 1000.0)
 	{
-		draw_beam(players[client].prev_pos,cur_pos,DRAW_REFRESH,2.0,color,g_lbeam);	
-		players[client].prev_pos = cur_pos;	
+		draw_beam(jb_players[client].prev_pos,cur_pos,DRAW_REFRESH,2.0,color,g_lbeam);	
+		jb_players[client].prev_pos = cur_pos;	
 	}
 
 	// invalid
 	else
 	{
-		players[client].prev_pos[0] = 0.0;
-		players[client].prev_pos[1] = 0.0;
-		players[client].prev_pos[2] = 0.0;
+		jb_players[client].prev_pos[0] = 0.0;
+		jb_players[client].prev_pos[1] = 0.0;
+		jb_players[client].prev_pos[2] = 0.0;
 	}	
 }
 

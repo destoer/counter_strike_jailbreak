@@ -59,16 +59,16 @@ public void GiveGunGameGun(int client)
 	
 	if(game == Engine_CSS)
 	{
-		GivePlayerItem(client, gun_give_list_css[gungame_gun_idx[players[client].gungame_level]]);
+		GivePlayerItem(client, gun_give_list_css[gungame_gun_idx[sd_players[client].gungame_level]]);
 	}
 	
 	else if(game == Engine_CSGO)
 	{
-		GivePlayerItem(client, gun_give_list_csgo[gungame_gun_idx[players[client].gungame_level]]);
+		GivePlayerItem(client, gun_give_list_csgo[gungame_gun_idx[sd_players[client].gungame_level]]);
 	}
 	
 	PrintToChat(client, "%s Current level: %s (%d of %d)", 
-		SPECIALDAY_PREFIX, gun_list[gungame_gun_idx[players[client].gungame_level]],players[client].gungame_level+1,GUNS_SIZE);
+		SPECIALDAY_PREFIX, gun_list[gungame_gun_idx[sd_players[client].gungame_level]],sd_players[client].gungame_level+1,GUNS_SIZE);
 }
 
 
@@ -115,22 +115,22 @@ void gungame_death(int attacker, int victim)
 
 	if(game == Engine_CSS)
 	{
-		kill_gungame_weapon = StrEqual(weapon_name, gun_give_list_css[gungame_gun_idx[players[attacker].gungame_level]]);
+		kill_gungame_weapon = StrEqual(weapon_name, gun_give_list_css[gungame_gun_idx[sd_players[attacker].gungame_level]]);
 	}
 
 	else if(game == Engine_CSGO)
 	{
-		kill_gungame_weapon = StrEqual(weapon_name, gun_give_list_csgo[gungame_gun_idx[players[attacker].gungame_level]]);
+		kill_gungame_weapon = StrEqual(weapon_name, gun_give_list_csgo[gungame_gun_idx[sd_players[attacker].gungame_level]]);
 	}
 
 	// kill with current weapon
-	if(players[attacker].gungame_level < GUNS_SIZE && kill_gungame_weapon)
+	if(sd_players[attacker].gungame_level < GUNS_SIZE && kill_gungame_weapon)
 	{
-		players[attacker].gungame_level++;
-		if(players[attacker].gungame_level >= GUNS_SIZE)
+		sd_players[attacker].gungame_level++;
+		if(sd_players[attacker].gungame_level >= GUNS_SIZE)
 		{
 			// end the round
-			players[attacker].gungame_level = 0;
+			sd_players[attacker].gungame_level = 0;
 			
 			// renable loss conds
 			enable_round_end();
@@ -153,9 +153,9 @@ void gungame_death(int attacker, int victim)
 	// killed with knife dec the enemies weapon
 	else if(StrEqual(weapon_name,"weapon_knife"))
 	{
-		if(players[victim].gungame_level > 0)
+		if(sd_players[victim].gungame_level > 0)
 		{
-			players[victim].gungame_level--;
+			sd_players[victim].gungame_level--;
 		}
 	}
 	

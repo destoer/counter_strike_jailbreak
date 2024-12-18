@@ -56,7 +56,7 @@ public void OnClientCookiesCached(int client)
 		color = 0;
 	}
 
-	players[client].laser_color = color;
+	jb_players[client].laser_color = color;
 	
 #if defined DRAW_CUSTOM_FLAGS 
 
@@ -70,8 +70,8 @@ public void OnClientCookiesCached(int client)
 #endif
 
 	int draw = get_cookie_int(client,client_laser_draw_pref);
-	players[client].draw_laser = draw > 0;
+	jb_players[client].draw_laser = draw > 0;
 
 	int text_enable = get_cookie_int(client,client_warden_text_pref);
-	players[client].warden_text = text_enable > 0;
+	jb_players[client].warden_text = text_enable > 0;
 }

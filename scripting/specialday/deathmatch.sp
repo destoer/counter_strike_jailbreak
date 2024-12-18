@@ -65,5 +65,5 @@ void end_deathmatch()
 void deathmatch_death(int attacker, int victim)
 {
 	CreateTimer(3.0, ReviveDeathMatch, victim);
-	players[attacker].kills++;
+	sd_players[attacker].kills++;
 }

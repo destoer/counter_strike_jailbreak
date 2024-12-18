@@ -102,7 +102,7 @@ public Action NewZombie(Handle timer, int client)
 
 	
 	CS_RespawnPlayer(client);
-	TeleportEntity(client, players[client].death_cords, NULL_VECTOR, NULL_VECTOR);
+	TeleportEntity(client, sd_players[client].death_cords, NULL_VECTOR, NULL_VECTOR);
 	CS_SwitchTeam(client, CS_TEAM_T);
 	MakeZombie(client);
 	EmitSoundToAll("npc/zombie/zombie_voice_idle1.wav");
@@ -288,8 +288,8 @@ void zombie_death(int victim)
 		float cords[3];
 		GetClientAbsOrigin(victim, cords);
 		
-		players[victim].death_cords = cords;
-		players[victim].death_cords[2] -= 45.0; // account for player eyesight height
+		sd_players[victim].death_cords = cords;
+		sd_players[victim].death_cords[2] -= 45.0; // account for player eyesight height
 		CreateTimer(0.5,NewZombie, victim)
 	}
 	

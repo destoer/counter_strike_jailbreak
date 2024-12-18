@@ -111,7 +111,7 @@ enum struct Player
 	int pickup_count;
 }
 
-Player players[MAXPLAYERS + 1];
+Player jb_players[MAXPLAYERS + 1];
 Context global_ctx;
 
 void reset_context()
@@ -153,24 +153,24 @@ void init_player(int client)
 {
 	reset_player(client);
 
-	players[client].laser_color = 0;
-	players[client].warden_text = false;
-	players[client].draw_laser = false;
+	jb_players[client].laser_color = 0;
+	jb_players[client].warden_text = false;
+	jb_players[client].draw_laser = false;
 }
 
 void reset_player(int client)
 {
-	players[client].rebel = false;
+	jb_players[client].rebel = false;
 
-	players[client].laser_use = false;
-	players[client].t_laser = false;
+	jb_players[client].laser_use = false;
+	jb_players[client].t_laser = false;
 
 	for(int i = 0; i < 3 ; i++)
 	{
-		players[client].prev_pos[i] = 0.0;
+		jb_players[client].prev_pos[i] = 0.0;
 	}
 
-	players[client].pickup_count = 0;
+	jb_players[client].pickup_count = 0;
 }
 
 #include <sourcemod>
@@ -261,7 +261,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	}
 */	
 	bool in_use = (buttons & IN_USE) != 0;
-	players[client].laser_use = in_use;
+	jb_players[client].laser_use = in_use;
 
 
 	if(!in_use)
@@ -269,7 +269,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 		// reset laser posistion
 		for(int i = 0; i < 3; i++)
 		{
-			players[client].prev_pos[i] = 0.0;
+			jb_players[client].prev_pos[i] = 0.0;
 		}
 
 		return Plugin_Continue;
@@ -330,7 +330,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 				
 				case donator:
 				{
-					SetupLaser(client,laser_colors[players[client].laser_color]);
+					SetupLaser(client,laser_colors[jb_players[client].laser_color]);
 				}
 			}
 		}
@@ -805,9 +805,9 @@ public warden_text_handler(Menu menu, MenuAction action, int client, int param2)
 {
 	if(action == MenuAction_Select) 
 	{
-		players[client].warden_text = param2 == 2;
+		jb_players[client].warden_text = param2 == 2;
 
-		set_cookie_int(client,players[client].warden_text,client_warden_text_pref);
+		set_cookie_int(client,jb_players[client].warden_text,client_warden_text_pref);
 	}
 	
 	else if (action == MenuAction_Cancel) 
@@ -867,7 +867,7 @@ public Action print_warden_text_all(Handle timer)
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		// is its a valid client
-		if (IsClientInGame(i) && !IsFakeClient(i) && players[i].warden_text)
+		if (IsClientInGame(i) && !IsFakeClient(i) && jb_players[i].warden_text)
 		{
 			ShowSyncHudText(i, h_hud_text, buf);
 		}
@@ -1062,7 +1062,7 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 	int attacker = GetClientOfUserId(GetEventInt(event, "attacker")); // Get the dead clients id
 
 
-	if(players[client].rebel && is_valid_client(attacker) && print_rebel && attacker != client && 
+	if(jb_players[client].rebel && is_valid_client(attacker) && print_rebel && attacker != client && 
 		(!sd_enabled() || (sd_enabled() && sd_current_state() == sd_inactive)))
 	{
 		PrintToChatAll("%s %N killed the rebel %N",JB_PREFIX,attacker,client);
@@ -1369,7 +1369,7 @@ void set_rebel(int client)
 {
 	if(!global_ctx.warday_active && !is_in_lr(client))
 	{
-		players[client].rebel = true;
+		jb_players[client].rebel = true;
 	}
 }
 

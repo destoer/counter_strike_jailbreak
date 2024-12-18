@@ -65,5 +65,5 @@ void end_scout()
 void scoutknife_death(int attacker,int victim)
 {
 	CreateTimer(3.0, ReviveScout, victim);
-	players[attacker].kills++;
+	sd_players[attacker].kills++;
 }

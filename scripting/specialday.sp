@@ -166,7 +166,7 @@ enum struct Player
 	int gungame_level;
 }
 
-Player players[MAXPLAYERS+1];
+Player sd_players[MAXPLAYERS+1];
 Context global_ctx;
 
 const int INVALID_BOSS = -1;
@@ -205,12 +205,12 @@ void reset_context()
 
 void reset_player(int client)
 {
-	players[client].kills = 0;
-	players[client].gungame_level = 0;
+	sd_players[client].kills = 0;
+	sd_players[client].gungame_level = 0;
 
 	for(int i = 0; i < 3; i++)
 	{
-		players[client].death_cords[i] = 0.0;
+		sd_players[client].death_cords[i] = 0.0;
 	}
 }
 
@@ -873,9 +873,9 @@ int get_client_max_kills()
 	int cli = 1;
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if(players[i].kills > max)
+		if(sd_players[i].kills > max)
 		{
-			max = players[i].kills;
+			max = sd_players[i].kills;
 			cli = i;
 		}
 	}

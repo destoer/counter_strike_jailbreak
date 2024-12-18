@@ -1,7 +1,7 @@
 #if defined _WARDAY_INCLUDE_included
  #endinput
 #endif
-#define _WARDAY_INCLUDE_included#
+#define _WARDAY_INCLUDE_included
 
 
 void format_warday(int args)

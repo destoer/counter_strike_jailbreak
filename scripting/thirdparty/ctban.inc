@@ -39,7 +39,7 @@
 #else
 	#assert ONE == 1
 #endif
-#if !defined TWO 2
+#if !defined TWO
 	#define TWO 2
 #else
 	#assert TWO == 2
