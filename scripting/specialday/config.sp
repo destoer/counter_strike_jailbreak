@@ -3,7 +3,6 @@ ConVar sd_prefix_cvar;
 
 // common
 ConVar ctban_cvar;
-ConVar ctban_override_cvar;
 ConVar gangs_cvar;
 ConVar store_cvar;
 ConVar standalone_cvar;
@@ -37,7 +36,6 @@ new const String:sd_enable_name[SD_SIZE][] =
 
 
 bool ct_ban;
-bool ct_ban_override;
 bool store;
 bool gangs;
 bool standalone;
@@ -60,7 +58,6 @@ void create_sd_convar()
 
     // common
     ctban_cvar = CreateConVar("sd_ctban","1","enable ctban support");
-    ctban_override_cvar = CreateConVar("sd_ctban_override","0","enable ctban override");
     gangs_cvar = CreateConVar("sd_gangs","0","enable gangs support");
     store_cvar = CreateConVar("sd_store","1","enable store support");
     sd_delay_cvar = CreateConVar("sd_delay","15","How long before an sd starts");
@@ -99,8 +96,7 @@ void setup_sd_convar()
 
 
     // commmon
-    ct_ban = GetConVarInt(ctban_cvar) > 0;
-    ct_ban_override = GetConVarInt(ctban_override_cvar) > 0;
+    ct_ban = GetConVarInt(ctban_cvar) > 0 && check_command_exists("ct_ban");
     gangs = GetConVarInt(gangs_cvar) > 0;
     store = GetConVarInt(store_cvar) > 0;
     standalone = GetConVarInt(standalone_cvar) > 0;

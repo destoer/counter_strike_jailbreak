@@ -561,7 +561,6 @@ void CreateNatives()
 	CreateNative("CTBan_IsClientBanned", Native_IsClientBanned);
 	CreateNative("CTBan_GetTimeRemaining", Native_GetTimeRemaining);
 	CreateNative("CTBan_GetOverrideStatus", Native_GetOverrideStatus);
-	CreateNative("CTBan_SetGlobalOverride", Native_SetGlobalOverride);
 	CreateNative("CTBan_GetBanInfo", Native_GetBanInfo);
 	CreateNative("CTBan_GetBanInfo_Offline", Native_GetBanInfo_Offline);
 

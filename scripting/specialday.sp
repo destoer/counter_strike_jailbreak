@@ -92,9 +92,11 @@ typedef SD_STATE_FUNC = function void();
 
 // for some reason we cannot just init these with an initalizer
 // so we do it in a func...
-SD_STATE_FUNC end_fptr[SD_SIZE];
-SD_STATE_FUNC start_fptr[SD_SIZE];
-SD_STATE_FUNC init_fptr[SD_SIZE];
+// + 1 FOR CUSTOM SD
+#define SD_CALLBACK_SIZE SD_SIZE + 1
+SD_STATE_FUNC end_fptr[SD_CALLBACK_SIZE];
+SD_STATE_FUNC start_fptr[SD_CALLBACK_SIZE];
+SD_STATE_FUNC init_fptr[SD_CALLBACK_SIZE];
 
 
 // sd modifiers
@@ -391,6 +393,13 @@ public int native_current_day(Handle plugin, int numParam)
 	return view_as<int>(global_ctx.special_day);
 }
 
+public int native_start_custom_day(Handle plugin, int numParam)
+{
+	global_ctx.special_day = custom_day;
+	global_ctx.sd_state = sd_started;
+	StartSD();	
+	return 0;
+}
 
 // register our call
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
@@ -406,14 +415,11 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 		MarkNativeAsOptional("CTBan_IsClientBanned");
 	}
 
-	if(ct_ban_override)
-	{
-		MarkNativeAsOptional("CTBan_SetGlobalOverride");
-	}
 
 	MarkNativeAsOptional("get_warden_id");
 	MarkNativeAsOptional("remove_warden");
 
+	CreateNative("sd_start_custom_day",native_start_custom_day);
 	CreateNative("sd_current_state", native_sd_state);
 	CreateNative("sd_current_day", native_current_day);
 
@@ -458,7 +464,7 @@ public OnPluginStart()
 	RegConsoleCmd("sm_samira", samira_EE);
 
 	// gun removal
-	g_WeaponParent = FindSendPropOffs("CBaseCombatWeapon", "m_hOwnerEntity");
+	g_WeaponParent = FindSendPropInfo("CBaseCombatWeapon", "m_hOwnerEntity");
 
 	
 	// hook disonnect incase a vital member leaves
@@ -549,14 +555,14 @@ public void init_function_pointers()
 {
 
 	// incase we forget to init a ptr
-	for(int i = 0; i < SD_SIZE; i++)
+	for(int i = 0; i < SD_CALLBACK_SIZE; i++)
 	{
 		end_fptr[i] = panic_unimplemented;
 		start_fptr[i] = panic_unimplemented;
 		init_fptr[i] = panic_unimplemented;
 	}
 
-	for(int i = 0; i < SD_SIZE; i++)
+	for(int i = 0; i < SD_CALLBACK_SIZE; i++)
 	{
 		SpecialDay day = view_as<SpecialDay>(i);
 
@@ -666,6 +672,13 @@ public void init_function_pointers()
 				end_fptr[i] = callback_dummy;
 				start_fptr[i] = StartHeadshot;
 				init_fptr[i] = headshot_init;
+			}
+
+			case custom_day:
+			{
+				end_fptr[i] = callback_dummy;
+				start_fptr[i] = callback_dummy;
+				init_fptr[i] = callback_dummy;	
 			}
 /*
 			case vip_day:
@@ -885,12 +898,6 @@ int get_client_max_kills()
 
 void EndSd(bool forced=false)
 {
-	if(ct_ban_override)
-	{
-		// disable ct ban exception
-		CTBan_SetGlobalOverride(false);
-	}
-
 	// no sd running we dont need to do anything
 	if(global_ctx.sd_state == sd_inactive)
 	{
@@ -1025,6 +1032,11 @@ public Action print_specialday_text_all(Handle timer)
 	{	
 		switch(global_ctx.special_day)
 		{
+			case custom_day:
+			{
+
+			}
+
 			case tank_day:
 			{
 				Format(buf, sizeof(buf), "current tank: %N", global_ctx.boss);
@@ -1428,11 +1440,6 @@ public int sd_select(int client, int sd)
 			PrintToChat(client, "%s You can't do two special days at once!", SPECIALDAY_PREFIX);
 		}
 		return -1;
-	}
-
-	if(ct_ban_override)
-	{
-		CTBan_SetGlobalOverride(true);
 	}
 
 	global_ctx.sd_timer = SD_DELAY;

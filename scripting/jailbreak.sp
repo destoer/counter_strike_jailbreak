@@ -819,8 +819,6 @@ public warden_text_handler(Menu menu, MenuAction action, int client, int param2)
 // Top Screen Warden Printing
 public Action print_warden_text_all(Handle timer)
 {
-
-	
 	if(sd_enabled() && sd_current_state() != sd_inactive)
 	{
 		return Plugin_Continue;

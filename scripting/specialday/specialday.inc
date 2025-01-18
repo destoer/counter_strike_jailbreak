@@ -25,6 +25,7 @@ enum SpecialDay
 	spectre_day,
 	headshot_day,
 	//vip_day,
+	custom_day, // Must be after the last real sd
 	normal_day,
 };
 
@@ -38,6 +39,7 @@ enum SdState
 
 native SdState sd_current_state();
 native SpecialDay sd_current_day();
+native void sd_start_custom_day();
 
 forward void OnWinSD(int client, SpecialDay type);
 
