@@ -52,7 +52,7 @@ void give_vip(int client)
     // VIP is yellow
 	SetEntityRenderColor(client, 255, 255, 0, 255);
  
-    PrintToChatAll("%s %N is the vip",SPECIALDAY_PREFIX);
+    PrintToChatAll("%s %N is the vip for %s",SPECIALDAY_PREFIX,client,GetClientTeam(client) == CS_TEAM_T? "T" : "CT");
 
     SetEntityHealth(client,250);
 }
@@ -62,7 +62,7 @@ int pick_vip_internal(int team)
     // Get List of each team that is alive
     int clients[MAXPLAYERS + 1];
 
-    int count = filter_team(clients,team,true);
+    int count = filter_team(team,clients,true);
 
     // pick one at random...
     int idx = GetRandomInt(0,count - 1);
@@ -72,14 +72,14 @@ int pick_vip_internal(int team)
 
 void pick_t_vip()
 {
-    int vip = pick_vip_internal(CS_TEAM_T);
-    give_vip(vip);
+    t_vip = pick_vip_internal(CS_TEAM_T);
+    give_vip(t_vip);
 }
 
 void pick_ct_vip()
 {
-    int vip = pick_vip_internal(CS_TEAM_CT);
-    give_vip(vip);
+    ct_vip = pick_vip_internal(CS_TEAM_CT);
+    give_vip(ct_vip);
 }
 
 public void StartVip()
@@ -100,13 +100,12 @@ void end_vip()
 {
     // renable loss conds
     enable_round_end();
-    slay_all();    
+    slay_team(winner == CS_TEAM_CT? CS_TEAM_T : CS_TEAM_CT);    
 	
     if(winner != -1)
     {
-        PrintToChatAll("%s %s wont VIP day",SPECIALDAY_PREFIX,winner == CS_TEAM_CT? "Counter terrorists" : "Terrorists");
+        PrintToChatAll("%s %s won VIP day",SPECIALDAY_PREFIX,winner == CS_TEAM_CT? "Counter terrorists" : "Terrorists");
     }
-
 }
 
 
@@ -128,6 +127,6 @@ void vip_death(int attacker,int victim)
     else
     {
         PrintToChat(victim,"%s You will respawn in 20 seconds\n",SPECIALDAY_PREFIX);
-        CreateTimer(20.0, ReviveVip, victim);
+        CreateTimer(10.0, ReviveVip, victim);
     }
 }

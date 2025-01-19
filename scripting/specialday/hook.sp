@@ -66,7 +66,7 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 				laser_discon_active(client);
 			}
 
-/*
+
 			case vip_day:
 			{
 				if(client == t_vip)
@@ -79,7 +79,7 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 					pick_ct_vip();
 				}
 			}
-*/
+
 			default: {}
 		}
 	}
@@ -355,6 +355,11 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 		case laser_day:
 		{
 			laser_death(victim);
+		}
+
+		case vip_day:
+		{
+			vip_death(attacker,victim);
 		}
 	
 		default: {}

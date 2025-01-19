@@ -150,6 +150,18 @@ stock void slay_all()
 	}	
 }
 
+stock void slay_team(int team)
+{
+	// slay everyone
+	for (int i=1; i<=MaxClients; i++)
+	{
+		if (is_valid_client(i) && IsPlayerAlive(i) && GetClientTeam(i) == team) 
+		{
+			ForcePlayerSuicide(i);
+		}
+	}	
+}
+
 stock bool is_admin(int client)
 {
 	return CheckCommandAccess(client, "generic_admin", ADMFLAG_GENERIC, false);	

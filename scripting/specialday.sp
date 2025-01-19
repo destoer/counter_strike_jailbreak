@@ -55,7 +55,7 @@ Menu gun_menu;
 Handle SetCollisionGroup;
 
 
-const int SD_SIZE = 15;
+const int SD_SIZE = 16;
 new const String:sd_list[SD_SIZE][] =
 {	
 	"Friendly Fire Day", 
@@ -73,7 +73,7 @@ new const String:sd_list[SD_SIZE][] =
 	"Laser Wars",
 	"Spectre",
 	"Headshot",
-	//"VIP",
+	"VIP",
 };
 
 
@@ -249,7 +249,7 @@ int g_lpoint;
 #include "specialday/laserwars.sp"
 #include "specialday/spectre.sp"
 #include "specialday/headshot.sp"
-//#include "specialday/vip.sp"
+#include "specialday/vip.sp"
 #include "specialday/debug.sp"
 //#include "specialday/spawn.sp"
 #include "specialday/hook.sp"
@@ -680,14 +680,14 @@ public void init_function_pointers()
 				start_fptr[i] = callback_dummy;
 				init_fptr[i] = callback_dummy;	
 			}
-/*
+
 			case vip_day:
 			{
 				end_fptr[i] = callback_dummy;
 				start_fptr[i] = StartVip;
 				init_fptr[i] = vip_init;				
 			}
-*/
+
 			default:
 			{
 				ThrowNativeError(SP_ERROR_NATIVE, "did not initalize sd %d", i);				

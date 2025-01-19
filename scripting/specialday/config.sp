@@ -30,7 +30,7 @@ new const String:sd_enable_name[SD_SIZE][] =
 	"sd_laser_wars",
 	"sd_spectre",
 	"sd_headshot",
-	//"VIP",
+	"sd_vip",
 }
 
 

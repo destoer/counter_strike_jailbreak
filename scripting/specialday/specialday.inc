@@ -24,7 +24,7 @@ enum SpecialDay
 	laser_day,
 	spectre_day,
 	headshot_day,
-	//vip_day,
+	vip_day,
 	custom_day, // Must be after the last real sd
 	normal_day,
 };
