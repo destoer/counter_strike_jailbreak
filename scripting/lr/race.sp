@@ -19,7 +19,7 @@ void race_player_init(int id)
     PrintToChat(client,"%s GO!",LR_PREFIX);
 
     SetEntityMoveType(client, MOVETYPE_WALK);
-    unblock_client(client,SetCollisionGroup);
+    unblock_client(client);
 }
 
 void race_player_startup(int slot,float race_start[3], float race_end[3])

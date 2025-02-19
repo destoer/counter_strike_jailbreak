@@ -182,9 +182,6 @@ bool lr_sound_cached = false;
 
 bool use_key[MAXPLAYERS+1] = {false};
 
-// handle for sdkcall
-Handle SetCollisionGroup;
-
 int start_timestamp = 0;
 
 Handle lr_win_forward = null;
@@ -342,8 +339,6 @@ public OnPluginStart()
     }
 
     database_connect();
-
-    SetCollisionGroup = init_set_collision();
 
     LoadTranslations("common.phrases"); 
 }

@@ -183,7 +183,7 @@ public void MakeZombie(int client)
 
 	// fix no block issues on respawn
 	// really did not want to resort to this sigh...
-	unblock_client(client,SetCollisionGroup);
+	unblock_client(client);
 }
 
 public void MakePatientZero(int client)

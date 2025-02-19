@@ -12,13 +12,13 @@ bool block_state = false;
 public jb_disable_block_all()
 {
 	block_state = false;
-	unblock_all_clients(SetCollisionGroup);
+	unblock_all_clients();
 }
 
 public jb_enable_block_all()
 {
 	block_state = true;
-	block_all_clients(SetCollisionGroup);
+	block_all_clients();
 }
 
 
@@ -85,7 +85,7 @@ public Action OnEntitySpawn(int entity)
 	{
 		if (StrEqual(classname, "flashbang_projectile") || StrEqual(classname, "hegrenade_projectile") || StrEqual(classname, "smokegrenade_projectile"))
 		{
-			SetClientCollision(entity,SetCollisionGroup,COLLISION_GROUP_DEBRIS_TRIGGER);
+			SetEntityCollisionGroup(entity,COLLISION_GROUP_DEBRIS_TRIGGER);
 		}
 	}
 

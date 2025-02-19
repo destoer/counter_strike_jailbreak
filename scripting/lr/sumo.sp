@@ -11,7 +11,7 @@ void sumo_player_init(int id)
     // unstuck the player
     PrintToChat(client,"%s Fight!",LR_PREFIX);
     SetEntityMoveType(client, MOVETYPE_WALK);
-    unblock_client(client,SetCollisionGroup);
+    unblock_client(client);
 }
 
 float SUMO_CIRCLE_TIMER = 0.1;

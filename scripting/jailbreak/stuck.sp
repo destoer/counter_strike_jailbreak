@@ -27,7 +27,7 @@ public Action command_stuck(int client, int args)
 		CreateTimer(2.0, timer_end_stuck, client);
 		
 		// NOTE: we use the internal function as we want to use the others for state tracking of what block is meant to be
-		unblock_all_clients(SetCollisionGroup);
+		unblock_all_clients();
 	}
 	else if (global_ctx.stuck_timer)
 	{
@@ -55,12 +55,12 @@ public Action timer_end_stuck(Handle timer, int client)
 	// as wub can change it while active...
 	if(block_state)
 	{
-		block_all_clients(SetCollisionGroup);
+		block_all_clients();
 	}
 
 	else
 	{
-		unblock_all_clients(SetCollisionGroup);
+		unblock_all_clients();
 	}
     
 	return Plugin_Continue;

@@ -47,10 +47,6 @@ TODO make all names consistent
 // global vars
 
 
-
-// handle for sdkcall
-Handle SetCollisionGroup;
-
 // handles for client cookies
 Handle client_laser_draw_pref;
 Handle client_laser_color_pref;
@@ -558,9 +554,6 @@ public OnPluginStart()
 
 	create_jb_convar();
 	setup_jb_convar();
-	
-	SetCollisionGroup = init_set_collision();
-
 
 	// user commands
 	RegConsoleCmd("wd", warday_callback);
@@ -590,11 +583,7 @@ public OnPluginStart()
 	// we currently use the noblock toggle callback
 	if(stuck)
 	{
-		// workaround for csgo wont support this neatly
-		if(SetCollisionGroup != INVALID_HANDLE)
-		{
-			RegConsoleCmd("stuck", command_stuck);
-		}
+		RegConsoleCmd("stuck", command_stuck);
 	}
 	
 	
@@ -1087,15 +1076,16 @@ public Action player_death(Handle event, const String:name[], bool dontBroadcast
 	// if there is only one ct left alive automatically warden him
 	if(get_alive_team_count(CS_TEAM_CT,new_warden) == 1 && GetClientTeam(client) == CS_TEAM_CT && new_warden != 0)
 	{
+		if(!is_sudoer(new_warden))
+		{
+			EmitSoundToAll("bot\\its_all_up_to_you_sir.wav");
+		}
+
+		// restore hp
+		SetEntityHealth(new_warden,global_ctx.ct_handicap? 130 : 100);
+
 		if(global_ctx.warden_id == WARDEN_INVALID && auto_warden)
 		{
-			if(!is_sudoer(new_warden))
-			{
-				EmitSoundToAll("bot\\its_all_up_to_you_sir.wav");
-			}
-
-			// restore hp
-			SetEntityHealth(new_warden,global_ctx.ct_handicap? 130 : 100);
 			set_warden(new_warden);
 		}
 	}
@@ -1147,12 +1137,12 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 			
 			if(block_state)
 			{
-				block_client(client,SetCollisionGroup);
+				block_client(client);
 			}
 
 			else
 			{
-				unblock_client(client, SetCollisionGroup);
+				unblock_client(client);
 			}		
 		}
 				

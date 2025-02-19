@@ -51,10 +51,6 @@ int store_kill_ammount_backup = 0;
 // gun menu
 Menu gun_menu;
 
-// Handle for function call
-Handle SetCollisionGroup;
-
-
 const int SD_SIZE = 16;
 new const String:sd_list[SD_SIZE][] =
 {	
@@ -433,8 +429,6 @@ public OnPluginStart()
 	create_sd_convar();
 	setup_sd_convar();
 
-	SetCollisionGroup = init_set_collision();
-	
 	HookEvent("player_death", OnPlayerDeath,EventHookMode_Post);
 	HookEvent("player_hurt", OnPlayerHurt); 
 
@@ -1515,7 +1509,7 @@ public int sd_select(int client, int sd)
 	
 	// turn off collison if its allready on this function
 	// will just ignore the request
-	unblock_all_clients(SetCollisionGroup);
+	unblock_all_clients();
 	
 	// init_func
 

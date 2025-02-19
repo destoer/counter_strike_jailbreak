@@ -172,24 +172,10 @@ stock bool check_command_exists(const String:command[])
 	return GetCommandFlags(command) != INVALID_FCVAR_FLAGS;
 }
 
-stock void block_all_clients(Handle func)
+stock void block_all_clients()
 {
-	if(GetEngineVersion() == Engine_CSGO && func == INVALID_HANDLE)
-	{
-		ConVar solid_teamates = FindConVar("mp_solid_teammates");
-		if(solid_teamates == null)
-		{
-			return;
-		}
-		// allready solid
-		if(GetConVarInt(solid_teamates) == 1)
-		{
-			return;
-		}
-	}
-
 	// block is allready on dont bother
-	else if(!noblock_enabled())
+	if(!noblock_enabled())
 	{
 		return;
 	}
@@ -197,132 +183,50 @@ stock void block_all_clients(Handle func)
 	
   	for(int i=1; i <= MaxClients; i++)
 	{
-		block_client(i,func);
+		block_client(i);
 	}
 }
 
 // https://bugs.alliedmods.net/show_bug.cgi?id=6348
 // https://web.archive.org/web/20190406220848/https://forum.facepunch.com/gmoddev/likl/Crazy-Physics-cause-found/1/
-// setting this directly will cause problems so we have to do a sdkcall to CBaseEntity::SetClientCollision which calls CBaseEntity::CollisionRulesChanged()
+// setting this directly with SetEntProp cause problems so we have to do a sdkcall to CBaseEntity::SetClientCollision which calls CBaseEntity::CollisionRulesChanged()
 // or we will have fun
 
-stock void SetClientCollision(int entity,Handle func, int type)
+stock void SetClientCollision(int client, int type)
 {
-	if(func != INVALID_HANDLE)
+	if(is_valid_client(client))
 	{
-		SDKCall(func, entity, type);
-	}
-
-	else
-	{
-		EngineVersion game = GetEngineVersion();
-
-		if(game == Engine_CSS)
-		{
-			// causes crashes
-			SetEntProp(entity, Prop_Data, "m_CollisionGroup", type);
-		}
-
-		else if(game == Engine_CSGO)
-		{
-			// for no block we can just turn team collision on as a workaround
-			// this is good enough for now
-
-			if(type == COLLISION_GROUP_PLAYER)
-			{
-				ServerCommand("mp_solid_teammates 1");
-			}
-
-			else if(type == COLLISION_GROUP_DEBRIS_TRIGGER)
-			{
-				ServerCommand("mp_solid_teammates 0");
-			}
-		}
+		SetEntityCollisionGroup(client,type);
 	}
 }
 
-stock PrintCollisionWarning()
-{
-	PrintToServer("invalid handle, setcollisiongroup will not work failling back to setentprop(css), mp_solid_teammates(csgo)");
-	PrintToServer("setentprop may result in physics bugs, and mp_solid_teamates wont no block the other team");
-}
-
-stock Handle init_set_collision()
-{
-	// get our handle to call SetCollisionGroup to make noblock not break
-	Handle game_conf = LoadGameConfigFile("destoer");
-	
-	if(game_conf == INVALID_HANDLE)
-	{
-		PrintToServer("[warn] game data handle invalid");
-		PrintCollisionWarning();
-		return INVALID_HANDLE;
-	}
-	
-	
-	// setup call so we can change collsion groups
-	StartPrepSDKCall(SDKCall_Entity);
-	if(!PrepSDKCall_SetFromConf(game_conf, SDKConf_Signature, "SetCollisionGroup"))
-	{
-		PrintToServer("[warn] signature not found");
-		PrintCollisionWarning();
-		return INVALID_HANDLE;
-	}
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	Handle handle = EndPrepSDKCall();
-	
-	if(handle == INVALID_HANDLE)
-	{
-		PrintToServer("[warn] function handle invalid");
-		PrintCollisionWarning();
-		return handle;
-	}
-	
-	return handle;
-}
-
-
-stock void block_client(int client, Handle func)
+stock void block_client(int client)
 {
 	if (is_valid_client(client))
 	{
-		SetClientCollision(client, func,COLLISION_GROUP_PLAYER );
+		SetClientCollision(client, COLLISION_GROUP_PLAYER );
 	}		
 }
 
-stock void unblock_client(int client,Handle func)
+stock void unblock_client(int client)
 {
 	if (is_valid_client(client))
 	{
-		SetClientCollision(client,func,COLLISION_GROUP_DEBRIS_TRIGGER);
+		SetClientCollision(client,COLLISION_GROUP_DEBRIS_TRIGGER);
 	}	
 }
 
-stock void unblock_all_clients(Handle func)
+stock void unblock_all_clients()
 {
-	if(GetEngineVersion() == Engine_CSGO && func == INVALID_HANDLE)
-	{
-		ConVar solid_teamates = FindConVar("mp_solid_teammates");
-		if(solid_teamates == null)
-		{
-			return;
-		}
-		// allready non solid
-		if(GetConVarInt(solid_teamates) == 0)
-		{
-			return;
-		}
-	}
-
 	// noblock allready enabled dont bother
-	else if(noblock_enabled())
+	if(noblock_enabled())
 	{
 		return;
 	}
 	
   	for(int i=1; i <= MaxClients; i++)
 	{
-		unblock_client(i,func);
+		unblock_client(i);
 	}
 }
 

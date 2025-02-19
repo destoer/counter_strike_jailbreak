@@ -111,6 +111,11 @@ void end_vip()
 
 void vip_death(int attacker,int victim)
 {
+    if(is_valid_client(attacker) && is_valid_client(victim))
+    {
+        PrintToChatAll("%s %N killed the the VIP %N",SPECIALDAY_PREFIX,attacker,victim);
+    }
+
     if(t_vip == victim)
     {
         winner = CS_TEAM_CT;
