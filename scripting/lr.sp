@@ -858,9 +858,6 @@ bool command_lr_internal(int client)
         return true;
     }
 
-    SetCollisionGroup = init_set_collision();
-
-
     // lr is not enabled
     if(lr_cvar.IntValue == 0)
     {
