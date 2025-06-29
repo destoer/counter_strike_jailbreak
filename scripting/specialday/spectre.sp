@@ -72,7 +72,10 @@ public void StartSpectre()
 void end_spectre()
 {
 	RestoreTeams();
-	SetEntityRenderColor(global_ctx.boss,255,255,255, 255)
+	if(is_valid_client(global_ctx.boss))
+	{
+		SetEntityRenderColor(global_ctx.boss,255,255,255, 255);
+	}
 }
 
 void spectre_discon_active(int client)

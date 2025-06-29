@@ -272,6 +272,11 @@ public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &
             }
         }
 
+        case combo_key:
+        {
+            return Plugin_Handled;
+        }
+
         case race:
         {
             return Plugin_Handled;
@@ -733,7 +738,6 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
         return Plugin_Continue;
     }
 
-
     switch(slots[id].type)
     {
         case knife_fight:
@@ -783,6 +787,15 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
                     int partner = slots[id].partner;
                     ForcePlayerSuicide(slots[partner].client);
                 }
+            }
+        }
+
+
+        case combo_key:
+        {
+            if(slots[id].state == lr_active)
+            {
+                check_button(id,buttons);
             }
         }
     }

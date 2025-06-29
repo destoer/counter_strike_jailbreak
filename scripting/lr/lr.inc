@@ -24,14 +24,15 @@ enum lr_type
     custom,
     rebel,
     knife_rebel,
+    combo_key,
 
     // this is an invalid entry if we get this we have trouble
     slot_error,
 }
 
 
-const int LR_SIZE = 18;
-#define LR_SIZE_ACTUAL 17
+const int LR_SIZE = 19;
+#define LR_SIZE_ACTUAL 18
 new const String:lr_list[LR_SIZE][] =
 {	
     "Knife fight",
@@ -51,6 +52,7 @@ new const String:lr_list[LR_SIZE][] =
     "Custom",
     "Rebel",
     "Knife rebel",
+    "Combo key",
     "Error"
 /*
     "Race",

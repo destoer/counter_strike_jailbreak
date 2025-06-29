@@ -284,6 +284,20 @@ stock void set_clip_ammo(int client, int weapon, int ammo)
 	}
 }
 
+stock int population_count(int value)
+{
+	int count = 0;
+
+	for(int i = 0; i < 32; i++)
+	{
+		if(value & (1 << i))
+		{
+			count++;
+		}
+	}
+
+	return count;
+}
 
 stock void set_reserve_ammo(int client, int weapon, int ammo)
 {

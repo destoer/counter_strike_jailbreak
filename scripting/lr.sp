@@ -7,7 +7,7 @@
 #include "lib.inc"
 
 #define PLUGIN_AUTHOR "destoer(organ harvester)"
-#define PLUGIN_VERSION "V0.3.6 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V0.3.7 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -57,6 +57,7 @@ new const String:lr_win_field[LR_SIZE_ACTUAL][] =
     "Custom_Win",
     "Rebel_Win",
     "Knife_rebel_Win",
+    "Combo_key_Win",
 };
 
 
@@ -79,6 +80,7 @@ new const String:lr_loss_field[LR_SIZE_ACTUAL][] =
     "Custom_Loss",
     "Rebel_Loss",
     "Knife_rebel_Loss",
+    "Combo_key_Loss",
 };
 
 enum lr_state 
@@ -96,6 +98,11 @@ enum struct LrSlot
     int option;
 
     int weapon;
+
+    int combo_buttons[16];
+    int current_button;
+    int button_size;
+    int buttons_old;
 
     float pos[3];
     float gun_pos[3];
@@ -227,6 +234,7 @@ public int WeaponHandler(Menu menu, MenuAction action, int client, int param2)
 #include "lr/race.sp"
 #include "lr/sumo.sp"
 #include "lr/rebel.sp"
+#include "lr/combo_key.sp"
 #include "lr/crash.sp"
 #include "lr/custom.sp"
 #include "lr/config.sp"
@@ -469,6 +477,9 @@ void end_lr(LrSlot slot)
 
     slot.crash_stop = -1;
     slot.dropped_last = -1;
+
+    slot.current_button = 0;
+    slot.button_size = 0;
 
     end_line(slot);
 }
@@ -737,6 +748,11 @@ public Action start_lr_callback(Handle timer, int id)
             start_race(t_slot,ct_slot);
         }
 
+        case combo_key:
+        {
+            start_combo_key(t_slot,ct_slot);
+        }
+
         case slot_error:
         {
             PrintToConsole(console,"%s An error has occured in picking an lr");
@@ -865,7 +881,7 @@ bool command_lr_internal(int client)
         return true;
     }
 
-    if(GetTime() - start_timestamp < 15)
+    if(GetTime() - start_timestamp < 15 && !is_sudoer(client))
     {
         int remain = 15 - (GetTime() - start_timestamp);
 

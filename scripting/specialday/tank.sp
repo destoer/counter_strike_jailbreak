@@ -33,7 +33,10 @@ void end_tank()
 {
 	PrintToChatAll("%s Tank day over", SPECIALDAY_PREFIX);
 	RestoreTeams();
-	SetEntityRenderColor(global_ctx.boss, 255, 255, 255, 255);
+	if(is_valid_client(global_ctx.boss))
+	{
+		SetEntityRenderColor(global_ctx.boss, 255, 255, 255, 255);
+	}
 }
 
 

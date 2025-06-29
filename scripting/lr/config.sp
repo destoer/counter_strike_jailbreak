@@ -26,6 +26,7 @@ new const String:lr_enable_name[LR_SIZE_ACTUAL][] =
     "lr_custom_enable",
     "lr_rebel_enable",
     "lr_knife_rebel_enable",
+    "lr_combo_key_enable",
 }
 
 ConVar lr_enable_cvar[LR_SIZE_ACTUAL];
