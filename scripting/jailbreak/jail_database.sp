@@ -87,7 +87,19 @@ public void T_load_warden_from_db(Database db, DBResultSet results, const char[]
     results.FieldNameToNum("tag", field);
     char tag[64]
     results.FetchString(field,tag,sizeof(tag));
-    Format(warden_info[client].custom_tag,sizeof(warden_info[client].custom_tag),"\x04[%s]\x0700BFFF",tag);
+
+    // Use the default tag
+    if(StrEqual(tag,""))
+    {
+        Format(WARDEN_PLAYER_PREFIX,PREFIX_SIZE,"\x04%s\x0700BFFF",WARDEN_PLAYER_PREFIX);
+    }
+
+    // Use the custom one
+    else
+    {
+        Format(warden_info[client].custom_tag,sizeof(warden_info[client].custom_tag),"\x04[%s]\x0700BFFF",tag);
+    }
+
 
     results.FieldNameToNum("wins", field);
     warden_info[client].wins = results.FetchInt(field);
