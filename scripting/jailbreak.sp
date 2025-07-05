@@ -34,7 +34,7 @@ TODO make all names consistent
 //#define VOICE_ANNOUNCE_HOOK
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi, ashort"
-#define PLUGIN_VERSION "V3.8.2 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.8.3 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -584,6 +584,8 @@ public OnPluginStart()
 
 	RegConsoleCmd("wm",tmp_warden_mute);
 
+	RegConsoleCmd("warden_stats",warden_stats);
+
 	if(gun_commands)
 	{
 		RegConsoleCmd("wempty", empty_menu);
@@ -603,6 +605,8 @@ public OnPluginStart()
 	RegAdminCmd("block", enable_block_admin, ADMFLAG_BAN);
 	RegAdminCmd("ublock",disable_block_admin, ADMFLAG_BAN);	
 	RegAdminCmd("force_open", force_open_callback, ADMFLAG_UNBAN);
+
+	RegAdminCmd("set_warden_tag",set_warden_tag_command,ADMFLAG_UNBAN);
 
 	if(laser_death)
 	{
@@ -712,6 +716,33 @@ void explode(int client)
 	ForcePlayerSuicide(client);
 }
 
+public Action warden_stats(int client, int args)
+{
+	PrintToChat(client,"%s Warden wins: %d",WARDEN_PREFIX,warden_info[client].wins);
+	
+	return Plugin_Handled;
+}
+
+public Action set_warden_tag_command(int client, int args)
+{
+    if(GetCmdArgs() != 2)
+    {
+        PrintToChat(client,"%s Usage: <steamid3> <tag>",WARDEN_PREFIX);
+        return Plugin_Handled;
+    }
+
+    char steamid[64];
+    GetCmdArg(1,steamid,sizeof(steamid));
+
+	char tag[64];
+	GetCmdArg(2,tag,sizeof(tag));
+
+	update_warden_tag(steamid,tag);
+	PrintToChat(client,"%s Set tag for %s to %s",WARDEN_PREFIX,steamid,tag);
+
+	return Plugin_Handled;
+}
+
 public Action kill_command(int client, const char[] command, int args) 
 {
 	if(!is_valid_client(client) || !IsPlayerAlive(client))
@@ -735,6 +766,9 @@ public Action player_team(Event event, const char[] name, bool dontBroadcast)
 	{
 		return Plugin_Continue;
 	}
+
+    // extra load
+    load_warden_info_from_db(client);
 
 	int team = GetEventInt(event, "team");
 
@@ -1194,6 +1228,11 @@ public Action round_end(Handle event, const String:name[], bool dontBroadcast)
 	{
 		kill_handle(mute_timer);
 		unmute_all(true);
+	}
+
+	if(global_ctx.warden_id != WARDEN_INVALID && is_valid_client(global_ctx.warden_id) && IsPlayerAlive(global_ctx.warden_id))
+	{
+		warden_win(global_ctx.warden_id);
 	}
 
 	kill_handle(cell_auto_timer);

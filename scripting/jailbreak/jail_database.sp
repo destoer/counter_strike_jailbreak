@@ -2,7 +2,7 @@ Handle cell_auto_timer;
 
 enum struct WardenInfo
 {
-    char custom_tag[64];
+    char custom_tag[128];
     int wins;
     bool banned;
 }
@@ -37,7 +37,7 @@ void add_warden_db_client(int client)
     }
 
     char query[256];
-    SQL_FormatQuery(database,query,sizeof(query),"INSERT IGNORE INTO warden (steamid,tag,wins) VALUES ('%s' ,'%s','%d','%s')",steam_id,"",0,"false");
+    SQL_FormatQuery(database,query,sizeof(query),"INSERT IGNORE INTO warden (steamid,tag,wins,banned) VALUES ('%s' ,'%s','%d','%s')",steam_id,"",0,"false");
 
     //PrintToServer("Query: %s\n",query);
 
@@ -45,6 +45,18 @@ void add_warden_db_client(int client)
     SQL_TQuery(database,T_QueryGeneric,query,client);    
 }
 
+
+void update_warden_tag(char[] steamid, char[] tag)
+{
+    if(!database)
+    {
+        return;
+    }
+
+    char query[256];
+    SQL_FormatQuery(database,query,sizeof(query),"UPDATE warden set TAG = '%s' where steamid = '%s'",tag,steamid);
+    SQL_TQuery(database,T_QueryGeneric,query,0);  
+}
 
 public void T_load_warden_from_db(Database db, DBResultSet results, const char[] error, int client)
 {
@@ -73,7 +85,9 @@ public void T_load_warden_from_db(Database db, DBResultSet results, const char[]
     // fetch win
     int field;
     results.FieldNameToNum("tag", field);
-    results.FetchString(field,warden_info[client].custom_tag,sizeof(warden_info[client].custom_tag));
+    char tag[64]
+    results.FetchString(field,tag,sizeof(tag));
+    Format(warden_info[client].custom_tag,sizeof(warden_info[client].custom_tag),"\x04[%s]\x0700BFFF",tag);
 
     results.FieldNameToNum("wins", field);
     warden_info[client].wins = results.FetchInt(field);
@@ -145,6 +159,29 @@ public void OnButtonPressed(const char[] output, int button, int activator, floa
         }
     }
     
+}
+
+void warden_win(int client)
+{
+    if(!is_valid_client(client) || database == null)
+    {
+        return;
+    }
+
+    warden_info[client].wins += 1;
+    PrintToChatAll("%s %N has won as warden %d times",WARDEN_PREFIX,client,warden_info[client].wins);
+
+    char query[256];
+
+    char steam_id[40];
+    if(!GetClientAuthId(client,AuthId_Engine,steam_id,sizeof(steam_id)))
+    {
+        PrintToServer("Could not get auth id");
+        return;
+    }
+
+    SQL_FormatQuery(database,query,sizeof(query),"UPDATE warden SET wins = wins + 1 WHERE steamid = '%s'",steam_id);
+    SQL_TQuery(database,T_QueryGeneric,query,client);
 }
 
 void force_cell_doors()
