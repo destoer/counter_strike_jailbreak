@@ -1,5 +1,115 @@
 Handle cell_auto_timer;
 
+enum struct WardenInfo
+{
+    char custom_tag[64];
+    int wins;
+    bool banned;
+}
+
+WardenInfo warden_info[64];
+
+Database database = null;
+
+void default_warden_info(int client)
+{
+    if(!is_valid_client(client))
+    {
+        return;
+    }
+
+
+    strcopy(warden_info[client].custom_tag,sizeof(warden_info[client].custom_tag),"");
+}
+
+void add_warden_db_client(int client)
+{
+    if(!is_valid_client(client) || !database)
+    {
+        return;
+    }
+
+    char steam_id[40];
+    if(!GetClientAuthId(client,AuthId_Engine,steam_id,sizeof(steam_id)))
+    {
+        PrintToServer("Could not get auth id");
+        return;
+    }
+
+    char query[256];
+    SQL_FormatQuery(database,query,sizeof(query),"INSERT IGNORE INTO warden (steamid,tag,wins) VALUES ('%s' ,'%s','%d','%s')",steam_id,"",0,"false");
+
+    //PrintToServer("Query: %s\n",query);
+
+    // perform the query
+    SQL_TQuery(database,T_QueryGeneric,query,client);    
+}
+
+
+public void T_load_warden_from_db(Database db, DBResultSet results, const char[] error, int client)
+{
+    if (db == null || results == null || error[0] != '\0')
+    {
+        LogError("Query failed! %s", error);
+    }
+
+    // nothing to do
+    if(!is_valid_client(client))
+    {
+        return;
+    }    
+
+    // this user is new, go add them
+    if(!results.RowCount)
+    {
+        add_warden_db_client(client);
+        return;        
+    }
+
+    //PrintToServer("Fetched results %d : %d\n",results.RowCount,results.FieldCount);
+
+    results.FetchRow();
+
+    // fetch win
+    int field;
+    results.FieldNameToNum("tag", field);
+    results.FetchString(field,warden_info[client].custom_tag,sizeof(warden_info[client].custom_tag));
+
+    results.FieldNameToNum("wins", field);
+    warden_info[client].wins = results.FetchInt(field);
+}
+
+void load_warden_info_from_db(int client)
+{
+    if(!database || !is_valid_client(client))
+    {
+        return;
+    }
+
+    char query[256];
+
+    char steam_id[40];
+    if(!GetClientAuthId(client,AuthId_Engine,steam_id,sizeof(steam_id)))
+    {
+        PrintToServer("Could not get auth id");
+        return;
+    }
+
+    // setup our query
+    SQL_FormatQuery(database,query,sizeof(query),"SELECT * FROM warden WHERE steamid = '%s'",steam_id);
+
+    //PrintToServer("Query: %s\n",query);
+
+    // perform the query
+    SQL_TQuery(database,T_load_warden_from_db,query,client);
+}
+
+public Action load_warden_from_db_callback(Handle timer, int client)
+{
+    load_warden_info_from_db(client);
+    return Plugin_Continue;
+}
+
 int get_hammer_id(int entity)
 {
     return GetEntProp(entity, Prop_Data, "m_iHammerID");
@@ -130,12 +240,9 @@ public Action set_cell_button_cmd(int client, int args)
     return Plugin_Handled;
 }
 
-
-Database database = null;
-
 void database_connect()
 {
-    SQL_TConnect(T_Connect,"cell_door");
+    SQL_TConnect(T_Connect,"jailbreak");
 }
 
 public void T_Connect(DBDriver driver,Database db, const char[] error, any data)
@@ -157,6 +264,7 @@ public void T_Connect(DBDriver driver,Database db, const char[] error, any data)
     {
         // active setup db, just grab the door
         setup_door_id();
+
 
         delete db;
         return;
@@ -189,6 +297,9 @@ void setup_db()
     }
 
     SQL_TQuery(database,T_setup_done,"CREATE TABLE IF NOT EXISTS cell_door (map_name varchar(64) PRIMARY KEY,hammer_id int)");
+    SQL_TQuery(database,T_QueryGeneric,
+        "CREATE TABLE IF NOT EXISTS warden (steamid varchar(64) PRIMARY KEY,tag varchar(64) DEFAULT 'Warden', wins int DEFAULT 0, banned boolean DEFAULT false)"
+    );
 }
 
 

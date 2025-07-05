@@ -58,11 +58,11 @@ which uses SetCollisionGroup rather than SetEntProp to prevent physics breaking
 }
 
 
-"cell_door"
+"jailbreak"
 {
     "driver"			"default"
     "host"				"127.0.0.1"
-    "database"			"cell_door"
+    "database"			"jailbreak"
     "user"				"root"
     "pass"				"boop"
     //"timeout"			"0"

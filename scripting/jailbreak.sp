@@ -152,6 +152,8 @@ void init_player(int client)
 	jb_players[client].laser_color = 0;
 	jb_players[client].warden_text = false;
 	jb_players[client].draw_laser = false;
+
+	default_warden_info(client);
 }
 
 void reset_player(int client)
@@ -194,7 +196,7 @@ void reset_player(int client)
 #include "jailbreak/warday.sp"
 #include "jailbreak/circle.sp"
 #include "jailbreak/mute.sp"
-#include "jailbreak/door_control.sp"
+#include "jailbreak/jail_database.sp"
 
 
 int g_ExplosionSprite = -1;
@@ -425,6 +427,13 @@ public OnMapEnd()
 }
 
 
+public void OnClientAuthorized(int client, const char[] auth)
+{
+    default_warden_info(client);
+
+    CreateTimer(10.0,load_warden_from_db_callback,client,TIMER_FLAG_NO_MAPCHANGE);
+}
+
 // need to use this to be able to call client funcs
 // thanks tring
 public void OnClientPutInServer(int client)
@@ -513,6 +522,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 			Format(color2,strlen(color2),"\x06");
 		}
 
+		bool custom_tag = !StrEqual(warden_info[client].custom_tag,"");
 
 		if(sArgs[0] == '@')
 		{
@@ -521,7 +531,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 
 		else if (!StrEqual(command, "say_team"))
 		{    
-			PrintToChatAll("%s %N %s: %s%s", WARDEN_PLAYER_PREFIX, client,color1,color2, sArgs);
+			PrintToChatAll("%s %N %s: %s%s", custom_tag? warden_info[client].custom_tag : WARDEN_PLAYER_PREFIX, client,color1,color2, sArgs);
 			LogAction(client, -1, "[Warden] %N : %s", client, sArgs);
 			return Plugin_Handled;	
 		}
@@ -533,7 +543,8 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 			{
 				if (is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT && sArgs[0] != '@')
 				{
-					PrintToChat(i, "%s (Counter-Terrorist) %N %s: %s%s", WARDEN_PLAYER_PREFIX, client,color1,color2, sArgs);
+					PrintToChat(i, "%s (Counter-Terrorist) %N %s: %s%s",
+						custom_tag? warden_info[client].custom_tag : WARDEN_PLAYER_PREFIX, client,color1,color2, sArgs);
 					LogAction(client, -1, "[Warden CT] %N : %s", client, sArgs);
 				}
 			}
