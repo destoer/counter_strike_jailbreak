@@ -664,10 +664,6 @@ public Action start_lr_callback(Handle timer, int id)
         slots[id].timer = null;
     }
 
-    slots[t_slot].state = lr_active;
-    slots[ct_slot].state = lr_active;
-
-
     PrintCenterText(t,"Go!");
     PrintCenterText(ct,"Go!");
 
@@ -758,6 +754,10 @@ public Action start_lr_callback(Handle timer, int id)
             PrintToConsole(console,"%s An error has occured in picking an lr");
         }
     }
+
+
+    slots[t_slot].state = lr_active;
+    slots[ct_slot].state = lr_active;
 
     return Plugin_Continue;
 }

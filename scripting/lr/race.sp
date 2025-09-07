@@ -148,11 +148,6 @@ public int race_end_cord_handler(Menu end_menu, MenuAction action, int client, i
 
             pick_partner(client);
         }
-
-        else
-        {
-            delete end_menu;
-        }
     }
 
     else if (action == MenuAction_End)
@@ -180,11 +175,6 @@ public int race_start_cord_handler(Menu start_menu, MenuAction action, int clien
             end_menu.ExitButton = false;
 
             end_menu.Display(client,20);    
-        }
-
-        else
-        {
-            delete start_menu;
         }
     }
 

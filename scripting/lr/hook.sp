@@ -1,4 +1,4 @@
-// this seems overkill put the m_owner members aernt working..
+// this seems overkill but the m_owner members aernt working..
 int weapon_owner[2048];
 
 void purge_state()
@@ -260,6 +260,12 @@ public Action HookTraceAttack(int victim, int &attacker, int &inflictor, float &
 
     int id = get_slot(attacker);
     int partner = slots[id].partner;
+
+    // Prevent damage before LR starts
+    if(slots[id].state != lr_active)
+    {
+        return Plugin_Handled;
+    }
 
     switch(slots[id].type)
     {
