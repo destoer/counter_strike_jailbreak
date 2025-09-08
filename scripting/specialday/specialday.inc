@@ -30,6 +30,28 @@ enum SpecialDay
 };
 
 
+const int SD_SIZE = 16;
+new const String:sd_list[SD_SIZE][] =
+{	
+	"Friendly Fire Day", 
+	"Tank Day",
+	"Friendly Fire Juggernaut Day",
+	"Sky Wars",
+	"Hide and Seek",
+	"Dodgeball",
+	"Grenade",
+	"Zombie",
+	"Gun Game",
+	"Knife",
+	"Scout Knives",
+	"Death Match",
+	"Laser Wars",
+	"Spectre",
+	"Headshot",
+	"VIP",
+};
+
+
 enum SdState
 {
 	sd_started,
@@ -42,7 +64,8 @@ native SpecialDay sd_current_day();
 native void sd_start_custom_day();
 
 forward void OnWinSD(int client, SpecialDay type);
-
+forward void OnStartSD(SpecialDay type);
+forward void OnEndSD(SpecialDay type, bool forced);
 
 #define ROUND_WARDEN_SD 50
 #define ROUND_STACK_LIM 1

@@ -557,6 +557,17 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	return Plugin_Continue;
 }
 
+public void OnStartSD(SpecialDay type)
+{
+	PrintToServer("Sd start: %s",sd_list[type]);
+}
+
+public void OnEndSD(SpecialDay type, bool forced)
+{
+	PrintToServer("Sd ended: %s %s",sd_list[type],forced? "true" : "false");
+}
+
+
 // init the plugin
 public OnPluginStart()
 {

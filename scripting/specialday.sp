@@ -14,7 +14,7 @@
 //#define CUSTOM_ZOMBIE_MUSIC
 
 
-#define VERSION "3.1 - Violent Intent Jailbreak"
+#define VERSION "3.2 - Violent Intent Jailbreak"
 
 public Plugin myinfo = {
 	name = "Jailbreak Special Days",
@@ -26,7 +26,6 @@ public Plugin myinfo = {
 
 // todo
 // shotgun wars
-// human only fog on zombies
 
 
 // override duration of zombie sd
@@ -50,28 +49,6 @@ int store_kill_ammount_backup = 0;
 
 // gun menu
 Menu gun_menu;
-
-const int SD_SIZE = 16;
-new const String:sd_list[SD_SIZE][] =
-{	
-	"Friendly Fire Day", 
-	"Tank Day",
-	"Friendly Fire Juggernaut Day",
-	"Sky Wars",
-	"Hide and Seek",
-	"Dodgeball",
-	"Grenade",
-	"Zombie",
-	"Gun Game",
-	"Knife",
-	"Scout Knives",
-	"Death Match",
-	"Laser Wars",
-	"Spectre",
-	"Headshot",
-	"VIP",
-};
-
 
 
 void callback_dummy()
@@ -122,8 +99,12 @@ enum struct Context
 	SD_INIT_FUNC player_init;
 
 	Handle sd_win_forward;
+	Handle sd_start_forward;
+	Handle sd_end_forward;
 
 	bool sd_init_failure;
+
+	int old_ignore_nade_radio;
 
 	// how long till sd starts?
 	int sd_timer;
@@ -177,6 +158,8 @@ void reset_context()
 	global_ctx.sd_timer = 15;
 
 	global_ctx.sd_init_failure = false;
+
+	global_ctx.old_ignore_nade_radio = 0;
 
 	global_ctx.player_init = sd_player_init_invalid;
 
@@ -420,6 +403,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("sd_current_day", native_current_day);
 
 	global_ctx.sd_win_forward = CreateGlobalForward("OnWinSD",ET_Ignore,Param_Cell,Param_Cell);
+	global_ctx.sd_start_forward = CreateGlobalForward("OnStartSD",ET_Ignore,Param_Cell);
+	global_ctx.sd_end_forward = CreateGlobalForward("OnEndSD",ET_Ignore,Param_Cell,Param_Cell);
 
 	return APLRes_Success;
 }
@@ -890,6 +875,36 @@ int get_client_max_kills()
 	return cli;
 }
 
+void sd_end_forward(bool forced)
+{
+	// Trigger End forward
+	Call_StartForward(global_ctx.sd_end_forward);
+	Call_PushCell(global_ctx.special_day);
+	Call_PushCell(forced);
+	int unused;
+	Call_Finish(unused);
+}
+
+void sd_start_forward()
+{
+	// Trigger Start forward
+	Call_StartForward(global_ctx.sd_start_forward);
+	Call_PushCell(global_ctx.special_day);
+	int unused;
+	Call_Finish(unused);
+}
+
+void unmute_nades()
+{
+	// Unmute Fire In the Hole
+	Handle ignore_grenade_radio_cvar = FindConVar("sv_ignoregrenaderadio");
+
+	if(ignore_grenade_radio_cvar)
+	{
+		SetConVarInt(ignore_grenade_radio_cvar,global_ctx.old_ignore_nade_radio);
+	}
+}
+
 void EndSd(bool forced=false)
 {
 	// no sd running we dont need to do anything
@@ -897,6 +912,10 @@ void EndSd(bool forced=false)
 	{
 		return;
 	}
+
+	sd_end_forward(forced);
+
+	unmute_nades();
 
 	if(forced)
 	{
@@ -1425,6 +1444,18 @@ public int SdHandler(Menu menu, MenuAction action, int client, int param2)
 	return -1;
 }
 
+void mute_nades()
+{
+	// Mute Fire In the Hole
+	Handle ignore_grenade_radio_cvar = FindConVar("sv_ignoregrenaderadio");
+
+	if(ignore_grenade_radio_cvar)
+	{
+		global_ctx.old_ignore_nade_radio = GetConVarInt(ignore_grenade_radio_cvar);
+		SetConVarInt(ignore_grenade_radio_cvar,1);
+	}
+}
+
 public int sd_select(int client, int sd)
 {
 	if(global_ctx.sd_state != sd_inactive) // if sd is active dont allow two
@@ -1441,6 +1472,7 @@ public int sd_select(int client, int sd)
 	// special done begun but not active
 	global_ctx.sd_state = sd_started; 
 
+	mute_nades();
 
 	if(standalone)
 	{
@@ -1600,14 +1632,15 @@ public StartSD()
 			SetConVarBool(nade_var,false);
 		}
 	}
-
-
+	
 	// incase we cancel our sd
 	if(global_ctx.sd_state == sd_inactive)
 	{
 		return;
 	}
 	
+	sd_start_forward();
+
 	global_ctx.sd_state = sd_active;
 
 	if(gangs)
