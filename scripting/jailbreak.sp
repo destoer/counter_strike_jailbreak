@@ -337,13 +337,22 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	return Plugin_Continue;
 }
 
+bool can_warden(int client)
+{
+	return GetClientTeam(client) == CS_TEAM_CT && IsPlayerAlive(client) && global_ctx.warden_id == WARDEN_INVALID;
+}
 
 void voice_internal(int client)
 {
-	if(voice && GetClientTeam(client) == CS_TEAM_CT && IsPlayerAlive(client) && global_ctx.warden_id == WARDEN_INVALID)
+	if(!voice || !is_valid_client(client))
+	{
+		return;
+	}
+
+	if(can_warden(client))
 	{
 		set_warden(client);
-	}	
+	}
 }
 
 #if defined VOICE_ANNOUNCE_HOOK

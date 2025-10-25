@@ -304,10 +304,14 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 	if(global_ctx.hp_steal)
 	{
 		int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-		// give the killer +100 hp
-		int health = GetClientHealth(attacker);
-		health += 100;
-		SetEntityHealth(attacker, health);
+		
+		if(is_valid_client(attacker))
+		{
+			// give the killer +100 hp
+			int health = GetClientHealth(attacker);
+			health += 100;
+			SetEntityHealth(attacker, health);
+		}
 	}
 	
 	if(global_ctx.sd_state == sd_inactive)
