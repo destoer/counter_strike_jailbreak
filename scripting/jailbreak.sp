@@ -79,6 +79,7 @@ enum struct Context
 	bool first_warden;
 
 	Handle warden_to_lr_forward;
+	Handle on_take_warden_forward;
 
 	int cell_door_hammer_id;
 
@@ -238,6 +239,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	MarkNativeAsOptional("in_lr");
 
 	global_ctx.warden_to_lr_forward = CreateGlobalForward("OnWardenToLR",ET_Ignore,Param_Cell);
+	global_ctx.on_take_warden_forward = CreateGlobalForward("OnTakeWarden",ET_Ignore,Param_Cell);
 
 	return APLRes_Success;
 }
@@ -569,6 +571,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 public void OnStartSD(SpecialDay type)
 {
 	PrintToServer("Sd start: %s",sd_list[type]);
+	global_ctx.ct_handicap = false;
 }
 
 public void OnEndSD(SpecialDay type, bool forced)
@@ -1045,7 +1048,7 @@ public print_warden_commands(int client)
 public set_warden(int client)
 {
 	// dont bother doing this on sds
-	if(sd_enabled() && sd_current_state() == sd_active)
+	if(sd_enabled() && sd_current_state() != sd_inactive)
 	{
 		return;
 	}
@@ -1058,11 +1061,16 @@ public set_warden(int client)
 
 
 	PrintCenterTextAll("New Warden: %N", client);
-	
+
 	PrintToChatAll("%s New Warden: %N", WARDEN_PREFIX, client);
 	
 	// set the actual warden
 	global_ctx.warden_id = client;
+
+	// inform that lr is now enabled
+	Call_StartForward(global_ctx.on_take_warden_forward);
+	Call_PushCell(global_ctx.warden_id);
+	Call_Finish();
 
 	// warden has been taken old orders stand!
 	kill_handle(global_ctx.command_end_timer);
@@ -1191,25 +1199,28 @@ public Action player_spawn(Handle event, const String:name[], bool dontBroadcast
 			unmute_client(client);
 		}
 
-		if(!sd_enabled() || sd_enabled() && sd_current_state() == sd_inactive)
+		if(sd_enabled() && sd_current_state() != sd_inactive)
 		{
-		
-			//taking this information off clients is not functioning reliably
-		
-			// ignore clients setting as its unreliable
-			// the first round we cant rely on it to be set as there are no players
-			// apparently hoping a empty team join will force a round reset aint good enough
-			
-			if(block_state)
-			{
-				block_client(client);
-			}
-
-			else
-			{
-				unblock_client(client);
-			}		
+			return Plugin_Continue;
 		}
+
+		
+		//taking this information off clients is not functioning reliably
+	
+		// ignore clients setting as its unreliable
+		// the first round we cant rely on it to be set as there are no players
+		// apparently hoping a empty team join will force a round reset aint good enough
+		
+		if(block_state)
+		{
+			block_client(client);
+		}
+
+		else
+		{
+			unblock_client(client);
+		}		
+		
 				
 		if(team == CS_TEAM_CT)
 		{
@@ -1413,14 +1424,24 @@ public void OnLREnabled()
 		// inform that lr is now enabled
 		Call_StartForward(global_ctx.warden_to_lr_forward);
 		Call_PushCell(global_ctx.warden_id);
-		int unused;
-		Call_Finish(unused);
+		Call_Finish();
 	}
 }
 
 public void OnWardenToLR(int client)
 {
 	PrintToChatAll("%s %N Was warden till LR!",WARDEN_PREFIX,client);
+}
+
+public void OnTakeWarden(int client)
+{
+	for(int i = 0; i <= MaxClients; i++)
+	{
+		if(is_valid_client(i))
+		{
+			PrintToConsole(i,"%s %N is now the warden!",WARDEN_PREFIX,client);
+		}
+	}
 }
 
 void set_rebel(int client)

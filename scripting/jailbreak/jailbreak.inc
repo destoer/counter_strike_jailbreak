@@ -9,3 +9,4 @@ native int get_warden_id();
 native int remove_warden();
 
 forward void OnWardenToLR(int client);
+forward void OnTakeWarden(int client);
