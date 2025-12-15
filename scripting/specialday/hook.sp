@@ -204,61 +204,18 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 	// hook any sd damage modifications here
 	if(global_ctx.sd_state != sd_inactive)
 	{
-		switch(global_ctx.special_day)
+		SD_ON_TAKE_DAMAGE take_damage = sd_impl[global_ctx.special_day].sd_take_damage;
+		if(take_damage != null)
 		{
-		
-			case dodgeball_day:
-			{
-				// any damage kills 
-				// prevents cheaters from healing 
-				damage = 500.0;
-			}
+			Call_StartFunction(null, take_damage);
+			Call_PushCell(victim);
+			Call_PushCell(attacker)
+			Call_PushCell(damage);
+			Call_Finish();
 			
 			
-			case zombie_day:
-			{
-				if (!is_valid_client(attacker)) { return Plugin_Continue; }
-				
-				// knockback is way to overkill on csgo
-				if(GetClientTeam(victim) == CS_TEAM_T && GetClientTeam(attacker) == CS_TEAM_CT && GetEngineVersion() == Engine_CSS)
-				{
-
-					char weapon_name[64];
-					GetClientWeapon(attacker, weapon_name, sizeof(weapon_name));
-
-					// knife gives extra knockback
-					if(StrEqual(weapon_name,"weapon_knife"))
-					{
-						CreateKnockBack(victim, attacker, damage * 25);
-					}
-
-					else
-					{
-						CreateKnockBack(victim, attacker, damage);
-					}
-				}
-				
-
-				// patient zero instantly kills
-				else if(attacker == global_ctx.boss)
-				{
-					damage = 120.0;
-				}
-				
-			}
-			
-			// spectre instant kills everyone
-			case spectre_day:
-			{
-				if(attacker == global_ctx.boss)
-				{
-					damage = 120.0;
-				}	
-			}
-
-			default: {}
+			return Plugin_Changed;
 		}
-		return Plugin_Changed;
 	}
 
 	return Plugin_Continue;

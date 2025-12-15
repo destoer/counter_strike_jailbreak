@@ -86,7 +86,17 @@ public Action GiveFlash(Handle timer, int entity)
 	return Plugin_Continue;		
 }
 
+void dodgeball_take_damage(int victim, int client, float& damage)
+{
+	// prevent cheaters healing
+	damage = 500.0;
+}
+
 SpecialDayImpl dodgeball_impl()
 {
-	return make_sd_impl(dodgeball_init,start_dodgeball,callback_dummy,dodgeball_player_init)
+	SpecialDayImpl dodgeball;
+	dodgeball = make_sd_impl(dodgeball_init,start_dodgeball,callback_dummy,dodgeball_player_init);
+	dodgeball.sd_take_damage = dodgeball_take_damage;
+
+	return dodgeball;
 }

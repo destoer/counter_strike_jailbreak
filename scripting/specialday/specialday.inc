@@ -66,6 +66,7 @@ typedef SD_INIT = function void();
 typedef SD_PLAYER_INIT = function void(int client);
 typedef SD_BOSS_DISCON_ACTIVE = function void(int client);
 typedef SD_PLAYER_DEATH = function void(int attacker, int victim);
+typedef SD_ON_TAKE_DAMAGE = function void(int attacker, int victim, float &damage)
 
 enum struct SpecialDayImpl
 {
@@ -85,6 +86,9 @@ enum struct SpecialDayImpl
 
 	// Called on player death during active SD (not required)
 	SD_PLAYER_DEATH sd_player_death;
+
+	// Called when a player takes damage during SD (not required)
+	SD_ON_TAKE_DAMAGE sd_take_damage;
 }
 
 native SdState sd_current_state();

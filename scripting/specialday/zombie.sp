@@ -307,12 +307,47 @@ void zombie_death(int attacker, int victim)
 	}
 }
 
+void zombie_take_damage(int attacker, int victim, float& damage)
+{
+	if (!is_valid_client(attacker)) 
+	{ 
+		return;
+	}
+	
+	// knockback is way to overkill on csgo
+	if(GetClientTeam(victim) == CS_TEAM_T && GetClientTeam(attacker) == CS_TEAM_CT && GetEngineVersion() == Engine_CSS)
+	{
+
+		char weapon_name[64];
+		GetClientWeapon(attacker, weapon_name, sizeof(weapon_name));
+
+		// knife gives extra knockback
+		if(StrEqual(weapon_name,"weapon_knife"))
+		{
+			CreateKnockBack(victim, attacker, damage * 25);
+		}
+
+		else
+		{
+			CreateKnockBack(victim, attacker, damage);
+		}
+	}
+	
+
+	// patient zero instantly kills
+	else if(attacker == global_ctx.boss)
+	{
+		damage = 120.0;
+	}
+}
+
 SpecialDayImpl zombie_impl()
 {
 	SpecialDayImpl zombie;
 	zombie = make_sd_impl(init_zombie,start_zombie,end_zombie,zombie_player_init);
 	zombie.sd_discon_active = zombie_discon_active;
 	zombie.sd_player_death = zombie_death;
+	zombie.sd_take_damage = zombie_take_damage;
 
 	return zombie;
 }
