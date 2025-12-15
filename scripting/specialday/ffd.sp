@@ -27,16 +27,13 @@ void ffd_player_init(int client)
 void init_ffd()
 {
 	global_ctx.special_day = friendly_fire_day;
-	PrintToChatAll("%s Friendly fire day started.", SPECIALDAY_PREFIX);
-	
-	global_ctx.player_init = ffd_player_init;
-	
+	PrintToChatAll("%s Friendly fire day started.", SPECIALDAY_PREFIX);	
 	
 	// allow player to pick for 15 seconds
 	PrintToChatAll("%s Please 15 seconds for friendly fire to be enabled", SPECIALDAY_PREFIX);
 }
 
-public void StartFFD()
+public void start_ffd()
 {
 	PrintToChatAll("%s Friendly fire enabled",SPECIALDAY_PREFIX);
 	
@@ -54,4 +51,9 @@ public void StartFFD()
 public void end_ffd()
 {
 
+}
+
+SpecialDayImpl ffd_impl()
+{
+	return make_sd_impl(init_ffd,start_ffd,end_ffd,ffd_player_init);
 }

@@ -16,9 +16,7 @@ void spectre_init()
 {
 	PrintToChatAll("%s spectre day started", SPECIALDAY_PREFIX);
 	global_ctx.special_day = spectre_day;
-	global_ctx.player_init = spectre_player_init;
-	
-	
+		
 	// save teams so we can swap them back later and select the "spectre"
 	SaveTeams(true);
 	
@@ -49,7 +47,7 @@ public void MakeSpectre(int client)
 	PrintCenterTextAll("%N is the SPECTRE!", client);		
 }
 
-public void StartSpectre()
+public void start_spectre()
 {
 
 	// swap everyone other than the tank to the t side
@@ -92,4 +90,9 @@ void spectre_discon_active(int client)
 	pick_boss_discon(client)
 	
 	MakeSpectre(global_ctx.boss);
+}
+
+SpecialDayImpl spectre_impl()
+{
+	return make_sd_impl(spectre_init,start_spectre,end_spectre,spectre_player_init);
 }

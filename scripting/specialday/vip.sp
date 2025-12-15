@@ -37,7 +37,6 @@ void vip_init()
 	PrintToChatAll("%s vip day started", SPECIALDAY_PREFIX);
     PrintToChatAll("%s Protect the vip for your team!",SPECIALDAY_PREFIX);
 	global_ctx.special_day = vip_day;
-	global_ctx.player_init = vip_player_init;
 	
 	BalTeams();
 }
@@ -82,7 +81,7 @@ void pick_ct_vip()
     give_vip(ct_vip);
 }
 
-public void StartVip()
+public void start_vip()
 {
 	start_round_delay(240);
 	CreateTimer(1.0, RemoveGuns);
@@ -134,4 +133,9 @@ void vip_death(int attacker,int victim)
         PrintToChat(victim,"%s You will respawn in 20 seconds\n",SPECIALDAY_PREFIX);
         CreateTimer(10.0, ReviveVip, victim);
     }
+}
+
+SpecialDayImpl vip_impl()
+{
+    return make_sd_impl(vip_init,start_vip,callback_dummy,vip_player_init);
 }

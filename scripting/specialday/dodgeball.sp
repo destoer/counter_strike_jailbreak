@@ -23,12 +23,11 @@ void dodgeball_init()
 	CreateTimer(1.0, RemoveGuns);
 	global_ctx.special_day = dodgeball_day;
 
-	global_ctx.player_init = dodgeball_player_init;
 	global_ctx.weapon_restrict = "weapon_flashbang";
 }
 
 
-public void StartDodgeball()
+public void start_dodgeball()
 {
 
 	PrintCenterTextAll("Dodgeball active!");
@@ -85,4 +84,9 @@ public Action GiveFlash(Handle timer, int entity)
 	}
 
 	return Plugin_Continue;		
+}
+
+SpecialDayImpl dodgeball_impl()
+{
+	return make_sd_impl(dodgeball_init,start_dodgeball,callback_dummy,dodgeball_player_init)
 }

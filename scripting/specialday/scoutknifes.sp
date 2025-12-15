@@ -41,10 +41,9 @@ void scoutknife_init()
 {
 	PrintToChatAll("%s scout knife day started", SPECIALDAY_PREFIX);
 	global_ctx.special_day = scoutknife_day;
-	global_ctx.player_init = scout_player_init;
 }
 
-public void StartScout()
+public void start_scout()
 {
 	start_round_delay(90);
 	CreateTimer(1.0, RemoveGuns);
@@ -66,4 +65,9 @@ void scoutknife_death(int attacker,int victim)
 {
 	CreateTimer(3.0, ReviveScout, victim);
 	sd_players[attacker].kills++;
+}
+
+SpecialDayImpl scoutknife_impl()
+{
+	return make_sd_impl(scoutknife_init,start_scout,end_scout,scout_player_init);
 }

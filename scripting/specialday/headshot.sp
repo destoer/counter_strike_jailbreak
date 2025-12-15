@@ -6,17 +6,12 @@
 #endif
 #define HEADSHOT_INCLUDE_included
 
-void StartHeadshot()
-{
-	
-}
 
 void headshot_init()
 {
 	global_ctx.special_day = headshot_day;
 	PrintToChatAll("%s headshot day started.", SPECIALDAY_PREFIX);
 	
-	global_ctx.player_init = headshot_player_init;
 	global_ctx.weapon_restrict = "weapon_deagle";
 }
 
@@ -30,4 +25,9 @@ void headshot_player_init(int client)
 	// give them plenty of deagle ammo
 	int weapon = GetPlayerWeaponSlot(client, CS_SLOT_SECONDARY);
 	set_reserve_ammo(client, weapon, 999);
+}
+
+SpecialDayImpl headshot_impl()
+{
+	return make_sd_impl(headshot_init,callback_dummy,callback_dummy,headshot_player_init);
 }

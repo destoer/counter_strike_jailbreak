@@ -44,7 +44,6 @@ void init_gungame()
 		gungame_gun_idx[idx] = tmp;
 	}
 		
-	global_ctx.player_init = gun_game_player_init;
 	BalTeams();
 }
 
@@ -89,7 +88,7 @@ public Action ReviveGunGame(Handle timer, int client)
 	return Plugin_Continue;		
 }
 
-public void StartGunGame()
+public void start_gungame()
 {
 	PrintCenterTextAll("Gun game active");
 	disable_round_end();
@@ -167,4 +166,9 @@ public void end_gungame()
 {
 	enable_round_end();
 	RestoreTeams();	
+}
+
+SpecialDayImpl gungame_impl()
+{
+	return make_sd_impl(init_gungame,start_gungame,init_gungame,gun_game_player_init);
 }

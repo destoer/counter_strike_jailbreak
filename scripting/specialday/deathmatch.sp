@@ -37,13 +37,12 @@ void deathmatch_init()
 {
 	PrintToChatAll("%s deathmatch day started", SPECIALDAY_PREFIX);
 	global_ctx.special_day = deathmatch_day;
-	global_ctx.player_init = deathmatch_player_init;
 	
 	BalTeams();
 }	
 
 
-public void StartDeathMatch()
+public void start_deathmatch()
 {
 	start_round_delay(90);
 	CreateTimer(1.0, RemoveGuns);
@@ -66,4 +65,9 @@ void deathmatch_death(int attacker, int victim)
 {
 	CreateTimer(3.0, ReviveDeathMatch, victim);
 	sd_players[attacker].kills++;
+}
+
+SpecialDayImpl deathmatch_impl()
+{
+	return make_sd_impl(deathmatch_init,start_deathmatch,end_deathmatch,deathmatch_player_init);
 }

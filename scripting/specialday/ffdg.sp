@@ -8,19 +8,17 @@
 
 
 // ffdg
-void ffdg_player_init(int client)
+void juggernaut_player_init(int client)
 {
 	WeaponMenu(client);
 }
 
 
-void init_ffdg()
+void init_juggernaut()
 {
 	global_ctx.hp_steal = true; 
 	global_ctx.special_day = juggernaut_day;
 	PrintToChatAll("%s Friendly fire juggernaut day  started.", SPECIALDAY_PREFIX);
-	
-	global_ctx.player_init = ffdg_player_init;
 	
 	
 	// allow player to pick for 20 seconds
@@ -28,7 +26,7 @@ void init_ffdg()
 	
 }
 
-StartJuggernaut()
+void start_juggernaut()
 {
 	PrintToChatAll("%s Friendly fire enabled",SPECIALDAY_PREFIX);
 	
@@ -38,4 +36,9 @@ StartJuggernaut()
 public void end_juggernaut()
 {
 
+}
+
+SpecialDayImpl juggernaut_impl() 
+{
+	return make_sd_impl(init_juggernaut,start_juggernaut,end_juggernaut,juggernaut_player_init)
 }

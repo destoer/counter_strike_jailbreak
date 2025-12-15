@@ -59,6 +59,26 @@ enum SdState
 	sd_inactive
 };
 
+
+typedef SD_START = function void();
+typedef SD_END = function void();
+typedef SD_INIT = function void();
+typedef SD_PLAYER_INIT = function void(int client);
+
+enum struct SpecialDayImpl
+{
+	// called on sd start (required)
+	SD_START sd_start;
+	// called on sd init (required)
+	SD_INIT sd_init;
+	// called on special day end (required)
+	SD_END sd_end;
+
+	// function pointer set to tell us how to handle initialize players on sds
+	// Can be null;
+	SD_PLAYER_INIT sd_player_init;
+}
+
 native SdState sd_current_state();
 native SpecialDay sd_current_day();
 native void sd_start_custom_day();

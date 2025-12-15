@@ -138,8 +138,6 @@ void init_zombie()
 	PrintToChatAll("%s zombie day started", SPECIALDAY_PREFIX);
 	CreateTimer(1.0, RemoveGuns); 
 	global_ctx.special_day = zombie_day;
-
-	global_ctx.player_init = zombie_player_init;
 }
 
 
@@ -195,7 +193,7 @@ public void MakePatientZero(int client)
 	PrintCenterTextAll("%N is patient zero!", client);
 }
 
-public void StartZombie()
+public void start_zombie()
 {
 	// swap everyone other than the patient zero to the t side
 	// if they were allready in ct or t
@@ -307,4 +305,9 @@ void zombie_death(int victim)
 		enable_round_end();
 		slay_all();		
 	}
+}
+
+SpecialDayImpl zombie_impl()
+{
+	return make_sd_impl(init_zombie,start_zombie,end_zombie,zombie_player_init);
 }

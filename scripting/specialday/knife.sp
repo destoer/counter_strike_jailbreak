@@ -19,12 +19,16 @@ void knife_init()
 	PrintToChatAll("%s knife day started", SPECIALDAY_PREFIX);
 	
 	global_ctx.special_day = knife_day;
-	global_ctx.player_init = knife_player_init;
 	global_ctx.weapon_restrict = "weapon_knife";
 }
 
-public void StartKnife()
+public void start_knife()
 {
 	PrintCenterTextAll("Knife day active");
 	CreateTimer(1.0, RemoveGuns);
+}
+
+SpecialDayImpl knife_impl()
+{
+	return make_sd_impl(knife_init,start_knife,callback_dummy,knife_player_init);
 }
