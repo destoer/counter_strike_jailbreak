@@ -72,12 +72,18 @@ bool scoutknife_restrict_weapon(int client, char[] weapon_string)
 	return StrEqual(weapon_string,"weapon_scout") || StrEqual(weapon_string,"weapon_knife") || StrEqual(weapon_string,"weapon_ssg08");
 }
 
+void scoutknife_fix_ladder(int client)
+{
+	scout_player_init(client);
+}
+
 SpecialDayImpl scoutknife_impl()
 {
 	SpecialDayImpl scout_knife
 	scout_knife = make_sd_impl(scoutknife_init,start_scout,end_scout,scout_player_init);
 	scout_knife.sd_player_death = scoutknife_death;
 	scout_knife.sd_restrict_weapon = scoutknife_restrict_weapon;
+	scout_knife.sd_fix_ladder = scoutknife_fix_ladder;
 
 	return scout_knife;
 }

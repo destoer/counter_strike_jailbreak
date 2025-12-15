@@ -384,40 +384,12 @@ public Action check_movement(Handle Timer)
 			MoveType old_type = player_last_movement_type[client];
 			if(cur_type != old_type && old_type == MOVETYPE_LADDER)
 			{
-				switch(global_ctx.special_day)
+				SD_FIX_LADDER fix_ladder = sd_impl[global_ctx.special_day].sd_fix_ladder;
+				if(fix_ladder != null)
 				{
-					
-					case zombie_day:
-					{
-						if(GetClientTeam(client) == CS_TEAM_T && global_ctx.sd_state == sd_active)
-						{
-							set_zombie_speed(client);
-						}
-					}
-					
-					// we use a button toggle i dont think we need this anymore
-					case fly_day:
-					{
-						//client_fly(client);
-					}
-
-
-					case dodgeball_day: 
-					{
-						sd_player_init(client);
-					}
-					
-					case grenade_day: 
-					{
-						sd_player_init(client);
-					}					
-
-					case scoutknife_day: 
-					{
-						sd_player_init(client);
-					}
-					
-					default: {}
+					Call_StartFunction(null, fix_ladder);
+					Call_PushCell(client);
+					Call_Finish();
 				}
 			}
 			

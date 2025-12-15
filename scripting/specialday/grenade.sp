@@ -74,7 +74,16 @@ public Action GiveGrenade(Handle timer, any entity)
 	return Plugin_Continue;	
 }
 
+void grenade_fix_ladder(int client)
+{
+	grenade_player_init(client)
+}
+
 SpecialDayImpl grenade_impl()
 {
-	return make_sd_impl(grenade_init,start_grenade,callback_dummy,grenade_player_init);
+	SpecialDayImpl grenade;
+	grenade = make_sd_impl(grenade_init,start_grenade,callback_dummy,grenade_player_init);
+	grenade.sd_fix_ladder = grenade_fix_ladder;
+
+	return grenade;
 }

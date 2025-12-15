@@ -196,6 +196,7 @@ SpecialDayImpl make_sd_impl(SD_INIT sd_init, SD_START sd_start, SD_END sd_end, S
 	out.sd_player_death = null;
 	out.sd_take_damage = null;
 	out.sd_restrict_weapon = null;
+	out.sd_fix_ladder = null;
 
 	return out;
 }

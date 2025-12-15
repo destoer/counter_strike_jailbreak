@@ -354,6 +354,14 @@ bool zombie_restrict_weapon(int client, char[] weapon_string)
 	return true;
 }
 
+void zombie_fix_ladder(int client)
+{
+	if(GetClientTeam(client) == CS_TEAM_T && global_ctx.sd_state == sd_active)
+	{
+		set_zombie_speed(client);
+	}
+}
+
 SpecialDayImpl zombie_impl()
 {
 	SpecialDayImpl zombie;
@@ -362,6 +370,7 @@ SpecialDayImpl zombie_impl()
 	zombie.sd_player_death = zombie_death;
 	zombie.sd_take_damage = zombie_take_damage;
 	zombie.sd_restrict_weapon = zombie_restrict_weapon;
+	zombie.sd_fix_ladder = zombie_fix_ladder;
 
 	return zombie;
 }

@@ -92,11 +92,17 @@ void dodgeball_take_damage(int victim, int client, float& damage)
 	damage = 500.0;
 }
 
+void dodgeball_fix_ladder(int client)
+{
+	dodgeball_player_init(client);
+}
+
 SpecialDayImpl dodgeball_impl()
 {
 	SpecialDayImpl dodgeball;
 	dodgeball = make_sd_impl(dodgeball_init,start_dodgeball,callback_dummy,dodgeball_player_init);
 	dodgeball.sd_take_damage = dodgeball_take_damage;
+	dodgeball.sd_fix_ladder = dodgeball_fix_ladder;
 
 	return dodgeball;
 }
