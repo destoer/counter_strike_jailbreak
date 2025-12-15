@@ -56,12 +56,6 @@ void callback_dummy()
 
 }
 
-
-//typedef SD_
-
-// for some reason we cannot just init these with an initalizer
-// so we do it in a func...
-// + 1 FOR CUSTOM SD
 ArrayList sd_impl;
 
 SpecialDayImpl get_sd_impl(int index)
@@ -423,8 +417,15 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	return APLRes_Success;
 }
 
+public OnPluginEnd()
+{
+	delete sd_impl;
+} 
+
 public OnPluginStart() 
 {
+	sd_impl = new ArrayList(sizeof(SpecialDayImpl));
+
 	create_sd_convar();
 	setup_sd_convar();
 
@@ -543,6 +544,7 @@ public void panic_unimplemented()
 
 public void init_function_pointers()
 {
+	// NOTE: These must be added in the same order as defined or this wont work.
 	add_ffd_impl();
 	add_tank_impl();
 	add_juggernaut_impl();
@@ -1349,6 +1351,8 @@ public int sd_select(int client, int sd)
 
 	// special done begun but not active
 	global_ctx.sd_state = sd_started; 
+
+	global_ctx.cur_day = get_sd_impl(sd);
 
 	mute_nades();
 

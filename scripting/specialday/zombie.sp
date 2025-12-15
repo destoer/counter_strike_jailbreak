@@ -307,7 +307,7 @@ void zombie_death(int attacker, int victim)
 	}
 }
 
-void zombie_take_damage(int attacker, int victim, float& damage)
+void zombie_take_damage(int victim, int attacker, float& damage)
 {
 	if (!is_valid_client(attacker)) 
 	{ 

@@ -171,7 +171,7 @@ public void end_gungame()
 void add_gungame_impl()
 {
 	SpecialDayImpl gun_game;
-	gun_game = make_sd_impl(init_gungame,start_gungame,init_gungame,gun_game_player_init,"Gun Game");
+	gun_game = make_sd_impl(init_gungame,start_gungame,end_gungame,gun_game_player_init,"Gun Game");
 	gun_game.sd_player_death = gungame_death;
 
 	add_special_day(gun_game);
