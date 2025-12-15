@@ -69,5 +69,9 @@ void scoutknife_death(int attacker,int victim)
 
 SpecialDayImpl scoutknife_impl()
 {
-	return make_sd_impl(scoutknife_init,start_scout,end_scout,scout_player_init);
+	SpecialDayImpl scout_knife
+	scout_knife = make_sd_impl(scoutknife_init,start_scout,end_scout,scout_player_init);
+	scout_knife.sd_player_death = scoutknife_death;
+
+	return scout_knife;
 }

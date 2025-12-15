@@ -64,6 +64,8 @@ typedef SD_START = function void();
 typedef SD_END = function void();
 typedef SD_INIT = function void();
 typedef SD_PLAYER_INIT = function void(int client);
+typedef SD_BOSS_DISCON_ACTIVE = function void(int client);
+typedef SD_PLAYER_DEATH = function void(int attacker, int victim);
 
 enum struct SpecialDayImpl
 {
@@ -75,8 +77,14 @@ enum struct SpecialDayImpl
 	SD_END sd_end;
 
 	// function pointer set to tell us how to handle initialize players on sds
-	// Can be null;
+	// (required)
 	SD_PLAYER_INIT sd_player_init;
+
+	// Called on dc active during active SD (not required)
+	SD_BOSS_DISCON_ACTIVE sd_discon_active;
+
+	// Called on player death during active SD (not required)
+	SD_PLAYER_DEATH sd_player_death;
 }
 
 native SdState sd_current_state();

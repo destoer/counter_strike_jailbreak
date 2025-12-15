@@ -69,5 +69,9 @@ void deathmatch_death(int attacker, int victim)
 
 SpecialDayImpl deathmatch_impl()
 {
-	return make_sd_impl(deathmatch_init,start_deathmatch,end_deathmatch,deathmatch_player_init);
+	SpecialDayImpl deathmatch;
+	deathmatch = make_sd_impl(deathmatch_init,start_deathmatch,end_deathmatch,deathmatch_player_init);
+	deathmatch.sd_player_death = deathmatch_death;
+
+	return deathmatch;
 }

@@ -187,11 +187,12 @@ void reset_player(int client)
 SpecialDayImpl make_sd_impl(SD_INIT sd_init, SD_START sd_start, SD_END sd_end, SD_PLAYER_INIT sd_player_init)
 {
 	SpecialDayImpl out;
-	out.sd_player_init = null;
 	out.sd_init = sd_init;
 	out.sd_start = sd_start;
 	out.sd_end = sd_end;
 	out.sd_player_init = sd_player_init;
+	
+	out.sd_discon_active = null;
 
 	return out;
 }

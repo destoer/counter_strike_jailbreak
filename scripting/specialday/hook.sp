@@ -40,48 +40,14 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 			return Plugin_Continue;
 		}
 
-		switch(global_ctx.special_day)
-		{
-			case tank_day:
-			{	
-				tank_discon_active(client);	
-			}
-			
-			case spectre_day:
-			{
-				spectre_discon_active(client);
-			}
-			
-			
-			case zombie_day:
-			{
-				zombie_discon_active(client);
-			}
-
-			case laser_day:
-			{
-				laser_discon_active(client);
-			}
-
-
-			case vip_day:
-			{
-				if(client == t_vip)
-				{
-					pick_t_vip();
-				}
-
-				else if(client == ct_vip)
-				{
-					pick_ct_vip();
-				}
-			}
-
-			default: {}
+		SD_BOSS_DISCON_ACTIVE discon = sd_impl[global_ctx.special_day].sd_discon_active;
+		if(discon != null)
+		{		
+			Call_StartFunction(null, discon);
+			Call_PushCell(client);
+			Call_Finish();
 		}
 	}
-
-
 
 	return Plugin_Continue;
 }
@@ -331,40 +297,14 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 		SetEntProp(attacker, Prop_Data, "m_iFrags", frags + 2);
 	}
 
-	switch(global_ctx.special_day)
-	{
-		case zombie_day:
-		{
-			zombie_death(victim);
-		}
-		
-		case scoutknife_day:
-		{	
-			scoutknife_death(attacker, victim);
-		}
-		
-		case deathmatch_day:
-		{
-			deathmatch_death(attacker, victim);
-		}	
-		
-		case gungame_day:
-		{
-			gungame_death(attacker, victim);
-		}
-	
-		case laser_day:
-		{
-			laser_death(victim);
-		}
+	SD_PLAYER_DEATH player_death = sd_impl[global_ctx.special_day].sd_player_death;
 
-		case vip_day:
-		{
-			vip_death(attacker,victim);
-		}
-	
-		default: {}
-	
+	if(player_death != null)
+	{
+		Call_StartFunction(null, player_death);
+		Call_PushCell(attacker);
+		Call_PushCell(victim);
+		Call_Finish();
 	}
 	
 	return Plugin_Continue;

@@ -94,5 +94,9 @@ void spectre_discon_active(int client)
 
 SpecialDayImpl spectre_impl()
 {
-	return make_sd_impl(spectre_init,start_spectre,end_spectre,spectre_player_init);
+	SpecialDayImpl spectre;
+	spectre = make_sd_impl(spectre_init,start_spectre,end_spectre,spectre_player_init);
+	spectre.sd_discon_active = spectre_discon_active;
+
+	return spectre;
 }

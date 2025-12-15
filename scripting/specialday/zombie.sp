@@ -250,7 +250,7 @@ void zombie_discon_active(int client)
 	MakePatientZero(global_ctx.boss);
 }
 
-void zombie_death(int victim)
+void zombie_death(int attacker, int victim)
 {
 	// only revive when sd is active
 	if(global_ctx.sd_state != sd_active)
@@ -309,5 +309,10 @@ void zombie_death(int victim)
 
 SpecialDayImpl zombie_impl()
 {
-	return make_sd_impl(init_zombie,start_zombie,end_zombie,zombie_player_init);
+	SpecialDayImpl zombie;
+	zombie = make_sd_impl(init_zombie,start_zombie,end_zombie,zombie_player_init);
+	zombie.sd_discon_active = zombie_discon_active;
+	zombie.sd_player_death = zombie_death;
+
+	return zombie;
 }

@@ -103,5 +103,9 @@ public void laser_death(int victim)
 
 SpecialDayImpl laser_impl()
 {
-	return make_sd_impl(laser_init,start_laser,end_laser,laser_player_init);
+	SpecialDayImpl laser;
+	laser = make_sd_impl(laser_init,start_laser,end_laser,laser_player_init);
+	laser.sd_discon_active = laser_discon_active;
+	
+	return laser;
 }

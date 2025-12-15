@@ -170,5 +170,9 @@ public void end_gungame()
 
 SpecialDayImpl gungame_impl()
 {
-	return make_sd_impl(init_gungame,start_gungame,init_gungame,gun_game_player_init);
+	SpecialDayImpl gun_game;
+	gun_game = make_sd_impl(init_gungame,start_gungame,init_gungame,gun_game_player_init);
+	gun_game.sd_player_death = gungame_death;
+
+	return gun_game;
 }

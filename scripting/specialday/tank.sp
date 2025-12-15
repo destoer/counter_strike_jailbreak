@@ -91,5 +91,9 @@ void tank_discon_active(int client)
 
 SpecialDayImpl tank_impl()
 {
-	return make_sd_impl(init_tank,start_tank,end_tank,tank_player_init);
+	SpecialDayImpl tank; 
+	tank = make_sd_impl(init_tank,start_tank,end_tank,tank_player_init);
+	tank.sd_discon_active = tank_discon_active;
+
+	return tank;
 }
