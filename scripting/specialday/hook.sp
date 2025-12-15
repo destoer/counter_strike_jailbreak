@@ -40,10 +40,9 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 			return Plugin_Continue;
 		}
 
-		SD_BOSS_DISCON_ACTIVE discon = sd_impl[global_ctx.special_day].sd_discon_active;
-		if(discon != null)
+		if(global_ctx.cur_day.sd_discon_active != null)
 		{		
-			Call_StartFunction(null, discon);
+			Call_StartFunction(null, global_ctx.cur_day.sd_discon_active);
 			Call_PushCell(client);
 			Call_Finish();
 		}
@@ -204,10 +203,9 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 	// hook any sd damage modifications here
 	if(global_ctx.sd_state != sd_inactive)
 	{
-		SD_ON_TAKE_DAMAGE take_damage = sd_impl[global_ctx.special_day].sd_take_damage;
-		if(take_damage != null)
+		if(global_ctx.cur_day.sd_take_damage != null)
 		{
-			Call_StartFunction(null, take_damage);
+			Call_StartFunction(null, global_ctx.cur_day.sd_take_damage);
 			Call_PushCell(victim);
 			Call_PushCell(attacker)
 			Call_PushFloatRef(damage);
@@ -254,11 +252,10 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 		SetEntProp(attacker, Prop_Data, "m_iFrags", frags + 2);
 	}
 
-	SD_PLAYER_DEATH player_death = sd_impl[global_ctx.special_day].sd_player_death;
 
-	if(player_death != null)
+	if(global_ctx.cur_day.sd_player_death != null)
 	{
-		Call_StartFunction(null, player_death);
+		Call_StartFunction(null, global_ctx.cur_day.sd_player_death);
 		Call_PushCell(attacker);
 		Call_PushCell(victim);
 		Call_Finish();
@@ -321,11 +318,10 @@ public Action OnWeaponEquip(int client, int weapon)
 	}
 #endif
 
-	SD_RESTRICT_WEAPON restrict_weapon = sd_impl[global_ctx.special_day].sd_restrict_weapon;
 
-	if(restrict_weapon != null)
+	if(global_ctx.cur_day.sd_restrict_weapon != null)
 	{
-		Call_StartFunction(null, restrict_weapon);
+		Call_StartFunction(null, global_ctx.cur_day.sd_restrict_weapon);
 		Call_PushCell(client);
 		Call_PushString(weapon_string);
 		bool allowed = false;
@@ -384,10 +380,9 @@ public Action check_movement(Handle Timer)
 			MoveType old_type = player_last_movement_type[client];
 			if(cur_type != old_type && old_type == MOVETYPE_LADDER)
 			{
-				SD_FIX_LADDER fix_ladder = sd_impl[global_ctx.special_day].sd_fix_ladder;
-				if(fix_ladder != null)
+				if(global_ctx.cur_day.sd_fix_ladder)
 				{
-					Call_StartFunction(null, fix_ladder);
+					Call_StartFunction(null, global_ctx.cur_day.sd_fix_ladder);
 					Call_PushCell(client);
 					Call_Finish();
 				}

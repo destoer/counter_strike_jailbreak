@@ -89,11 +89,11 @@ void tank_discon_active(int client)
 	MakeTank(global_ctx.boss);		
 }
 
-SpecialDayImpl tank_impl()
+void add_tank_impl()
 {
 	SpecialDayImpl tank; 
-	tank = make_sd_impl(init_tank,start_tank,end_tank,tank_player_init);
+	tank = make_sd_impl(init_tank,start_tank,end_tank,tank_player_init,"Tank Day");
 	tank.sd_discon_active = tank_discon_active;
 
-	return tank;
+	add_special_day(tank);
 }

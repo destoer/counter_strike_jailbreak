@@ -362,15 +362,15 @@ void zombie_fix_ladder(int client)
 	}
 }
 
-SpecialDayImpl zombie_impl()
+void add_zombie_impl()
 {
 	SpecialDayImpl zombie;
-	zombie = make_sd_impl(init_zombie,start_zombie,end_zombie,zombie_player_init);
+	zombie = make_sd_impl(init_zombie,start_zombie,end_zombie,zombie_player_init,"Zombie");
 	zombie.sd_discon_active = zombie_discon_active;
 	zombie.sd_player_death = zombie_death;
 	zombie.sd_take_damage = zombie_take_damage;
 	zombie.sd_restrict_weapon = zombie_restrict_weapon;
 	zombie.sd_fix_ladder = zombie_fix_ladder;
 
-	return zombie;
+	add_special_day(zombie);
 }

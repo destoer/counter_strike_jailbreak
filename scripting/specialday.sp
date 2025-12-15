@@ -62,17 +62,18 @@ void callback_dummy()
 // for some reason we cannot just init these with an initalizer
 // so we do it in a func...
 // + 1 FOR CUSTOM SD
-#define SD_CALLBACK_SIZE SD_SIZE + 1
-ArrayList sd_impl[SD_CALLBACK_SIZE];
+ArrayList sd_impl;
 
 SpecialDayImpl get_sd_impl(int index)
 {
-	return view_as<SpecialDayImpl>(GetArrayCell(sd_impl,index));
+	SpecialDayImpl impl;
+	sd_impl.GetArray(index,impl);
+	return impl;
 }
 
 void add_special_day(SpecialDayImpl impl)
 {
-	PushArrayCell(sd_impl,impl);	
+	sd_impl.PushArray(impl);	
 }
 
 
@@ -101,6 +102,8 @@ enum struct Context
 	Handle sd_win_forward;
 	Handle sd_start_forward;
 	Handle sd_end_forward;
+
+	SpecialDayImpl cur_day;
 
 	bool sd_init_failure;
 
@@ -251,21 +254,10 @@ void sd_player_init(int client)
 {
 	if(global_ctx.sd_state != sd_inactive && is_valid_client(client) && is_on_team(client))
 	{
-		SD_PLAYER_INIT player_init = sd_impl[global_ctx.special_day].sd_player_init;
-		if(player_init != null)
-		{
-			Call_StartFunction(null, player_init);
-			Call_PushCell(client);
-			Call_Finish();
-		}
+		Call_StartFunction(null,global_ctx.cur_day.sd_player_init);
+		Call_PushCell(client);
+		Call_Finish();
 	}
-}
-
-// no valid pointer set 
-// (lets us know if we forget to set one)
-void sd_player_init_invalid(int client)
-{
-	ThrowNativeError(SP_ERROR_NATIVE, "invalid sd_init function %d:%d:%d\n", client, global_ctx.sd_state, global_ctx.special_day);
 }
 
 void sd_player_init_dummy(int client)
@@ -548,114 +540,26 @@ public void panic_unimplemented()
 	ThrowNativeError(SP_ERROR_NATIVE, "did not initalize sd %d\n",view_as<int>(global_ctx.special_day));
 }
 
-// just sourcemod things
+
 public void init_function_pointers()
 {
-
-	// incase we forget to init a ptr
-	for(int i = 0; i < SD_CALLBACK_SIZE; i++)
-	{
-		sd_impl[i] = make_sd_impl(panic_unimplemented,panic_unimplemented,panic_unimplemented,sd_player_init_invalid);
-	}
-
-	for(int i = 0; i < SD_CALLBACK_SIZE; i++)
-	{
-		SpecialDay day = view_as<SpecialDay>(i);
-
-		switch(day)
-		{
-			case friendly_fire_day:
-			{
-				sd_impl[i] = ffd_impl();
-			}
-
-			case tank_day:
-			{
-				sd_impl[i] = tank_impl();
-			}
-
-			case juggernaut_day:
-			{
-				sd_impl[i] = juggernaut_impl();
-			}
-
-			case fly_day:
-			{
-				sd_impl[i] = fly_impl();
-			}
-
-			case hide_day:
-			{
-				sd_impl[i] = hide_impl();
-			}
-
-			case dodgeball_day:
-			{
-				sd_impl[i] = dodgeball_impl();
-			}
-
-			case grenade_day:
-			{
-				sd_impl[i] = grenade_impl();
-			}
-
-			case zombie_day:
-			{
-				sd_impl[i] = zombie_impl();
-			}
-
-			case gungame_day:
-			{
-				sd_impl[i] = gungame_impl();
-			}
-
-			case knife_day:
-			{
-				sd_impl[i] = knife_impl();
-			}
-
-			case scoutknife_day:
-			{
-				sd_impl[i] = scoutknife_impl();
-			}
-
-			case deathmatch_day:
-			{
-				sd_impl[i] = deathmatch_impl();
-			}
-		
-			case laser_day:
-			{
-				sd_impl[i] = laser_impl();
-			}
-		
-
-			case spectre_day:
-			{
-				sd_impl[i] = spectre_impl();
-			}
-
-			case headshot_day:
-			{
-				sd_impl[i] = headshot_impl();
-			}
-
-			case custom_day:
-			{
-				sd_impl[i] = make_sd_impl(callback_dummy,callback_dummy,callback_dummy,sd_player_init_dummy);
-			}
-
-			case vip_day:
-			{
-				sd_impl[i] = vip_impl();				
-			}
-
-			default:
-			{
-				ThrowNativeError(SP_ERROR_NATIVE, "did not initalize sd %d", i);				
-			}
-		}
-	}
+	add_ffd_impl();
+	add_tank_impl();
+	add_juggernaut_impl();
+	add_fly_impl();
+	add_hide_impl();
+	add_dodgeball_impl();
+	add_grenade_impl();
+	add_zombie_impl();
+	add_gungame_impl();
+	add_knife_impl();
+	add_scoutknife_impl();
+	add_deathmatch_impl();
+	add_laser_impl();
+	add_spectre_impl();
+	add_headshot_impl();
+	add_vip_impl();				
+	add_special_day(make_sd_impl(callback_dummy,callback_dummy,callback_dummy,sd_player_init_dummy,"Custom"));
 }
 
 
@@ -912,13 +816,7 @@ void EndSd(bool forced=false)
 	}
 
 
-
-	// call sd cleanup
-	int idx = view_as<int>(global_ctx.special_day);
-
-	SD_END end_func = sd_impl[idx].sd_end;
-
-	Call_StartFunction(null, end_func);
+	Call_StartFunction(null, global_ctx.cur_day.sd_end);
 	Call_Finish();
 
 	// just in case
@@ -1525,10 +1423,7 @@ public int sd_select(int client, int sd)
 	
 	// init_func
 
-	SpecialDayImpl impl;
-	impl = get_sd_impl(global_ctx.special_day);
-
-	Call_StartFunction(null, impl.sd_init);
+	Call_StartFunction(null, global_ctx.cur_day.sd_init);
 	Call_Finish();
 
 	if(global_ctx.sd_init_failure)
@@ -1638,10 +1533,8 @@ public StartSD()
 		disable_lr();
 	}
 
-	SpecialDayImpl impl
-	impl = get_sd_impl(global_ctx.special_day);
 
-	Call_StartFunction(null, impl.sd_start);
+	Call_StartFunction(null, global_ctx.cur_day.sd_start);
 	Call_Finish();
 }
 

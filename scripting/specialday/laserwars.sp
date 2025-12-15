@@ -101,11 +101,11 @@ public void laser_death(int victim)
 	//CreateTimer(3.0, ReviveLaser, victim);
 }
 
-SpecialDayImpl laser_impl()
+void add_laser_impl()
 {
 	SpecialDayImpl laser;
-	laser = make_sd_impl(laser_init,start_laser,end_laser,laser_player_init);
+	laser = make_sd_impl(laser_init,start_laser,end_laser,laser_player_init,"Laser Wars");
 	laser.sd_discon_active = laser_discon_active;
 	
-	return laser;
+	add_special_day(laser);
 }

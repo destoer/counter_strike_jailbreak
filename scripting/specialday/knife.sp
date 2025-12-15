@@ -28,7 +28,7 @@ public void start_knife()
 	CreateTimer(1.0, RemoveGuns);
 }
 
-SpecialDayImpl knife_impl()
+void add_knife_impl()
 {
-	return make_sd_impl(knife_init,start_knife,callback_dummy,knife_player_init);
+	add_special_day(make_sd_impl(knife_init,start_knife,callback_dummy,knife_player_init,"Knife"));
 }

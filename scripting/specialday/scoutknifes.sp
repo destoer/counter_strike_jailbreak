@@ -77,13 +77,13 @@ void scoutknife_fix_ladder(int client)
 	scout_player_init(client);
 }
 
-SpecialDayImpl scoutknife_impl()
+void add_scoutknife_impl()
 {
 	SpecialDayImpl scout_knife
-	scout_knife = make_sd_impl(scoutknife_init,start_scout,end_scout,scout_player_init);
+	scout_knife = make_sd_impl(scoutknife_init,start_scout,end_scout,scout_player_init,"Scout Knives");
 	scout_knife.sd_player_death = scoutknife_death;
 	scout_knife.sd_restrict_weapon = scoutknife_restrict_weapon;
 	scout_knife.sd_fix_ladder = scoutknife_fix_ladder;
 
-	return scout_knife;
+	add_special_day(scout_knife);
 }

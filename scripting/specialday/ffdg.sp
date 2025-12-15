@@ -38,7 +38,7 @@ public void end_juggernaut()
 
 }
 
-SpecialDayImpl juggernaut_impl() 
+void add_juggernaut_impl() 
 {
-	return make_sd_impl(init_juggernaut,start_juggernaut,end_juggernaut,juggernaut_player_init)
+	add_special_day(make_sd_impl(init_juggernaut,start_juggernaut,end_juggernaut,juggernaut_player_init,"Juggernaut"));
 }

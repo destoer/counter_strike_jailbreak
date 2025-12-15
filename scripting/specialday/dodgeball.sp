@@ -97,12 +97,12 @@ void dodgeball_fix_ladder(int client)
 	dodgeball_player_init(client);
 }
 
-SpecialDayImpl dodgeball_impl()
+void add_dodgeball_impl()
 {
 	SpecialDayImpl dodgeball;
-	dodgeball = make_sd_impl(dodgeball_init,start_dodgeball,callback_dummy,dodgeball_player_init);
+	dodgeball = make_sd_impl(dodgeball_init,start_dodgeball,callback_dummy,dodgeball_player_init,"Dodgeball");
 	dodgeball.sd_take_damage = dodgeball_take_damage;
 	dodgeball.sd_fix_ladder = dodgeball_fix_ladder;
 
-	return dodgeball;
+	add_special_day(dodgeball);
 }

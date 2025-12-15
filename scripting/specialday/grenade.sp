@@ -79,11 +79,11 @@ void grenade_fix_ladder(int client)
 	grenade_player_init(client)
 }
 
-SpecialDayImpl grenade_impl()
+void add_grenade_impl()
 {
 	SpecialDayImpl grenade;
-	grenade = make_sd_impl(grenade_init,start_grenade,callback_dummy,grenade_player_init);
+	grenade = make_sd_impl(grenade_init,start_grenade,callback_dummy,grenade_player_init,"Grenade");
 	grenade.sd_fix_ladder = grenade_fix_ladder;
 
-	return grenade;
+	add_special_day(grenade);
 }

@@ -135,11 +135,11 @@ void vip_death(int attacker,int victim)
     }
 }
 
-SpecialDayImpl vip_impl()
+void add_vip_impl()
 {
     SpecialDayImpl vip;
-    vip = make_sd_impl(vip_init,start_vip,callback_dummy,vip_player_init);
+    vip = make_sd_impl(vip_init,start_vip,callback_dummy,vip_player_init,"VIP");
     vip.sd_player_death = vip_death;
 
-    return vip;
+    add_special_day(vip);
 }

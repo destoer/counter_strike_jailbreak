@@ -53,7 +53,7 @@ public void end_ffd()
 
 }
 
-SpecialDayImpl ffd_impl()
+void add_ffd_impl()
 {
-	return make_sd_impl(init_ffd,start_ffd,end_ffd,ffd_player_init);
+	add_special_day(make_sd_impl(init_ffd,start_ffd,end_ffd,ffd_player_init,"Friendly Fire Day"));
 }

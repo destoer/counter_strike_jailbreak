@@ -68,7 +68,7 @@ public void make_invis_t()
 	}	
 }
 
-SpecialDayImpl hide_impl()
+void add_hide_impl()
 {
-	return make_sd_impl(init_hide,start_hide,callback_dummy,hide_player_init);
+	add_special_day(make_sd_impl(init_hide,start_hide,callback_dummy,hide_player_init,"Hide and Seek"));
 }

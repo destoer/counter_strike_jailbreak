@@ -27,7 +27,7 @@ void headshot_player_init(int client)
 	set_reserve_ammo(client, weapon, 999);
 }
 
-SpecialDayImpl headshot_impl()
+void add_headshot_impl()
 {
-	return make_sd_impl(headshot_init,callback_dummy,callback_dummy,headshot_player_init);
+	add_special_day(make_sd_impl(headshot_init,callback_dummy,callback_dummy,headshot_player_init,"Headshot Only"));
 }

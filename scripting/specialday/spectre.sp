@@ -113,13 +113,13 @@ bool spectre_weapon_restrict(int client, char[] weapon_string)
 	return true;
 }
 
-SpecialDayImpl spectre_impl()
+void add_spectre_impl()
 {
 	SpecialDayImpl spectre;
-	spectre = make_sd_impl(spectre_init,start_spectre,end_spectre,spectre_player_init);
+	spectre = make_sd_impl(spectre_init,start_spectre,end_spectre,spectre_player_init,"Spectre");
 	spectre.sd_discon_active = spectre_discon_active;
 	spectre.sd_take_damage = spectre_take_damage;
 	spectre.sd_restrict_weapon = spectre_weapon_restrict;
 
-	return spectre;
+	add_special_day(spectre);
 }
