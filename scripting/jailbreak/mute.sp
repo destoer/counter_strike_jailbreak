@@ -42,7 +42,7 @@ public Action unmute_tmp(Handle timer)
     unmute_all(false);
     tmp_mute_timer = null;
 
-    // re grab the timestmap for the cooldown
+    // re grab the timestamp for the cooldown
     global_ctx.tmp_mute_timestamp = GetTime();
 
     return Plugin_Continue;
@@ -56,8 +56,10 @@ public Action tmp_warden_mute(int client, int args)
         return Plugin_Continue;
     }
 
+    bool client_admin = is_admin(client);
+
     // make sure we are actually the warden
-    if(client != global_ctx.warden_id && !is_admin(client))
+    if(client != global_ctx.warden_id && !client_admin)
     {
         PrintToChat(client,"%s You must be the warden or admin to use !wm",WARDEN_PREFIX);
         return Plugin_Continue;
@@ -65,8 +67,8 @@ public Action tmp_warden_mute(int client, int args)
 
     int remain = 60 - (GetTime() - global_ctx.tmp_mute_timestamp);
 
-    // make sure we cant spam this
-    if(remain > 0)
+    // make sure we cant spam this unless we are admin
+    if(remain > 0 && !client_admin)
     {
         PrintToChat(client,"%s Warden mute cannot be used for another %d seconds",WARDEN_PREFIX,remain);
         return Plugin_Continue;
