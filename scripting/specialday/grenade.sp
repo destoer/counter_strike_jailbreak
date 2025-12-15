@@ -30,11 +30,10 @@ void grenade_init()
 	CreateTimer(1.0, RemoveGuns);
 	global_ctx.special_day = grenade_day;
 
-	global_ctx.player_init = grenade_player_init;
 	global_ctx.weapon_restrict = "weapon_hegrenade";
 }
 
-public void StartGrenade()
+public void start_grenade()
 {
 	// set everyones hp to 250
 	for(new i = 1; i <= MaxClients; i++)
@@ -73,4 +72,18 @@ public Action GiveGrenade(Handle timer, any entity)
 	}
 
 	return Plugin_Continue;	
+}
+
+void grenade_fix_ladder(int client)
+{
+	grenade_player_init(client)
+}
+
+void add_grenade_impl()
+{
+	SpecialDayImpl grenade;
+	grenade = make_sd_impl(grenade_init,start_grenade,callback_dummy,grenade_player_init,"Grenade");
+	grenade.sd_fix_ladder = grenade_fix_ladder;
+
+	add_special_day(grenade);
 }

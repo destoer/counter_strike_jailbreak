@@ -138,8 +138,6 @@ void init_zombie()
 	PrintToChatAll("%s zombie day started", SPECIALDAY_PREFIX);
 	CreateTimer(1.0, RemoveGuns); 
 	global_ctx.special_day = zombie_day;
-
-	global_ctx.player_init = zombie_player_init;
 }
 
 
@@ -195,7 +193,7 @@ public void MakePatientZero(int client)
 	PrintCenterTextAll("%N is patient zero!", client);
 }
 
-public void StartZombie()
+public void start_zombie()
 {
 	// swap everyone other than the patient zero to the t side
 	// if they were allready in ct or t
@@ -252,7 +250,7 @@ void zombie_discon_active(int client)
 	MakePatientZero(global_ctx.boss);
 }
 
-void zombie_death(int victim)
+void zombie_death(int attacker, int victim)
 {
 	// only revive when sd is active
 	if(global_ctx.sd_state != sd_active)
@@ -307,4 +305,72 @@ void zombie_death(int victim)
 		enable_round_end();
 		slay_all();		
 	}
+}
+
+void zombie_take_damage(int victim, int attacker, float& damage)
+{
+	if (!is_valid_client(attacker)) 
+	{ 
+		return;
+	}
+	
+	// knockback is way to overkill on csgo
+	if(GetClientTeam(victim) == CS_TEAM_T && GetClientTeam(attacker) == CS_TEAM_CT && GetEngineVersion() == Engine_CSS)
+	{
+
+		char weapon_name[64];
+		GetClientWeapon(attacker, weapon_name, sizeof(weapon_name));
+
+		// knife gives extra knockback
+		if(StrEqual(weapon_name,"weapon_knife"))
+		{
+			CreateKnockBack(victim, attacker, damage * 25);
+		}
+
+		else
+		{
+			CreateKnockBack(victim, attacker, damage);
+		}
+	}
+	
+
+	// patient zero instantly kills
+	else if(attacker == global_ctx.boss)
+	{
+		damage = 120.0;
+	}
+}
+
+bool zombie_restrict_weapon(int client, char[] weapon_string)
+{
+	if(global_ctx.sd_state == sd_active)
+	{
+		if(GetClientTeam(client) == CS_TEAM_T)
+		{
+			return StrEqual(weapon_string,"weapon_knife");
+		}
+	}
+
+	return true;
+}
+
+void zombie_fix_ladder(int client)
+{
+	if(GetClientTeam(client) == CS_TEAM_T && global_ctx.sd_state == sd_active)
+	{
+		set_zombie_speed(client);
+	}
+}
+
+void add_zombie_impl()
+{
+	SpecialDayImpl zombie;
+	zombie = make_sd_impl(init_zombie,start_zombie,end_zombie,zombie_player_init,"Zombie");
+	zombie.sd_discon_active = zombie_discon_active;
+	zombie.sd_player_death = zombie_death;
+	zombie.sd_take_damage = zombie_take_damage;
+	zombie.sd_restrict_weapon = zombie_restrict_weapon;
+	zombie.sd_fix_ladder = zombie_fix_ladder;
+
+	add_special_day(zombie);
 }

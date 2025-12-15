@@ -40,48 +40,13 @@ public Action PlayerDisconnect_Event(Handle event, const String:name[], bool don
 			return Plugin_Continue;
 		}
 
-		switch(global_ctx.special_day)
-		{
-			case tank_day:
-			{	
-				tank_discon_active(client);	
-			}
-			
-			case spectre_day:
-			{
-				spectre_discon_active(client);
-			}
-			
-			
-			case zombie_day:
-			{
-				zombie_discon_active(client);
-			}
-
-			case laser_day:
-			{
-				laser_discon_active(client);
-			}
-
-
-			case vip_day:
-			{
-				if(client == t_vip)
-				{
-					pick_t_vip();
-				}
-
-				else if(client == ct_vip)
-				{
-					pick_ct_vip();
-				}
-			}
-
-			default: {}
+		if(global_ctx.cur_day.sd_discon_active != null)
+		{		
+			Call_StartFunction(null, global_ctx.cur_day.sd_discon_active);
+			Call_PushCell(client);
+			Call_Finish();
 		}
 	}
-
-
 
 	return Plugin_Continue;
 }
@@ -238,61 +203,17 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 	// hook any sd damage modifications here
 	if(global_ctx.sd_state != sd_inactive)
 	{
-		switch(global_ctx.special_day)
+		if(global_ctx.cur_day.sd_take_damage != null)
 		{
-		
-			case dodgeball_day:
-			{
-				// any damage kills 
-				// prevents cheaters from healing 
-				damage = 500.0;
-			}
+			Call_StartFunction(null, global_ctx.cur_day.sd_take_damage);
+			Call_PushCell(victim);
+			Call_PushCell(attacker)
+			Call_PushFloatRef(damage);
+			Call_Finish();
 			
 			
-			case zombie_day:
-			{
-				if (!is_valid_client(attacker)) { return Plugin_Continue; }
-				
-				// knockback is way to overkill on csgo
-				if(GetClientTeam(victim) == CS_TEAM_T && GetClientTeam(attacker) == CS_TEAM_CT && GetEngineVersion() == Engine_CSS)
-				{
-
-					char weapon_name[64];
-					GetClientWeapon(attacker, weapon_name, sizeof(weapon_name));
-
-					// knife gives extra knockback
-					if(StrEqual(weapon_name,"weapon_knife"))
-					{
-						CreateKnockBack(victim, attacker, damage * 25);
-					}
-
-					else
-					{
-						CreateKnockBack(victim, attacker, damage);
-					}
-				}
-				
-
-				// patient zero instantly kills
-				else if(attacker == global_ctx.boss)
-				{
-					damage = 120.0;
-				}
-				
-			}
-			
-			// spectre instant kills everyone
-			case spectre_day:
-			{
-				if(attacker == global_ctx.boss)
-				{
-					damage = 120.0;
-				}	
-			}
-
-			default: {}
+			return Plugin_Changed;
 		}
-		return Plugin_Changed;
 	}
 
 	return Plugin_Continue;
@@ -331,40 +252,13 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 		SetEntProp(attacker, Prop_Data, "m_iFrags", frags + 2);
 	}
 
-	switch(global_ctx.special_day)
-	{
-		case zombie_day:
-		{
-			zombie_death(victim);
-		}
-		
-		case scoutknife_day:
-		{	
-			scoutknife_death(attacker, victim);
-		}
-		
-		case deathmatch_day:
-		{
-			deathmatch_death(attacker, victim);
-		}	
-		
-		case gungame_day:
-		{
-			gungame_death(attacker, victim);
-		}
-	
-		case laser_day:
-		{
-			laser_death(victim);
-		}
 
-		case vip_day:
-		{
-			vip_death(attacker,victim);
-		}
-	
-		default: {}
-	
+	if(global_ctx.cur_day.sd_player_death != null)
+	{
+		Call_StartFunction(null, global_ctx.cur_day.sd_player_death);
+		Call_PushCell(attacker);
+		Call_PushCell(victim);
+		Call_Finish();
 	}
 	
 	return Plugin_Continue;
@@ -424,60 +318,35 @@ public Action OnWeaponEquip(int client, int weapon)
 	}
 #endif
 
-	switch(global_ctx.special_day)
+
+	if(global_ctx.cur_day.sd_restrict_weapon != null)
 	{
-		case scoutknife_day:
-		{
-			// need to check for ssg08 incase we are oncsgo
-			if(!(StrEqual(weapon_string,"weapon_scout") || StrEqual(weapon_string,"weapon_knife") || StrEqual(weapon_string,"weapon_ssg08")))
-			{
-				return Plugin_Handled;
-			}
-		}
-	
-		case zombie_day:
-		{
-			if(global_ctx.sd_state == sd_active)
-			{
-				if(GetClientTeam(client) == CS_TEAM_T)
-				{
-					if(!StrEqual(weapon_string,"weapon_knife"))
-					{
-						return Plugin_Handled;
-					}
-				}
-			}
-		}
+		Call_StartFunction(null, global_ctx.cur_day.sd_restrict_weapon);
+		Call_PushCell(client);
+		Call_PushString(weapon_string);
+		bool allowed = false;
+		Call_Finish(allowed);
 
-		// spectre can only use knife
-		case spectre_day:
+		if(!allowed)
 		{
-			if(global_ctx.sd_state == sd_active)
-			{
-				if(client == global_ctx.boss)
-				{
-					if(!StrEqual(weapon_string,"weapon_knife"))
-					{
-						return Plugin_Handled;
-					}					
-				}				
-			}
-		}
-
-		default:
-		{
-			// no restrict
-			if(StrEqual(global_ctx.weapon_restrict,""))
-			{
-				return Plugin_Continue;
-			}
-
-			if(!StrEqual(weapon_string,global_ctx.weapon_restrict))
-			{
-				return Plugin_Handled;
-			}
+			return Plugin_Handled;
 		}
 	}
+
+	else
+	{
+		// no restrict
+		if(StrEqual(global_ctx.weapon_restrict,""))
+		{
+			return Plugin_Continue;
+		}
+
+		if(!StrEqual(weapon_string,global_ctx.weapon_restrict))
+		{
+			return Plugin_Handled;
+		}
+	}
+
 	return Plugin_Continue;
 }
 
@@ -511,40 +380,11 @@ public Action check_movement(Handle Timer)
 			MoveType old_type = player_last_movement_type[client];
 			if(cur_type != old_type && old_type == MOVETYPE_LADDER)
 			{
-				switch(global_ctx.special_day)
+				if(global_ctx.cur_day.sd_fix_ladder)
 				{
-					
-					case zombie_day:
-					{
-						if(GetClientTeam(client) == CS_TEAM_T && global_ctx.sd_state == sd_active)
-						{
-							set_zombie_speed(client);
-						}
-					}
-					
-					// we use a button toggle i dont think we need this anymore
-					case fly_day:
-					{
-						//client_fly(client);
-					}
-
-
-					case dodgeball_day: 
-					{
-						sd_player_init(client);
-					}
-					
-					case grenade_day: 
-					{
-						sd_player_init(client);
-					}					
-
-					case scoutknife_day: 
-					{
-						sd_player_init(client);
-					}
-					
-					default: {}
+					Call_StartFunction(null, global_ctx.cur_day.sd_fix_ladder);
+					Call_PushCell(client);
+					Call_Finish();
 				}
 			}
 			

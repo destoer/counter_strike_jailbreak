@@ -23,12 +23,11 @@ void dodgeball_init()
 	CreateTimer(1.0, RemoveGuns);
 	global_ctx.special_day = dodgeball_day;
 
-	global_ctx.player_init = dodgeball_player_init;
 	global_ctx.weapon_restrict = "weapon_flashbang";
 }
 
 
-public void StartDodgeball()
+public void start_dodgeball()
 {
 
 	PrintCenterTextAll("Dodgeball active!");
@@ -85,4 +84,25 @@ public Action GiveFlash(Handle timer, int entity)
 	}
 
 	return Plugin_Continue;		
+}
+
+void dodgeball_take_damage(int victim, int client, float& damage)
+{
+	// prevent cheaters healing
+	damage = 500.0;
+}
+
+void dodgeball_fix_ladder(int client)
+{
+	dodgeball_player_init(client);
+}
+
+void add_dodgeball_impl()
+{
+	SpecialDayImpl dodgeball;
+	dodgeball = make_sd_impl(dodgeball_init,start_dodgeball,callback_dummy,dodgeball_player_init,"Dodgeball");
+	dodgeball.sd_take_damage = dodgeball_take_damage;
+	dodgeball.sd_fix_ladder = dodgeball_fix_ladder;
+
+	add_special_day(dodgeball);
 }

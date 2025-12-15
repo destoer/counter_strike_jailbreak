@@ -59,6 +59,50 @@ enum SdState
 	sd_inactive
 };
 
+
+typedef SD_START = function void();
+typedef SD_END = function void();
+typedef SD_INIT = function void();
+typedef SD_PLAYER_INIT = function void(int client);
+typedef SD_BOSS_DISCON_ACTIVE = function void(int client);
+typedef SD_PLAYER_DEATH = function void(int attacker, int victim);
+typedef SD_ON_TAKE_DAMAGE = function void(int attacker, int victim, float &damage)
+typedef SD_RESTRICT_WEAPON = function bool(int client, char[] weapon);
+typedef SD_FIX_LADDER = function void(int client);
+
+enum struct SpecialDayImpl
+{
+	// Name of the specialday
+	char name[64];
+
+	// called on sd start (required)
+	SD_START sd_start;
+	// called on sd init (required)
+	SD_INIT sd_init;
+	// called on special day end (required)
+	SD_END sd_end;
+
+	// function pointer set to tell us how to handle initialize players on sds
+	// (required)
+	SD_PLAYER_INIT sd_player_init;
+
+	// Called on dc active during active SD (not required)
+	SD_BOSS_DISCON_ACTIVE sd_discon_active;
+
+	// Called on player death during active SD (not required)
+	SD_PLAYER_DEATH sd_player_death;
+
+	// Called when a player takes damage during SD (not required)
+	SD_ON_TAKE_DAMAGE sd_take_damage;
+
+	// Called on weapon pickup during active SD (not required)
+	// Returns bool, false for not allowed true for allowed.
+	SD_RESTRICT_WEAPON sd_restrict_weapon;
+
+	// Called when moving off a ladder. (not required)
+	SD_FIX_LADDER sd_fix_ladder;
+}
+
 native SdState sd_current_state();
 native SpecialDay sd_current_day();
 native void sd_start_custom_day();

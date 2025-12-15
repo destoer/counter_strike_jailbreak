@@ -30,10 +30,9 @@ void init_skywars()
 {
 	global_ctx.special_day = fly_day;
 	PrintToChatAll("%s Sky wars started, press e to toggle flying", SPECIALDAY_PREFIX);
-	global_ctx.player_init = flying_player_init;
 }
 
-public void StartFly()
+void add_fly_impl()
 {
-
+	add_special_day(make_sd_impl(init_skywars,callback_dummy,callback_dummy,flying_player_init,"Sky Wars"));
 }

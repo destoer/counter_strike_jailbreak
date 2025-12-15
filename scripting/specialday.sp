@@ -56,20 +56,19 @@ void callback_dummy()
 
 }
 
+ArrayList sd_impl;
 
-typedef SD_INIT_FUNC = function void (int client);
+SpecialDayImpl get_sd_impl(int index)
+{
+	SpecialDayImpl impl;
+	sd_impl.GetArray(index,impl);
+	return impl;
+}
 
-typedef SD_STATE_FUNC = function void();
-
-//typedef SD_
-
-// for some reason we cannot just init these with an initalizer
-// so we do it in a func...
-// + 1 FOR CUSTOM SD
-#define SD_CALLBACK_SIZE SD_SIZE + 1
-SD_STATE_FUNC end_fptr[SD_CALLBACK_SIZE];
-SD_STATE_FUNC start_fptr[SD_CALLBACK_SIZE];
-SD_STATE_FUNC init_fptr[SD_CALLBACK_SIZE];
+void add_special_day(SpecialDayImpl impl)
+{
+	sd_impl.PushArray(impl);	
+}
 
 
 // sd modifiers
@@ -94,13 +93,11 @@ enum struct Context
 	SpecialDay special_day;
 	SdState sd_state;
 
-	// function pointer set to tell us how to handle initilaze players on sds
-	// set back to invalid on endsd to make sure we set it properly for each sd
-	SD_INIT_FUNC player_init;
-
 	Handle sd_win_forward;
 	Handle sd_start_forward;
 	Handle sd_end_forward;
+
+	SpecialDayImpl cur_day;
 
 	bool sd_init_failure;
 
@@ -161,8 +158,6 @@ void reset_context()
 
 	global_ctx.old_ignore_nade_radio = 0;
 
-	global_ctx.player_init = sd_player_init_invalid;
-
 	global_ctx.round_delay_timer = 0;
 	global_ctx.ignore_round_end = false;
 
@@ -195,10 +190,25 @@ void reset_player(int client)
 	}
 }
 
-// backups
-// (unused)
-//new b_hFriendlyFire; // mp_friendlyfire var
-//new b_autokick; // turn auto kick off for friednly fire
+
+SpecialDayImpl make_sd_impl(SD_INIT sd_init, SD_START sd_start, SD_END sd_end, SD_PLAYER_INIT sd_player_init, char[] name)
+{
+	SpecialDayImpl out;
+	out.sd_init = sd_init;
+	out.sd_start = sd_start;
+	out.sd_end = sd_end;
+	out.sd_player_init = sd_player_init;
+	
+	out.sd_discon_active = null;
+	out.sd_player_death = null;
+	out.sd_take_damage = null;
+	out.sd_restrict_weapon = null;
+	out.sd_fix_ladder = null;
+	strcopy(out.name,sizeof(out.name) - 1, name);
+
+	return out;
+}
+
 
 // gun removal
 int g_WeaponParent;
@@ -236,19 +246,17 @@ int g_lpoint;
 // we can then just call this rather than having to switch on the sds in many places
 void sd_player_init(int client)
 {
-	if(global_ctx.sd_state != sd_inactive && IsClientConnected(client) && IsClientInGame(client) && is_on_team(client))
+	if(global_ctx.sd_state != sd_inactive && is_valid_client(client) && is_on_team(client))
 	{
-		Call_StartFunction(null, global_ctx.player_init);
+		Call_StartFunction(null,global_ctx.cur_day.sd_player_init);
 		Call_PushCell(client);
 		Call_Finish();
 	}
 }
 
-// no valid pointer set 
-// (lets us know if we forget to set one)
-void sd_player_init_invalid(int client)
+void sd_player_init_dummy(int client)
 {
-	ThrowNativeError(SP_ERROR_NATIVE, "invalid sd_init function %d:%d:%d\n", client, global_ctx.sd_state, global_ctx.special_day);
+
 }
 
 
@@ -409,8 +417,15 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	return APLRes_Success;
 }
 
+public OnPluginEnd()
+{
+	delete sd_impl;
+} 
+
 public OnPluginStart() 
 {
+	sd_impl = new ArrayList(sizeof(SpecialDayImpl));
+
 	create_sd_convar();
 	setup_sd_convar();
 
@@ -486,10 +501,7 @@ public OnPluginStart()
 			OnClientPutInServer(i);
 		}
 	}
-	
-	//set our initial function pointer
-	global_ctx.player_init = sd_player_init_invalid;
-	
+
 	// timer for printing current sd info
 	CreateTimer(1.0, print_specialday_text_all, _, TIMER_REPEAT);
 	CreateTimer(0.1, check_movement, _, TIMER_REPEAT);
@@ -529,150 +541,27 @@ public void panic_unimplemented()
 	ThrowNativeError(SP_ERROR_NATIVE, "did not initalize sd %d\n",view_as<int>(global_ctx.special_day));
 }
 
-// just sourcemod things
+
 public void init_function_pointers()
 {
-
-	// incase we forget to init a ptr
-	for(int i = 0; i < SD_CALLBACK_SIZE; i++)
-	{
-		end_fptr[i] = panic_unimplemented;
-		start_fptr[i] = panic_unimplemented;
-		init_fptr[i] = panic_unimplemented;
-	}
-
-	for(int i = 0; i < SD_CALLBACK_SIZE; i++)
-	{
-		SpecialDay day = view_as<SpecialDay>(i);
-
-		switch(day)
-		{
-			case friendly_fire_day:
-			{
-				end_fptr[i] = end_ffd;
-				start_fptr[i] = StartFFD;
-				init_fptr[i] = init_ffd;
-			}
-
-			case tank_day:
-			{
-				end_fptr[i] = end_tank;
-				start_fptr[i] = StartTank;
-				init_fptr[i] = init_tank;
-			}
-
-			case juggernaut_day:
-			{
-				end_fptr[i] = end_juggernaut;
-				start_fptr[i] = StartJuggernaut;
-				init_fptr[i] = init_ffdg;
-			}
-
-			case fly_day:
-			{
-				end_fptr[i] = callback_dummy;
-				start_fptr[i] = StartFly;
-				init_fptr[i] = init_skywars;
-			}
-
-			case hide_day:
-			{
-				end_fptr[i] = callback_dummy;
-				start_fptr[i] = StartHide;
-				init_fptr[i] = init_hide;
-			}
-
-			case dodgeball_day:
-			{
-				end_fptr[i] = callback_dummy;
-				start_fptr[i] = StartDodgeball;
-				init_fptr[i] = dodgeball_init;
-			}
-
-			case grenade_day:
-			{
-				end_fptr[i] = callback_dummy;
-				start_fptr[i] = StartGrenade;
-				init_fptr[i] = grenade_init;
-			}
-
-			case zombie_day:
-			{
-				end_fptr[i] = end_zombie;
-				start_fptr[i] = StartZombie;
-				init_fptr[i] = init_zombie;
-			}
-
-			case gungame_day:
-			{
-				end_fptr[i] = end_gungame;
-				start_fptr[i] = StartGunGame;
-				init_fptr[i] = init_gungame;
-			}
-
-			case knife_day:
-			{
-				end_fptr[i] = callback_dummy;
-				start_fptr[i] = StartKnife;
-				init_fptr[i] = knife_init;
-			}
-
-			case scoutknife_day:
-			{
-				end_fptr[i] = end_scout;
-				start_fptr[i] = StartScout;
-				init_fptr[i] = scoutknife_init;
-			}
-
-			case deathmatch_day:
-			{
-				end_fptr[i] = end_deathmatch;
-				start_fptr[i] = StartDeathMatch;
-				init_fptr[i] = deathmatch_init;
-			}
-		
-			case laser_day:
-			{
-				end_fptr[i] = end_laser;
-				start_fptr[i] = StartLaser;
-				init_fptr[i] = laser_init;
-			}
-		
-
-			case spectre_day:
-			{
-				end_fptr[i] = end_spectre;
-				start_fptr[i] = StartSpectre;
-				init_fptr[i] = spectre_init;
-			}
-
-			case headshot_day:
-			{
-				end_fptr[i] = callback_dummy;
-				start_fptr[i] = StartHeadshot;
-				init_fptr[i] = headshot_init;
-			}
-
-			case custom_day:
-			{
-				end_fptr[i] = callback_dummy;
-				start_fptr[i] = callback_dummy;
-				init_fptr[i] = callback_dummy;	
-			}
-
-			case vip_day:
-			{
-				end_fptr[i] = callback_dummy;
-				start_fptr[i] = StartVip;
-				init_fptr[i] = vip_init;				
-			}
-
-			default:
-			{
-				ThrowNativeError(SP_ERROR_NATIVE, "did not initalize sd %d", i);				
-			}
-		}
-	}
+	// NOTE: These must be added in the same order as defined or this wont work.
+	add_ffd_impl();
+	add_tank_impl();
+	add_juggernaut_impl();
+	add_fly_impl();
+	add_hide_impl();
+	add_dodgeball_impl();
+	add_grenade_impl();
+	add_zombie_impl();
+	add_gungame_impl();
+	add_knife_impl();
+	add_scoutknife_impl();
+	add_deathmatch_impl();
+	add_laser_impl();
+	add_spectre_impl();
+	add_headshot_impl();
+	add_vip_impl();				
+	add_special_day(make_sd_impl(callback_dummy,callback_dummy,callback_dummy,sd_player_init_dummy,"Custom"));
 }
 
 
@@ -929,13 +818,7 @@ void EndSd(bool forced=false)
 	}
 
 
-
-	// call sd cleanup
-	int idx = view_as<int>(global_ctx.special_day);
-
-	SD_STATE_FUNC end_func = end_fptr[idx];
-
-	Call_StartFunction(null, end_func);
+	Call_StartFunction(null, global_ctx.cur_day.sd_end);
 	Call_Finish();
 
 	// just in case
@@ -1005,10 +888,7 @@ void EndSd(bool forced=false)
 			SetEntityMoveType(i, MOVETYPE_WALK);
 			set_client_speed(i, 1.0);
 		}
-	}	
-
-	// reset our function pointer
-	global_ctx.player_init = sd_player_init_invalid;
+	}
 }
 
 
@@ -1472,6 +1352,8 @@ public int sd_select(int client, int sd)
 	// special done begun but not active
 	global_ctx.sd_state = sd_started; 
 
+	global_ctx.cur_day = get_sd_impl(sd);
+
 	mute_nades();
 
 	if(standalone)
@@ -1518,7 +1400,7 @@ public int sd_select(int client, int sd)
 	// re-spawn all players
 	for(int i = 1; i <= MaxClients; i++)
 	{
-		if(IsClientInGame(i)) // check the client is in the game
+		if(is_valid_client(i)) // check the client is in the game
 		{
 			if(!IsPlayerAlive(i))  // check player is dead
 			{
@@ -1545,9 +1427,7 @@ public int sd_select(int client, int sd)
 	
 	// init_func
 
-	SD_STATE_FUNC init_func = init_fptr[sd];
-
-	Call_StartFunction(null, init_func);
+	Call_StartFunction(null, global_ctx.cur_day.sd_init);
 	Call_Finish();
 
 	if(global_ctx.sd_init_failure)
@@ -1657,10 +1537,8 @@ public StartSD()
 		disable_lr();
 	}
 
-	int idx = view_as<int>(global_ctx.special_day);
-	SD_STATE_FUNC start_func = start_fptr[idx];
 
-	Call_StartFunction(null, start_func);
+	Call_StartFunction(null, global_ctx.cur_day.sd_start);
 	Call_Finish();
 }
 

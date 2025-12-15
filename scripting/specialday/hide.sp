@@ -32,12 +32,10 @@ void init_hide()
 	global_ctx.special_day = hide_day;
 	
 	CreateTimer(1.0,MoreTimers);
-	
-	global_ctx.player_init = hide_player_init;
 }
 
 
-public void StartHide()
+public void start_hide()
 {
 	// renable movement
 	for(new i = 1; i <= MaxClients; i++)
@@ -68,4 +66,9 @@ public void make_invis_t()
 			}
 		}
 	}	
+}
+
+void add_hide_impl()
+{
+	add_special_day(make_sd_impl(init_hide,start_hide,callback_dummy,hide_player_init,"Hide and Seek"));
 }

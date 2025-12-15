@@ -24,9 +24,7 @@ void init_tank()
 	}
 	
 	global_ctx.special_day = tank_day;
-	PrintToChatAll("%s Tank day started", SPECIALDAY_PREFIX);
-	
-	global_ctx.player_init = tank_player_init;
+	PrintToChatAll("%s Tank day started", SPECIALDAY_PREFIX);	
 }
 
 void end_tank()
@@ -53,7 +51,7 @@ public void MakeTank(int client)
 }
 
 
-public void StartTank()
+public void start_tank()
 {	
 	// swap everyone other than the tank to the t side
 	// if they were allready in ct or t
@@ -89,4 +87,13 @@ void tank_discon_active(int client)
 	pick_boss_discon(client);
 	
 	MakeTank(global_ctx.boss);		
+}
+
+void add_tank_impl()
+{
+	SpecialDayImpl tank; 
+	tank = make_sd_impl(init_tank,start_tank,end_tank,tank_player_init,"Tank Day");
+	tank.sd_discon_active = tank_discon_active;
+
+	add_special_day(tank);
 }

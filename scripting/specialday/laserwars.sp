@@ -28,7 +28,6 @@ void laser_init()
 {
 	PrintToChatAll("%s laser day started hold e after timer if you are selected", SPECIALDAY_PREFIX);
 	global_ctx.special_day = laser_day;
-	global_ctx.player_init = laser_player_init;
 
 	SaveTeams(true);
 	
@@ -54,7 +53,7 @@ void make_laser(int client)
 }
 
 
-public void StartLaser()
+public void start_laser()
 {
 	// swap everyone other than the tank to the t side
 	// if they were allready in ct or t
@@ -100,4 +99,13 @@ void end_laser()
 public void laser_death(int victim)
 {
 	//CreateTimer(3.0, ReviveLaser, victim);
+}
+
+void add_laser_impl()
+{
+	SpecialDayImpl laser;
+	laser = make_sd_impl(laser_init,start_laser,end_laser,laser_player_init,"Laser Wars");
+	laser.sd_discon_active = laser_discon_active;
+	
+	add_special_day(laser);
 }
