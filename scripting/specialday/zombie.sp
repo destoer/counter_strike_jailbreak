@@ -341,6 +341,19 @@ void zombie_take_damage(int attacker, int victim, float& damage)
 	}
 }
 
+bool zombie_restrict_weapon(int client, char[] weapon_string)
+{
+	if(global_ctx.sd_state == sd_active)
+	{
+		if(GetClientTeam(client) == CS_TEAM_T)
+		{
+			return StrEqual(weapon_string,"weapon_knife");
+		}
+	}
+
+	return true;
+}
+
 SpecialDayImpl zombie_impl()
 {
 	SpecialDayImpl zombie;
@@ -348,6 +361,7 @@ SpecialDayImpl zombie_impl()
 	zombie.sd_discon_active = zombie_discon_active;
 	zombie.sd_player_death = zombie_death;
 	zombie.sd_take_damage = zombie_take_damage;
+	zombie.sd_restrict_weapon = zombie_restrict_weapon;
 
 	return zombie;
 }

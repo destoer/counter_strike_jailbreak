@@ -100,12 +100,26 @@ void spectre_take_damage(int victim, int attacker, float& damage)
 	}		
 }
 
+bool spectre_weapon_restrict(int client, char[] weapon_string)
+{
+	if(global_ctx.sd_state == sd_active)
+	{
+		if(client == global_ctx.boss)
+		{
+			return StrEqual(weapon_string,"weapon_knife");			
+		}				
+	}
+
+	return true;
+}
+
 SpecialDayImpl spectre_impl()
 {
 	SpecialDayImpl spectre;
 	spectre = make_sd_impl(spectre_init,start_spectre,end_spectre,spectre_player_init);
 	spectre.sd_discon_active = spectre_discon_active;
 	spectre.sd_take_damage = spectre_take_damage;
+	spectre.sd_restrict_weapon = spectre_weapon_restrict;
 
 	return spectre;
 }

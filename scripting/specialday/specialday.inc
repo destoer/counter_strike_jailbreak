@@ -67,6 +67,7 @@ typedef SD_PLAYER_INIT = function void(int client);
 typedef SD_BOSS_DISCON_ACTIVE = function void(int client);
 typedef SD_PLAYER_DEATH = function void(int attacker, int victim);
 typedef SD_ON_TAKE_DAMAGE = function void(int attacker, int victim, float &damage)
+typedef SD_RESTRICT_WEAPON = function bool(int client, char[] weapon);
 
 enum struct SpecialDayImpl
 {
@@ -89,6 +90,10 @@ enum struct SpecialDayImpl
 
 	// Called when a player takes damage during SD (not required)
 	SD_ON_TAKE_DAMAGE sd_take_damage;
+
+	// Called on weapon pickup during active SD (not required)
+	// Returns bool, false for not allowed true for allowed.
+	SD_RESTRICT_WEAPON sd_restrict_weapon;
 }
 
 native SdState sd_current_state();

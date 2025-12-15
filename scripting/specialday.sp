@@ -193,14 +193,13 @@ SpecialDayImpl make_sd_impl(SD_INIT sd_init, SD_START sd_start, SD_END sd_end, S
 	out.sd_player_init = sd_player_init;
 	
 	out.sd_discon_active = null;
+	out.sd_player_death = null;
+	out.sd_take_damage = null;
+	out.sd_restrict_weapon = null;
 
 	return out;
 }
 
-// backups
-// (unused)
-//new b_hFriendlyFire; // mp_friendlyfire var
-//new b_autokick; // turn auto kick off for friednly fire
 
 // gun removal
 int g_WeaponParent;

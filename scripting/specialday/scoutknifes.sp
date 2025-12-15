@@ -67,11 +67,17 @@ void scoutknife_death(int attacker,int victim)
 	sd_players[attacker].kills++;
 }
 
+bool scoutknife_restrict_weapon(int client, char[] weapon_string)
+{
+	return StrEqual(weapon_string,"weapon_scout") || StrEqual(weapon_string,"weapon_knife") || StrEqual(weapon_string,"weapon_ssg08");
+}
+
 SpecialDayImpl scoutknife_impl()
 {
 	SpecialDayImpl scout_knife
 	scout_knife = make_sd_impl(scoutknife_init,start_scout,end_scout,scout_player_init);
 	scout_knife.sd_player_death = scoutknife_death;
+	scout_knife.sd_restrict_weapon = scoutknife_restrict_weapon;
 
 	return scout_knife;
 }

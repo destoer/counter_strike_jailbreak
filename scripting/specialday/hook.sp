@@ -210,7 +210,7 @@ public Action OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 			Call_StartFunction(null, take_damage);
 			Call_PushCell(victim);
 			Call_PushCell(attacker)
-			Call_PushCell(damage);
+			Call_PushFloatRef(damage);
 			Call_Finish();
 			
 			
@@ -321,60 +321,36 @@ public Action OnWeaponEquip(int client, int weapon)
 	}
 #endif
 
-	switch(global_ctx.special_day)
+	SD_RESTRICT_WEAPON restrict_weapon = sd_impl[global_ctx.special_day].sd_restrict_weapon;
+
+	if(restrict_weapon != null)
 	{
-		case scoutknife_day:
-		{
-			// need to check for ssg08 incase we are oncsgo
-			if(!(StrEqual(weapon_string,"weapon_scout") || StrEqual(weapon_string,"weapon_knife") || StrEqual(weapon_string,"weapon_ssg08")))
-			{
-				return Plugin_Handled;
-			}
-		}
-	
-		case zombie_day:
-		{
-			if(global_ctx.sd_state == sd_active)
-			{
-				if(GetClientTeam(client) == CS_TEAM_T)
-				{
-					if(!StrEqual(weapon_string,"weapon_knife"))
-					{
-						return Plugin_Handled;
-					}
-				}
-			}
-		}
+		Call_StartFunction(null, restrict_weapon);
+		Call_PushCell(client);
+		Call_PushString(weapon_string);
+		bool allowed = false;
+		Call_Finish(allowed);
 
-		// spectre can only use knife
-		case spectre_day:
+		if(!allowed)
 		{
-			if(global_ctx.sd_state == sd_active)
-			{
-				if(client == global_ctx.boss)
-				{
-					if(!StrEqual(weapon_string,"weapon_knife"))
-					{
-						return Plugin_Handled;
-					}					
-				}				
-			}
-		}
-
-		default:
-		{
-			// no restrict
-			if(StrEqual(global_ctx.weapon_restrict,""))
-			{
-				return Plugin_Continue;
-			}
-
-			if(!StrEqual(weapon_string,global_ctx.weapon_restrict))
-			{
-				return Plugin_Handled;
-			}
+			return Plugin_Handled;
 		}
 	}
+
+	else
+	{
+		// no restrict
+		if(StrEqual(global_ctx.weapon_restrict,""))
+		{
+			return Plugin_Continue;
+		}
+
+		if(!StrEqual(weapon_string,global_ctx.weapon_restrict))
+		{
+			return Plugin_Handled;
+		}
+	}
+
 	return Plugin_Continue;
 }
 
