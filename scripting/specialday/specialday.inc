@@ -72,6 +72,9 @@ typedef SD_FIX_LADDER = function void(int client);
 
 enum struct SpecialDayImpl
 {
+	// Name of the specialday
+	char name[64];
+
 	// called on sd start (required)
 	SD_START sd_start;
 	// called on sd init (required)

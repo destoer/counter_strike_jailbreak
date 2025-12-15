@@ -63,7 +63,17 @@ void callback_dummy()
 // so we do it in a func...
 // + 1 FOR CUSTOM SD
 #define SD_CALLBACK_SIZE SD_SIZE + 1
-SpecialDayImpl sd_impl[SD_CALLBACK_SIZE];
+ArrayList sd_impl[SD_CALLBACK_SIZE];
+
+SpecialDayImpl get_sd_impl(int index)
+{
+	return view_as<SpecialDayImpl>(GetArrayCell(sd_impl,index));
+}
+
+void add_special_day(SpecialDayImpl impl)
+{
+	PushArrayCell(sd_impl,impl);	
+}
 
 
 // sd modifiers
@@ -184,7 +194,7 @@ void reset_player(int client)
 }
 
 
-SpecialDayImpl make_sd_impl(SD_INIT sd_init, SD_START sd_start, SD_END sd_end, SD_PLAYER_INIT sd_player_init)
+SpecialDayImpl make_sd_impl(SD_INIT sd_init, SD_START sd_start, SD_END sd_end, SD_PLAYER_INIT sd_player_init, char[] name)
 {
 	SpecialDayImpl out;
 	out.sd_init = sd_init;
@@ -197,6 +207,7 @@ SpecialDayImpl make_sd_impl(SD_INIT sd_init, SD_START sd_start, SD_END sd_end, S
 	out.sd_take_damage = null;
 	out.sd_restrict_weapon = null;
 	out.sd_fix_ladder = null;
+	strcopy(out.name,sizeof(out.name) - 1, name);
 
 	return out;
 }
@@ -1487,7 +1498,7 @@ public int sd_select(int client, int sd)
 	// re-spawn all players
 	for(int i = 1; i <= MaxClients; i++)
 	{
-		if(IsClientInGame(i)) // check the client is in the game
+		if(is_valid_client(i)) // check the client is in the game
 		{
 			if(!IsPlayerAlive(i))  // check player is dead
 			{
@@ -1514,9 +1525,10 @@ public int sd_select(int client, int sd)
 	
 	// init_func
 
-	SD_INIT init_func = sd_impl[sd].sd_init;
+	SpecialDayImpl impl;
+	impl = get_sd_impl(global_ctx.special_day);
 
-	Call_StartFunction(null, init_func);
+	Call_StartFunction(null, impl.sd_init);
 	Call_Finish();
 
 	if(global_ctx.sd_init_failure)
@@ -1626,10 +1638,10 @@ public StartSD()
 		disable_lr();
 	}
 
-	int idx = view_as<int>(global_ctx.special_day);
-	SD_START start_func = sd_impl[idx].sd_start;
+	SpecialDayImpl impl
+	impl = get_sd_impl(global_ctx.special_day);
 
-	Call_StartFunction(null, start_func);
+	Call_StartFunction(null, impl.sd_start);
 	Call_Finish();
 }
 
