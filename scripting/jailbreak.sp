@@ -1289,13 +1289,6 @@ public Action round_end(Handle event, const String:name[], bool dontBroadcast)
 
 public Action round_start(Handle event, const String:name[], bool dontBroadcast) 
 {
-	// setup auto open
-	if(global_ctx.cell_door_hammer_id != -1)
-	{
-		PrintToChatAll("%s Auto opening cell doors in 45 seconds",JB_PREFIX);
-		PrintCenterTextAll("Auto opening cell doors in 45 seconds");
-		cell_auto_timer = CreateTimer(45.0,auto_open_cell_callback);
-	}
 
 	enable_lr();
 
