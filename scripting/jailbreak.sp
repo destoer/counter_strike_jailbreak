@@ -34,7 +34,7 @@ TODO make all names consistent
 //#define VOICE_ANNOUNCE_HOOK
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi, ashort"
-#define PLUGIN_VERSION "V3.8.4 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.8.5 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -627,7 +627,9 @@ public OnPluginStart()
 	RegAdminCmd("sm_rw", fire_warden, ADMFLAG_KICK);
 	RegAdminCmd("block", enable_block_admin, ADMFLAG_BAN);
 	RegAdminCmd("ublock",disable_block_admin, ADMFLAG_BAN);	
+	
 	RegAdminCmd("force_open", force_open_callback, ADMFLAG_UNBAN);
+	
 
 	RegAdminCmd("set_warden_tag",set_warden_tag_command,ADMFLAG_UNBAN);
 
@@ -675,9 +677,12 @@ public OnPluginStart()
 
 	RegConsoleCmd("wcommands",warden_commands);
 	
-	RegConsoleCmd("open_cell",force_cell_doors_cmd);
-	RegAdminCmd("set_cell_button",set_cell_button_cmd,ADMFLAG_KICK);
-
+	if(warden_door_control)
+	{
+		RegConsoleCmd("open_cell",force_cell_doors_cmd);
+		RegAdminCmd("set_cell_button",set_cell_button_cmd,ADMFLAG_KICK);
+	}
+	
 	// hooks
 	HookEvent("round_start", round_start); // For the round start
 	HookEvent("round_end", round_end); // For the round start

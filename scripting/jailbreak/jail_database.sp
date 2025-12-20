@@ -206,7 +206,7 @@ void force_cell_doors()
             for(int i = 1; i <= MaxClients; i++) 
             {
                 // Find a player to fake press this button 
-                if(is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT)
+                if(is_valid_client(i) && GetClientTeam(i) == CS_TEAM_CT && IsPlayerAlive(i))
                 {
                     fake_press = true;
                     AcceptEntityInput(entity,"Use",1);

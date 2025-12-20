@@ -25,6 +25,7 @@ ConVar ct_primary_cvar;
 ConVar ct_secondary_cvar;
 ConVar warden_command_end_delay_cvar;
 ConVar explode_kill_cvar;
+ConVar warden_door_control_cvar;
 
 #define PREFIX_SIZE 128
 
@@ -36,32 +37,34 @@ char WARDEN_PLAYER_PREFIX[PREFIX_SIZE];
 char CT_PRIMARY[WEAPON_SIZE] = "weapon_m4a1";
 char CT_SECONDARY[WEAPON_SIZE] = "weapon_deagle";
 
-bool noblock;
-bool laser_death;
-bool t_laser;
-bool stuck;
-bool gun_commands;
-bool voice;
-bool armor;
-bool warden_block;
-bool mute;
-bool print_rebel;
-bool guns;
-bool helmet;
-bool admin_laser;
+bool noblock = false;
+bool laser_death = false;
+bool t_laser = false;
+bool stuck = false;
+bool gun_commands = false;
+bool voice = false;
+bool armor = true;
+bool warden_block = true;
+bool mute = true;
+bool print_rebel = true;
+bool guns = true;
+bool helmet = true;
+bool admin_laser = false;
 
-bool warday_enable;
-bool warday_gun_enable;
+bool warday_enable = true;
+bool warday_gun_enable = true;
 
-bool auto_warden;
+bool auto_warden = true;
 
-bool handicap_enable;
+bool handicap_enable = true;
 
-bool warden_ring;
+bool warden_ring = true;
 
 int warden_command_end_delay = 0;
 
-bool explode_kill_enable;
+bool explode_kill_enable = false;
+
+bool warden_door_control = false;
 
 void create_jb_convar()
 {
@@ -98,6 +101,8 @@ void create_jb_convar()
     admin_laser_cvar = CreateConVar("jb_admin_laser","0","enable admin laser");
 
     warden_command_end_delay_cvar = CreateConVar("warden_command_end_delay","0","delay for print to say orders are no longer active");
+
+    warden_door_control_cvar = CreateConVar("warden_door_control","0","enable open_cell command");
 
     explode_kill_cvar = CreateConVar("explode_kill","0","create explosion when kill is used");
 
@@ -171,6 +176,8 @@ void setup_jb_convar()
     ct_secondary_cvar.GetString(CT_SECONDARY,WEAPON_SIZE);
     
     warden_command_end_delay = GetConVarInt(warden_command_end_delay_cvar);
+
+    warden_door_control = warden_door_control_cvar.IntValue > 0;
 
     explode_kill_enable = GetConVarInt(explode_kill_cvar) > 0;
 }
