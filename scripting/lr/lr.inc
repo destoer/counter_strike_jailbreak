@@ -4,64 +4,60 @@
 #endif
 #define _INCLUDE_lr_included
 
+#define LR_SLOTS 4
+#define INVALID_SLOT -1
 
-enum lr_type
+enum struct LrPlayer
 {
-    knife_fight,
-    dodgeball,
-    grenade,
-    race,
-    no_scope,
-    gun_toss,
-    crash,
-    shot_for_shot,
-    mag_for_mag,
-    shotgun_war,
-    russian_roulette,
-    headshot_only,
-    sumo,
-    scout_knife,
-    custom,
-    rebel,
-    knife_rebel,
-    combo_key,
+    // Client associated with this player for.
+    int client;
+    // Slot for LR player for storing LR specific info about the player
+    int slot;
+    // Hash of the LR they are in. Use this when passing information about the LR
+    // Across a time boundary as it will prevent TOUTOC bugs.
+    // Use get_player_by_hash
+    int hash;
+}
 
-    // this is an invalid entry if we get this we have trouble
-    slot_error,
+typedef LR_INIT  = function void(LrPlayer player_t, LrPlayer player_ct);
+typedef LR_START  = function void(LrPlayer player_t, LrPlayer player_ct);
+typedef LR_FAILSAFE_TRIGGERED  = function void(LrPlayer player_t, LrPlayer player_ct);
+typedef LR_SELECTION_MENU = function void(int client);
+
+enum struct LrImpl
+{
+    int lr_type;
+
+    char name[64]
+
+    // Called when lr invoked (not required)
+    LR_INIT init_lr;
+
+    // Called when LR timer up (required)
+    LR_START start_lr;
+
+    // Called when LR failsafe triggered (not required)
+    LR_FAILSAFE_TRIGGERED failsafe_triggered
+
+    // LR selection menu (not required) defaults to pick_partner
+    LR_SELECTION_MENU selection_menu;
 }
 
 
-const int LR_SIZE = 19;
-#define LR_SIZE_ACTUAL 18
-new const String:lr_list[LR_SIZE][] =
-{	
-    "Knife fight",
-    "Dodgeball",
-    "Nade war",
-    "Race",
-    "No scope",
-    "Gun toss",
-    "Crash",
-    "Shot for shot",
-    "Mag for Mag",
-    "Shotgun war",
-    "Russian roulette",
-    "Headshot only",
-    "Sumo",
-    "Scout knife",
-    "Custom",
-    "Rebel",
-    "Knife rebel",
-    "Combo key",
-    "Error"
-/*
-    "Race",
-    "Rock paper scissors",
-*/
-};
 
-native bool is_in_lr(int client);
+native void add_lr(LrImpl impl);
+native void restrict_weapon(LrPlayer player, char[] weapon);
 
-// NOTE: partner may not be valid
-forward void OnWinLR(int client,int partner, lr_type type);
-forward void OnLREnabled(int client);
+LrImpl make_lr_impl(LR_START lr_start, char[] name)
+{
+	LrImpl out;
+	out.init_lr = null;
+	out.start_lr = lr_start;
+    strcopy(out.name,sizeof(out.name) - 1, name);
+	
+    out.failsafe_triggered = null;
+    out.selection_menu = null;
+
+	return out;
+}
+

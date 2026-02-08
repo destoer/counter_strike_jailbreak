@@ -116,14 +116,6 @@ public Action force_lr(int client, int args)
     GetCmdArg(3,arg,sizeof(arg));
 
     int lr = StringToInt(arg);
-    lr_type type = view_as<lr_type>(lr);
-
-    if(!(lr >= 0 && lr < LR_SIZE))
-    {
-        PrintToChat(client,"%s invalid lr %s\n",LR_PREFIX,arg);
-        return Plugin_Handled;
-    }
-
 
     if(GetClientTeam(cli1) != CS_TEAM_CT && GetClientTeam(cli2) != CS_TEAM_T)
     {
@@ -131,7 +123,7 @@ public Action force_lr(int client, int args)
         return Plugin_Handled;
     }
 
-    start_lr_internal(cli1, cli2, type);
+    start_lr_internal(cli1, cli2, lr);
 
     return Plugin_Continue;
 }
