@@ -21,48 +21,47 @@ void client_fly(int client)
 	SetEntityMoveType(client, MOVETYPE_FLY);
 }
 
-void knife_fight_player_init(LrPlayer player)
+void knife_fight_player_init(LrPlayer player,int option)
 {
     SetEntityHealth(player.client,100); 
     restrict_weapon(player,"weapon_knife");
 
-    // knife_choice choice = view_as<knife_choice>(slots[id].option);
+    knife_choice choice = view_as<knife_choice>(option);
 
-    // switch(choice)
-    // {
-    //     case knife_vanilla:
-    //     {
+    switch(choice)
+    {
+        case knife_vanilla:
+        {
             
-    //     }
+        }
 
-    //     case knife_low_grav: 
-    //     {
-    //         SetEntityGravity(client,0.6);
-    //     }
+        case knife_low_grav: 
+        {
+            SetEntityGravity(player.client,0.6);
+        }
 
-    //     case knife_high_speed:
-    //     {
-    //         set_client_speed(client,2.5);
-    //     }
+        case knife_high_speed:
+        {
+            set_client_speed(player.client,2.5);
+        }
 
-    //     case knife_one_hit:
-    //     {
-    //         SetEntityHealth(client,50); 
-    //     }
+        case knife_one_hit:
+        {
+            SetEntityHealth(player.client,50); 
+        }
 
-    //     case knife_fly:
-    //     {
-    //         PrintToChat(client,"%s Press e to toggle flying",LR_PREFIX)
-    //         client_fly(client);
-    //     }
-    // }
-
+        case knife_fly:
+        {
+            PrintToChat(player.client,"%s Press e to toggle flying",LR_PREFIX)
+            client_fly(player.client);
+        }
+    }
 }
 
-void start_knife_fight(LrPlayer player_t, LrPlayer player_ct)
+void start_knife_fight(LrPlayer player_t, LrPlayer player_ct, int option)
 {
-    knife_fight_player_init(player_t);
-    knife_fight_player_init(player_ct);
+    knife_fight_player_init(player_t,option);
+    knife_fight_player_init(player_ct,option);
 }
 
 // void knife_fight_menu(int client)
@@ -82,7 +81,7 @@ void start_knife_fight(LrPlayer player_t, LrPlayer player_ct)
 //     menu.Display(client,20);        
 // }
 
-public OnPluginStart()
+public OnAllPluginsLoaded()
 {
     add_lr(make_lr_impl(start_knife_fight,"Knife fight"));
 }

@@ -7,6 +7,8 @@
 #define LR_SLOTS 4
 #define INVALID_SLOT -1
 
+#define LR_PREFIX "\x04[Last Request]\x07F8F8FF"
+
 enum struct LrPlayer
 {
     // Client associated with this player for.
@@ -19,8 +21,8 @@ enum struct LrPlayer
     int hash;
 }
 
-typedef LR_INIT  = function void(LrPlayer player_t, LrPlayer player_ct);
-typedef LR_START  = function void(LrPlayer player_t, LrPlayer player_ct);
+typedef LR_INIT  = function void(LrPlayer player_t, LrPlayer player_ct, int option);
+typedef LR_START  = function void(LrPlayer player_t, LrPlayer player_ct, int option);
 typedef LR_FAILSAFE_TRIGGERED  = function void(LrPlayer player_t, LrPlayer player_ct);
 typedef LR_SELECTION_MENU = function void(int client);
 
@@ -48,7 +50,7 @@ enum struct LrImpl
 native void add_lr(LrImpl impl);
 native void restrict_weapon(LrPlayer player, char[] weapon);
 
-LrImpl make_lr_impl(LR_START lr_start, char[] name)
+stock LrImpl make_lr_impl(LR_START lr_start, char[] name)
 {
 	LrImpl out;
 	out.init_lr = null;

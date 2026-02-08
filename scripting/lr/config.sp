@@ -4,9 +4,6 @@
 ConVar lr_cvar;
 ConVar ct_ban_cvar;
 
-bool ct_ban = false;
-
-
 void create_lr_convar()
 {
     lr_cvar = CreateConVar("destoer_lr","1","enable lr",FCVAR_NONE);
@@ -18,5 +15,5 @@ void create_lr_convar()
 
 void setup_config()
 {
-    ct_ban = GetConVarInt(ct_ban_cvar) > 0;
+    global_ctx.ct_ban = GetConVarInt(ct_ban_cvar) > 0;
 }
