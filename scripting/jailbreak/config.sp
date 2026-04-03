@@ -26,6 +26,7 @@ ConVar ct_secondary_cvar;
 ConVar warden_command_end_delay_cvar;
 ConVar explode_kill_cvar;
 ConVar warden_door_control_cvar;
+ConVar warden_laser_colour_cvar;
 
 #define PREFIX_SIZE 128
 
@@ -66,6 +67,8 @@ bool explode_kill_enable = false;
 
 bool warden_door_control = false;
 
+bool warden_laser_colour = true;
+
 void create_jb_convar()
 {
     // css
@@ -86,6 +89,7 @@ void create_jb_convar()
     auto_warden_cvar = CreateConVar("jb_auto_warden","1","enable auto warden on last alive");
     handicap_enable_cvar = CreateConVar("jb_handicap","1","enable handicap on bad ct ratio");
     warden_ring_cvar = CreateConVar("jb_warden_ring","1","enable warden ring");
+    warden_laser_colour_cvar = CreateConVar("jb_warden_laser_colour","1","enable warden laser colours");
 
     ct_secondary_cvar = CreateConVar("jb_ct_secondary","weapon_deagle","default ct secondary");
     ct_primary_cvar = CreateConVar("jb_ct_primary","weapon_m4a1","default ct primary");
@@ -153,6 +157,8 @@ void setup_jb_convar()
 
     warday_enable = warday_cvar.IntValue > 0;
     warday_gun_enable = warday_gun_cvar.IntValue > 0;
+
+    warden_laser_colour = warden_laser_colour_cvar.IntValue > 0;
 
     jb_prefix.GetString(JB_PREFIX,PREFIX_SIZE);
     warden_prefix.GetString(WARDEN_PREFIX,PREFIX_SIZE);

@@ -88,7 +88,7 @@ enum laser_type
 {
 	warden,
 	admin,
-	donator,
+	warden_custom,
 	none	
 };
 

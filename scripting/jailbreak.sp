@@ -14,15 +14,7 @@ TODO make all names consistent
 */
 
 
-// if defined these two features are locked behind custom admin flags
-//#define DRAW_CUSTOM_FLAGS
-//#define LASER_COLOR_CUSTOM_FLAGS
-
 /*
-	admin flags
-
-	ADMFLAG_CUSTOM1 - allow clients to use a draw laser as warden
-	ADMFLAG_CUSTOM4 - allow clients to change laser color as warden
 	ADMFLAG_CUSTOM3 - rainbow laser for use anytime (restrict to admins)
 	ADMFLAG_CUSTOM6 - toggle laser killing people
 */
@@ -34,7 +26,7 @@ TODO make all names consistent
 //#define VOICE_ANNOUNCE_HOOK
 
 #define PLUGIN_AUTHOR "destoer(organ harvester), jordi, ashort"
-#define PLUGIN_VERSION "V3.8.5 - Violent Intent Jailbreak"
+#define PLUGIN_VERSION "V3.8.6 - Violent Intent Jailbreak"
 
 /*
 	onwards to the new era ( ͡° ͜ʖ ͡°)
@@ -280,25 +272,12 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 	// only warden or admin can shine laser
 	bool is_warden = (client == global_ctx.warden_id);
 	
-	laser_type type;
+	laser_type type = none;
 	
 	
 	if(is_warden)
 	{
-		// custom flag required to do use color changed laser
-#if defined LASER_COLOR_CUSTOM_FLAGS
-		if(CheckCommandAccess(client, "generic_admin",DONATOR, false))
-		{
-			type = donator;
-		}
-		
-		else
-		{
-			type = warden;
-		}
-#else
-		type = donator;
-#endif		
+		type = warden_laser_colour? warden_custom : warden;
 	}
 	
 	else if(CheckCommandAccess(client, "generic_admin", ADMIN, false) && admin_laser)
@@ -306,35 +285,32 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 		type = admin;
 	}
 
-	else
+
+	if(type == none || !is_valid_client(client))
 	{
-		type = none;
+		return Plugin_Continue;
 	}
 	
-	if(type != none)
+
+	switch(type)
 	{
-		if(is_valid_client(client))
+		case warden:
 		{
-			switch(type)
-			{
-				case warden:
-				{
-					SetupLaser(client,laser_colors[5]);
-				}
-			
-			
-				case admin:
-				{
-					SetupLaser(client,laser_rainbow[rainbow_color]);
-				}
-				
-				case donator:
-				{
-					SetupLaser(client,laser_colors[jb_players[client].laser_color]);
-				}
-			}
+			SetupLaser(client,laser_colors[5]);
+		}
+	
+	
+		case admin:
+		{
+			SetupLaser(client,laser_rainbow[rainbow_color]);
+		}
+		
+		case warden_custom:
+		{
+			SetupLaser(client,laser_colors[jb_players[client].laser_color]);
 		}
 	}
+		
 
 	return Plugin_Continue;
 }
@@ -642,12 +618,8 @@ public OnPluginStart()
 
 
 
-	// custom flag required to do draw laser
-#if defined DRAW_CUSTOM_FLAGS 
-	RegAdminCmd("laser", laser_menu, MEMBER);
-#else
+
 	RegConsoleCmd("laser", laser_menu);
-#endif
 	RegConsoleCmd("warden_text",warden_text_menu);
 
 
@@ -656,12 +628,12 @@ public OnPluginStart()
 		RegConsoleCmd("tlaser", t_laser_menu);
 	}
 
-#if defined LASER_COLOR_CUSTOM_FLAGS
-	RegAdminCmd("laser_color", command_laser_color, ADMFLAG_CUSTOM4);
-#else
-	RegConsoleCmd("laser_color", command_laser_color);
-#endif
-	
+
+	if(warden_laser_colour)
+	{
+		RegConsoleCmd("laser_color", command_laser_color);
+	}
+
 	RegConsoleCmd("color", warden_color);
 	RegConsoleCmd("reset_color", warden_reset_color);
 	
