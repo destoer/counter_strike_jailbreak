@@ -998,7 +998,12 @@ public print_warden_commands(int client)
 	}
 
 	PrintToChat(client,"%s!laser       %s- %sswitch point/draw laser",color1,color2,color3);
-	PrintToChat(client,"%s!laser_color       %s- %schange laser color",color1,color2,color3);
+	
+	if(warden_laser_colour)
+	{
+		PrintToChat(client,"%s!laser_color       %s- %schange laser color",color1,color2,color3);
+	}
+
 	PrintToChat(client,"%s!marker  %s- %s+marker, use mouse to adjust size, then -marker",color1,color2,color3);
 
 
