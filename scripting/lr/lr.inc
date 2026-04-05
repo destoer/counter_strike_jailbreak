@@ -43,6 +43,9 @@ enum struct LrImpl
 
     // LR selection menu (not required) defaults to pick_partner
     LR_SELECTION_MENU selection_menu;
+
+    // Calling plugin handle do not tamper with
+    Handle plugin_handle;
 }
 
 
@@ -59,6 +62,8 @@ stock LrImpl make_lr_impl(LR_START lr_start, char[] name)
 	
     out.failsafe_triggered = null;
     out.selection_menu = null;
+
+    out.plugin_handle = GetMyHandle();
 
 	return out;
 }

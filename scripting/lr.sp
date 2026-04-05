@@ -144,6 +144,7 @@ public void native_add_lr(Handle plugin, int num_param)
 {
     LrImpl impl;
     GetNativeArray(1,impl,sizeof(LrImpl));
+    PrintToConsoleAll("Adding LR %s",impl.name);
     lr_impl.PushArray(impl);
 }
 
@@ -153,6 +154,9 @@ public void native_restrict_weapon(Handle plugin, int num_param)
     GetNativeArray(1,player,sizeof(LrPlayer));
     char weapon[64];
     GetNativeString(2,weapon,sizeof(weapon));
+
+    PrintToConsoleAll("Restricting weapon for %N %s",player.client,weapon);
+
 
     int slot = get_slot_from_hash(player.hash);
     if(slot != INVALID_SLOT)
@@ -380,7 +384,8 @@ public Action start_lr_callback(Handle timer, int hash)
     PrintCenterText(t,"Go!");
     PrintCenterText(ct,"Go!");
 
-    Call_StartFunction(null,impl.start_lr);
+    PrintToConsoleAll("Starting %s %d",impl.name,view_as<int>(impl.start_lr));
+    Call_StartFunction(impl.plugin_handle,impl.start_lr);
     Call_PushArray(slots[t_slot].player,sizeof(LrPlayer));
     Call_PushArray(slots[t_slot].partner,sizeof(LrPlayer));
     Call_PushCell(lr_choice[t].option);
@@ -426,7 +431,7 @@ void start_lr_internal(int t, int ct, int lr_type)
 
     if(impl.init_lr != null)
     {
-        Call_StartFunction(null,impl.init_lr);
+        Call_StartFunction(impl.plugin_handle,impl.init_lr);
 		Call_PushArray(t_player,sizeof(LrPlayer));
         Call_PushArray(ct_player,sizeof(LrPlayer));
         Call_PushCell(lr_choice[t].option);

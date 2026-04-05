@@ -60,6 +60,8 @@ void knife_fight_player_init(LrPlayer player,int option)
 
 void start_knife_fight(LrPlayer player_t, LrPlayer player_ct, int option)
 {
+    PrintToConsoleAll("Start knife fight");
+
     knife_fight_player_init(player_t,option);
     knife_fight_player_init(player_ct,option);
 }
