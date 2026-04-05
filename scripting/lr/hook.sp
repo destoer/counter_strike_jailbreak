@@ -256,6 +256,8 @@ public Action OnPlayerDeath(Handle event, const String:name[], bool dontBroadcas
 
         if(victim == slot.player.client)
         {
+
+            PrintToConsoleAll("LR OVER");
             PrintToChatAll("%s %N won %s, %N lost\n",LR_PREFIX,slot.partner.client,slot.impl.name,slot.player.client);
 
             // lr_lose(slot.player,slot.impl.lr_type);

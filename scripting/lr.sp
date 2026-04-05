@@ -211,6 +211,8 @@ public OnPluginStart()
     HookEvent("round_end", OnRoundEnd);
     HookEvent("round_start", OnRoundStart);
 
+    HookEvent("player_death", OnPlayerDeath,EventHookMode_Post);
+
     for(int i = 1; i <= MaxClients; i++)
     {
         if(is_valid_client(i))
