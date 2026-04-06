@@ -52,6 +52,7 @@ void end_lr(LrSlot slot)
     slot.delay = 0;
 
     kill_handle(slot.start_timer);
+    kill_handle(slot.failsafe_timer);
     end_line(slot);
 }
 

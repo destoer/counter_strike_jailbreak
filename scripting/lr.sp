@@ -82,6 +82,8 @@ enum struct LrSlot
     int delay;
 
     Handle line_timer;
+
+    Handle failsafe_timer;
 }
 
 enum struct Choice
@@ -362,6 +364,35 @@ LrPlayer get_inactive_slot(int client)
 }
 
 
+public Action failsafe_callback(Handle timer, int hash)
+{
+    // By convention the passed hash is for the T
+    int t_slot = get_slot_from_hash(hash);
+    if(t_slot == INVALID_SLOT) 
+    {
+        return Plugin_Handled;
+    }
+
+    LrImpl impl;
+    impl = slots[t_slot].impl;
+
+    int partner = slots[t_slot].partner.slot;
+
+
+    slots[t_slot].failsafe = true;
+    slots[partner].failsafe = true;
+
+    PrintToConsoleAll("Starting failsafe for %d",hash);
+
+    Call_StartFunction(impl.plugin_handle,impl.failsafe);
+    Call_PushArray(slots[t_slot].player,sizeof(LrPlayer));
+    Call_PushArray(slots[t_slot].partner,sizeof(LrPlayer));
+    Call_Finish();
+
+    return Plugin_Continue;
+}
+
+
 public Action start_lr_callback(Handle timer, int hash)
 {
     // By convention the passed hash is for the T
@@ -393,6 +424,11 @@ public Action start_lr_callback(Handle timer, int hash)
         }
 
         slots[t_slot].start_timer = null;
+    }
+
+    if(impl.failsafe != null)
+    {
+        slots[t_slot].failsafe_timer = CreateTimer(impl.failsafe_time,failsafe_callback,hash,TIMER_FLAG_NO_MAPCHANGE);
     }
 
     PrintCenterText(t,"Go!");
@@ -465,7 +501,7 @@ void start_lr_internal(int t, int ct, int lr_type)
         SetEntityHealth(ct,100);
     }
 
-    
+
     int delay = 3;
     slots[t_player.slot].delay = delay; 
 

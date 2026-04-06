@@ -39,7 +39,9 @@ enum struct LrImpl
     LR_START start_lr;
 
     // Called when LR failsafe triggered (not required)
-    LR_FAILSAFE_TRIGGERED failsafe_triggered
+    LR_FAILSAFE_TRIGGERED failsafe;
+
+    float failsafe_time;
 
     // LR selection menu (not required) defaults to pick_partner
     LR_SELECTION_MENU selection_menu;
@@ -62,7 +64,7 @@ stock LrImpl make_lr_impl(LR_START lr_start, char[] name)
 	out.start_lr = lr_start;
     strcopy(out.name,sizeof(out.name) - 1, name);
 	
-    out.failsafe_triggered = null;
+    out.failsafe = null;
     out.selection_menu = null;
 
     out.plugin_handle = GetMyHandle();
@@ -79,8 +81,20 @@ stock LrImpl make_lr_impl_menu(LR_START lr_start, LR_SELECTION_MENU lr_menu, cha
     return out;
 }
 
+stock LrImpl make_lr_impl_menu_failsafe(LR_START lr_start, LR_SELECTION_MENU lr_menu, 
+    LR_FAILSAFE_TRIGGERED failsafe, float failsafe_time, char[] name)
+{
+	LrImpl out;
+    out = make_lr_impl_menu(lr_start,lr_menu,name);
+    out.failsafe_time = failsafe_time;
+    out.failsafe = failsafe;
 
-public int pick_partner_callback(Menu menu, MenuAction action, int client, int choice)
+    return out;
+}
+
+
+
+stock int pick_partner_callback(Menu menu, MenuAction action, int client, int choice)
 {
     if(action == MenuAction_Select)
     {
@@ -94,4 +108,3 @@ public int pick_partner_callback(Menu menu, MenuAction action, int client, int c
 
     return 0;
 }
-
