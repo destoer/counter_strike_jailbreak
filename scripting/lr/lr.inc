@@ -52,6 +52,8 @@ enum struct LrImpl
 
 native void add_lr(LrImpl impl);
 native void restrict_weapon(LrPlayer player, char[] weapon);
+native void default_menu_option();
+native void pick_partner(int client, int option);
 
 stock LrImpl make_lr_impl(LR_START lr_start, char[] name)
 {
@@ -66,5 +68,30 @@ stock LrImpl make_lr_impl(LR_START lr_start, char[] name)
     out.plugin_handle = GetMyHandle();
 
 	return out;
+}
+
+stock LrImpl make_lr_impl_menu(LR_START lr_start, LR_SELECTION_MENU lr_menu, char[] name)
+{
+	LrImpl out;
+    out = make_lr_impl(lr_start,name);
+    out.selection_menu = lr_menu;
+
+    return out;
+}
+
+
+public int pick_partner_callback(Menu menu, MenuAction action, int client, int choice)
+{
+    if(action == MenuAction_Select)
+    {
+        pick_partner(client,choice);
+    }
+
+    else if (action == MenuAction_End)
+    {
+        delete menu;
+    }
+
+    return 0;
 }
 

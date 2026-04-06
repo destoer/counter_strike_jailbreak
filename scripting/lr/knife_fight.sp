@@ -22,8 +22,7 @@ void client_fly(int client)
 }
 
 void knife_fight_player_init(LrPlayer player,int option)
-{
-    SetEntityHealth(player.client,100); 
+{ 
     restrict_weapon(player,"weapon_knife");
 
     knife_choice choice = view_as<knife_choice>(option);
@@ -66,24 +65,23 @@ void start_knife_fight(LrPlayer player_t, LrPlayer player_ct, int option)
     knife_fight_player_init(player_ct,option);
 }
 
-// void knife_fight_menu(int client)
-// {
-//     Menu menu = new Menu(default_choice_handler);
-//     menu.SetTitle("Knife option");
+void knife_fight_menu(int client)
+{
+    Menu menu = new Menu(pick_partner_callback);
+    menu.SetTitle("Knife option");
 
-//     menu.AddItem("vanilla","vanilla");
-//     menu.AddItem("low grav","low grav");
-//     menu.AddItem("high speed","high speed");
-//     menu.AddItem("one hit","one hit");
-//     menu.AddItem("fly", "fly");
+    menu.AddItem("vanilla","vanilla");
+    menu.AddItem("low grav","low grav");
+    menu.AddItem("high speed","high speed");
+    menu.AddItem("one hit","one hit");
+    menu.AddItem("fly", "fly");
 
-//     menu.ExitButton = false;
+    menu.ExitButton = false;
 
-
-//     menu.Display(client,20);        
-// }
+    menu.Display(client,20);        
+}
 
 public OnAllPluginsLoaded()
 {
-    add_lr(make_lr_impl(start_knife_fight,"Knife fight"));
+    add_lr(make_lr_impl_menu(start_knife_fight,knife_fight_menu,"Knife fight"));
 }

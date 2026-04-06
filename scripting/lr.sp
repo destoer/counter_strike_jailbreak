@@ -167,6 +167,17 @@ public void native_restrict_weapon(Handle plugin, int num_param)
     }
 }
 
+public void native_pick_partner(Handle plugin, int num_param)
+{
+    int client = GetNativeCell(1);
+    int option = GetNativeCell(2);
+
+    lr_pick_partner(client,option);
+}
+
+
+
+
 // register our call
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
@@ -175,6 +186,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("is_in_lr", native_is_in_lr);
     CreateNative("restrict_weapon", native_restrict_weapon);
     CreateNative("add_lr", native_add_lr);
+    CreateNative("pick_partner",native_pick_partner);
 
     lr_win_forward = CreateGlobalForward("OnWinLR",ET_Ignore,Param_Cell,Param_Cell,Param_Cell);
     lr_enabled_forward = CreateGlobalForward("OnLREnabled",ET_Ignore);
@@ -443,6 +455,17 @@ void start_lr_internal(int t, int ct, int lr_type)
     strip_all_weapons(t);
     strip_all_weapons(ct);
 
+    if(is_valid_client(t))
+    {
+        SetEntityHealth(t,100);
+    }
+
+    if(is_valid_client(ct))
+    {
+        SetEntityHealth(ct,100);
+    }
+
+    
     int delay = 3;
     slots[t_player.slot].delay = delay; 
 
@@ -504,8 +527,10 @@ public int partner_handler(Menu menu, MenuAction action, int t, int param2)
 }
 
 
-void pick_partner(int client)
+void lr_pick_partner(int client, int option)
 {
+    lr_choice[client].option = option;
+
     Menu menu = new Menu(partner_handler);
     menu.SetTitle("Pick partner");
 
@@ -538,7 +563,6 @@ void pick_partner(int client)
     menu.Display(client,20);    
 }
 
-
 public int lr_select(int client, LrImpl impl)
 {
     PrintToChat(client,"%s Selected %s\n",LR_PREFIX,impl.name);
@@ -551,7 +575,18 @@ public int lr_select(int client, LrImpl impl)
     // save what lr the current client is requesting so we can pull it inside the player handler
     lr_choice[client].lr_type = impl.lr_type;
     lr_choice[client].option = 0;
-    pick_partner(client);            
+
+
+    if(impl.selection_menu != null)
+    {
+        Call_StartFunction(impl.plugin_handle,impl.selection_menu);
+        Call_PushCell(client);
+		Call_Finish();        
+
+        return 0;
+    }
+
+    lr_pick_partner(client,0);            
 
     return 0;
 }
